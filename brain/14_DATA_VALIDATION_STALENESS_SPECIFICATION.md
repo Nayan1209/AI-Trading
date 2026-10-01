@@ -1,6 +1,6 @@
 # Data Validation & Staleness Specification
-**Document ID:** DATA-004
-**Status:** Implementation in progress
+**Document ID:** DATA-004  
+**Status:** Complete  
 **Scope:** Deterministic market-data quality gates before scanner/signal consumption
 
 ## Objective
@@ -51,7 +51,10 @@ Both timestamps must be timezone-aware. A candle timestamp in the future relativ
 - Stale candles are detected using the supplied threshold.
 - Fresh candles are accepted.
 - Tests use deterministic fixture timestamps and do not call Groww.
+- `MarketDataService.latest()` applies validation before returning a live/latest candle.
 
-## Next Gate
+## Completion
 
-After CI passes, integrate this validation gate into `MarketDataService` before market data is exposed to scanner/signal components. Then update the build tracker and README before starting historical candle ingestion.
+DATA-004 is complete. The validator, staleness detector, unit tests and mandatory `MarketDataService` quality gate are implemented and the final CI validation passed.
+
+Historical candle ingestion is tracked separately under DATA-005. Historical candles are validated for deterministic correctness, but they are not rejected merely because they are old; historical retrieval is intentionally distinct from latest-data freshness checks.

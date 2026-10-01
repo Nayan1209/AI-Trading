@@ -62,8 +62,12 @@
 - [x] Deterministic staleness detection implementation
 - [x] DATA-004 unit tests added
 - [x] `MarketDataService` validation/staleness gate implemented
-- [ ] DATA-004 final CI validation
-- [ ] Historical candle ingestion
+- [x] DATA-004 final CI validation — green
+- [x] DATA-005 historical candle ingestion contract
+- [x] Groww historical candle normalization
+- [x] Historical candle service validation gate
+- [x] Deterministic historical ingestion tests
+- [ ] DATA-005 final CI validation
 - [ ] PostgreSQL market-data persistence
 - [ ] Data-quality monitoring
 
@@ -105,13 +109,15 @@ Trade Journal / Analytics
 
 ## Initial Provider: Groww
 
-Groww is the first broker/market-data integration for the India-first phase. Current official documentation provides live quote/LTP/OHLC APIs, a streaming feed, historical candles, instrument data, portfolio/position APIs and order lifecycle APIs. The integration is deliberately isolated behind an adapter so future providers can be added without changing strategy logic.
+Groww is the first broker/market-data integration for the India-first phase. Current official documentation provides live quote/LTP/OHLC APIs, streaming data, historical candles, instrument data, portfolio/position APIs and order lifecycle APIs. The integration is deliberately isolated behind an adapter so future providers can be added without changing strategy logic.
 
-The first adapter milestone is deliberately **read-only**. The current implementation converts Groww `get_quote` data into the project's internal market-data model. Groww's current-day OHLC snapshot is explicitly labelled `1d_snapshot`; it is not treated as an interval candle. Historical interval candles will use a separate adapter path.
+The first adapter milestone is deliberately **read-only**. The current implementation converts Groww `get_quote` data into the project's internal market-data model. Groww's current-day OHLC snapshot is explicitly labelled `1d_snapshot`; it is not treated as an interval candle. Historical interval candles now use the separate historical-data adapter path.
 
-Groww's instrument master is now normalized into an internal `Instrument` model and `InstrumentMaster` registry. The registry supports lookup by internal ID, Groww symbol, exchange/trading symbol and exchange token. The first India-first operational scope is CASH/equity; derivative-specific fields are retained in the model so F&O can be added without redesigning the identity layer.
+Groww's instrument master is normalized into an internal `Instrument` model and `InstrumentMaster` registry. The registry supports lookup by internal ID, Groww symbol, exchange/trading symbol and exchange token. The first India-first operational scope is CASH/equity; derivative-specific fields are retained in the model so F&O can be added without redesigning the identity layer.
 
-Groww currently documents rate limits by API type and supports up to 1,000 live-feed instrument subscriptions at a time. Its current trading-API guidance also requires API order placement to originate from a registered static IP. These limits and requirements are treated as provider configuration and must be re-verified before production.
+Groww's historical-candle API returns OHLCV rows and, for FNO, optional open interest. The current internal `Candle` model intentionally stores the common OHLCV fields; open interest will be added when the derivative data model requires it. Historical timestamps without an explicit timezone are normalized as India Standard Time before entering the deterministic validation gate.
+
+Groww currently documents request-duration/history limits by candle interval. These provider constraints are treated as ingestion configuration and must be re-verified before production backfill jobs are designed.
 
 ## Development Phases
 
@@ -119,7 +125,7 @@ Groww currently documents rate limits by API type and supports up to 1,000 live-
 |---|---|---|
 | 0 | Foundation & specifications | 🟢 Complete |
 | 1 | Market Data Engine | 🟡 In Progress |
-| 2 | Instrument Master & Data Storage | 🟡 Instrument identity implemented; persistence pending |
+| 2 | Instrument Master & Data Storage | 🟡 Instrument identity + historical ingestion implemented; persistence pending |
 | 3 | Scanner & Signal Engine | ⚪ Planned |
 | 4 | AI Analysis Engine | ⚪ Planned |
 | 5 | Trade Planner & Risk Engine | ⚪ Planned |
@@ -131,16 +137,11 @@ Groww currently documents rate limits by API type and supports up to 1,000 live-
 
 ## CI / Change Discipline
 
-CI is intentionally **not triggered on every push to `main`**. Earlier development caused unnecessary red runs because multiple related files were committed sequentially while the repository was temporarily between implementation states.
+CI runs **automatically on every push to `main`** and can also be started with `workflow_dispatch`. There is no pull-request requirement for this project.
 
-The CI workflow now runs only when:
+Development work is performed directly on `main`; pull requests and development branches are not part of the normal workflow.
 
-1. A pull request is opened/updated, or
-2. A workflow run is explicitly started with `workflow_dispatch`.
-
-For this project, development work is performed directly on `main`; pull requests and development branches are not part of the normal workflow.
-
-Development therefore follows a **preflight → batch → CI** rule:
+Because CI is automatic, we do not intentionally push half-built changes. Development follows a **preflight → batch → push** rule:
 
 ```text
 Plan change
@@ -151,31 +152,33 @@ Review imports / contracts / tests / fixtures
    ↓
 Update documentation
    ↓
-Run CI once when the tree is expected to be internally consistent
+Push once
+   ↓
+Automatic CI
    ↓
 If green → proceed
 If red → fix on main before adding more functionality
 ```
 
-We do not intentionally create CI failures merely to discover obvious integration mistakes. CI is the verification gate, not the development loop.
+We do not use CI as the development loop. It is the final verification gate for a coherent commit.
 
 ## Immediate Next Step
 
-### DATA-004 → final controlled CI validation
+### DATA-005 → final controlled CI validation
 
-DATA-003 is complete: the instrument master model, CSV normalizer, lookup registry and mapping tests passed CI.
+DATA-004 is complete: deterministic candle validation, staleness detection, the mandatory `MarketDataService` quality gate, tests and documentation are all aligned, and the latest automatic CI run is green.
 
-DATA-004 is implemented with deterministic candle validation, staleness detection, and a mandatory fail-closed `MarketDataService` quality gate. The implementation and documentation are now aligned for the final verification.
+DATA-005 is now implemented as a read-only historical candle ingestion path. The Groww adapter normalizes historical OHLCV rows into internal `Candle` objects, and `MarketDataService.historical()` validates every returned candle before downstream use.
 
-**Next action: run the existing CI workflow manually from GitHub Actions. Do not create a pull request or another branch.**
+**Next action: push this complete DATA-005 change set to `main` and let the automatic CI workflow verify it. Do not create a pull request or another branch.**
 
-If CI is green, mark DATA-004 complete and advance to **DATA-005 — Historical Candle Ingestion**. If CI fails, fix the failure on `main` before adding new functionality.
+If CI is green, mark DATA-005 complete and advance to **DATA-006 — PostgreSQL Market-Data Persistence**. If CI fails, fix the failure on `main` before adding new functionality.
 
 ### What you need to do now
 
-You do **not** need to provide the Groww API key for DATA-004. Do not commit credentials, access tokens, secrets or TOTP values.
+You do **not** need to provide the Groww API key for the DATA-005 unit tests. Do not commit credentials, access tokens, secrets or TOTP values.
 
-The project is being developed directly on `main`. No new branch or pull request is required for the next step.
+The project is being developed directly on `main`. No new branch or pull request is required.
 
 **Rule:** We do not move to the Scanner phase until the market-data foundation passes its deterministic quality gates and the corresponding documentation is updated.
 
@@ -201,6 +204,6 @@ Every completed development step must update:
 3. `README.md` — current status + immediate next step
 4. Relevant `brain/` specification
 5. `brain/12_BUILD_STATUS.md`
-6. CI is run only after the complete change set has passed preflight review
+6. Push the complete change set once so automatic CI verifies the commit
 
 This keeps the repository self-documenting and prevents the implementation from drifting away from the architecture.

@@ -26,3 +26,23 @@ class MarketDataService:
             raise ValueError("market-data candle is stale")
 
         return candle
+
+    def historical(
+        self,
+        groww_symbol: str,
+        exchange: str,
+        start_time: datetime,
+        end_time: datetime,
+        interval_minutes: int,
+    ) -> list[Candle]:
+        """Return historical candles only after deterministic validation."""
+        candles = self.provider.get_historical_candles(
+            groww_symbol,
+            exchange,
+            start_time,
+            end_time,
+            interval_minutes,
+        )
+        for candle in candles:
+            validate_candle(candle)
+        return candles

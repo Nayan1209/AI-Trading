@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 0.4
+**Version:** 0.5
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -9,7 +9,7 @@
 | DOC-004 | Architecture | 🟢 | — | — | Complete |
 | DATA-001 | Market Data Provider Selection | 🟢 | 🟢 | 🟢 | Groww selected and approved |
 | DATA-002 | Groww Market Data Adapter | 🟢 | 🟢 | 🟢 | Read-only adapter skeleton + normalization test complete |
-| DATA-003 | Instrument Master / Mapping | 🟢 | 🟢 | 🟡 | In-memory model/registry implemented; CI validation pending |
+| DATA-003 | Instrument Master / Mapping | 🟢 | 🟢 | 🟡 | Model/registry implemented; CI validation pending after fixture correction |
 | DATA-004 | Data Validation / Staleness | 🟡 | ⚪ | ⚪ | Planned |
 | DATA-005 | Historical Candle Ingestion | 🟡 | ⚪ | ⚪ | Planned |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
@@ -37,9 +37,11 @@
 - Instrument lookup paths implemented for internal ID, Groww symbol, exchange/trading symbol and exchange token.
 - Instrument validation tests added for mapping, filtering, duplicate detection and required fields.
 - Instrument-master specification added under `brain/13_INSTRUMENT_MASTER_SPECIFICATION.md`.
+- Groww instrument fixture alignment corrected so `lot_size`, `tick_size`, `freeze_quantity`, and permission fields map to the intended CSV columns.
+- Instrument model permits provider-supplied zero values for `lot_size` and `freeze_quantity`.
 
 ## Immediate Next Step
-**DATA-003 test gate:** inspect the GitHub Actions run triggered by the instrument-master commits. If CI is green, mark DATA-003 complete and proceed to **DATA-004 Data Validation / Staleness**. If CI fails, fix the failing test/build before adding new functionality.
+**DATA-003 test gate:** wait for the GitHub Actions run triggered by the fixture correction. If CI is green, mark DATA-003 complete and proceed to **DATA-004 Data Validation / Staleness**. If CI fails, fix the failing test/build before adding new functionality.
 
 ## User Action Required
 No Groww secret or access token is required for DATA-003. Do **not** commit credentials. The instrument-master tests use local fixture data and do not call Groww.

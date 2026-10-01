@@ -67,8 +67,13 @@
 - [x] Groww historical candle normalization
 - [x] Historical candle service validation gate
 - [x] Deterministic historical ingestion tests
-- [ ] DATA-005 final CI validation
-- [ ] PostgreSQL market-data persistence
+- [x] DATA-005 final CI validation — green
+- [x] DATA-006 PostgreSQL candle persistence contract
+- [x] PostgreSQL candle schema migration
+- [x] Validated candle repository with idempotent upsert
+- [x] Historical candle range retrieval from PostgreSQL
+- [x] Deterministic PostgreSQL repository tests without external services
+- [ ] DATA-006 final automatic CI validation
 - [ ] Data-quality monitoring
 
 ## Safety Boundary
@@ -87,6 +92,8 @@ Market Data
 Instrument Master
     ↓
 Normalization / Validation
+    ↓
+PostgreSQL Persistence
     ↓
 Scanner
     ↓
@@ -111,7 +118,7 @@ Trade Journal / Analytics
 
 Groww is the first broker/market-data integration for the India-first phase. Current official documentation provides live quote/LTP/OHLC APIs, streaming data, historical candles, instrument data, portfolio/position APIs and order lifecycle APIs. The integration is deliberately isolated behind an adapter so future providers can be added without changing strategy logic.
 
-The first adapter milestone is deliberately **read-only**. The current implementation converts Groww `get_quote` data into the project's internal market-data model. Groww's current-day OHLC snapshot is explicitly labelled `1d_snapshot`; it is not treated as an interval candle. Historical interval candles now use the separate historical-data adapter path.
+The first adapter milestone is deliberately **read-only**. The current implementation converts Groww `get_quote` data into the project's internal market-data model. Groww's current-day OHLC snapshot is explicitly labelled `1d_snapshot`; it is not treated as an interval candle. Historical interval candles use the separate historical-data adapter path.
 
 Groww's instrument master is normalized into an internal `Instrument` model and `InstrumentMaster` registry. The registry supports lookup by internal ID, Groww symbol, exchange/trading symbol and exchange token. The first India-first operational scope is CASH/equity; derivative-specific fields are retained in the model so F&O can be added without redesigning the identity layer.
 
@@ -119,13 +126,21 @@ Groww's historical-candle API returns OHLCV rows and, for FNO, optional open int
 
 Groww currently documents request-duration/history limits by candle interval. These provider constraints are treated as ingestion configuration and must be re-verified before production backfill jobs are designed.
 
+## PostgreSQL Market-Data Persistence
+
+Validated internal `Candle` objects now have a dedicated persistence boundary. `PostgresCandleRepository` stores candles in a PostgreSQL `candles` table using `TIMESTAMPTZ`, fixed-precision `NUMERIC` OHLC values and `BIGINT` volume. Candle identity is unique across symbol, exchange, timeframe and timestamp, making repeated historical ingestion idempotent.
+
+The persistence layer validates every candle before writing and never accepts raw Groww payloads. CI uses deterministic fake database connections, so no production database or Groww credential is required for repository tests.
+
+The SQL schema is versioned under `database/migrations/001_candles.sql`.
+
 ## Development Phases
 
 | Phase | Name | Status |
 |---|---|---|
 | 0 | Foundation & specifications | 🟢 Complete |
 | 1 | Market Data Engine | 🟡 In Progress |
-| 2 | Instrument Master & Data Storage | 🟡 Instrument identity + historical ingestion implemented; persistence pending |
+| 2 | Instrument Master & Data Storage | 🟡 Instrument identity + historical ingestion + persistence implemented; CI gate pending |
 | 3 | Scanner & Signal Engine | ⚪ Planned |
 | 4 | AI Analysis Engine | ⚪ Planned |
 | 5 | Trade Planner & Risk Engine | ⚪ Planned |
@@ -164,19 +179,19 @@ We do not use CI as the development loop. It is the final verification gate for 
 
 ## Immediate Next Step
 
-### DATA-005 → final controlled CI validation
+### DATA-006 → final controlled CI validation
 
-DATA-004 is complete: deterministic candle validation, staleness detection, the mandatory `MarketDataService` quality gate, tests and documentation are all aligned, and the latest automatic CI run is green.
+DATA-005 is complete: historical candle ingestion, normalization, service validation and deterministic tests are implemented, and the latest automatic CI run is green.
 
-DATA-005 is now implemented as a read-only historical candle ingestion path. The Groww adapter normalizes historical OHLCV rows into internal `Candle` objects, and `MarketDataService.historical()` validates every returned candle before downstream use.
+DATA-006 is now implemented as a PostgreSQL persistence boundary for validated candles. The schema is versioned, writes are idempotent, range reads reconstruct the internal `Candle` model, and repository tests use deterministic fakes without an external database.
 
-**Next action: push this complete DATA-005 change set to `main` and let the automatic CI workflow verify it. Do not create a pull request or another branch.**
+**Next action: push this complete DATA-006 change set to `main` and let the automatic CI workflow verify it. Do not create a pull request or another branch.**
 
-If CI is green, mark DATA-005 complete and advance to **DATA-006 — PostgreSQL Market-Data Persistence**. If CI fails, fix the failure on `main` before adding new functionality.
+If CI is green, mark DATA-006 complete and advance to **DATA-007 — Data Quality Monitoring**. If CI fails, fix the failure on `main` before adding new functionality.
 
 ### What you need to do now
 
-You do **not** need to provide the Groww API key for the DATA-005 unit tests. Do not commit credentials, access tokens, secrets or TOTP values.
+You do **not** need to provide the Groww API key for DATA-006 unit tests. Do not commit credentials, access tokens, secrets or TOTP values.
 
 The project is being developed directly on `main`. No new branch or pull request is required.
 
@@ -187,6 +202,7 @@ The project is being developed directly on `main`. No new branch or pull request
 ```text
 AI-Trading/
 ├── brain/                 # authoritative specifications and rules
+├── database/              # versioned database migrations
 ├── src/                   # application code
 ├── tests/                 # automated tests
 ├── infrastructure/       # local/dev infrastructure

@@ -1,6 +1,6 @@
 # Historical Candle Ingestion Specification
 **Document ID:** DATA-005  
-**Status:** Implementation in progress  
+**Status:** Complete; automatic CI green  
 **Scope:** Read-only historical OHLCV ingestion through the market-data provider boundary
 
 ## Objective
@@ -60,6 +60,10 @@ A malformed candle fails closed. No AI or strategy component is allowed to consu
 - `MarketDataService.historical()` validates every candle.
 - No live Groww credential is required by CI tests.
 
+## Completion
+
+DATA-005 implementation and documentation are complete. The automatic GitHub Actions run after the DATA-005 push completed successfully, so the milestone is closed.
+
 ## Next Gate
 
-After DATA-005 CI is green, the next milestone is PostgreSQL persistence for validated historical market data. Persistence must consume validated candles rather than raw provider responses.
+The next milestone is **DATA-006 — PostgreSQL Market-Data Persistence**. Persistence consumes validated internal candles rather than raw provider responses.

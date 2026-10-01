@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 0.9
+**Version:** 1.0
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -11,8 +11,9 @@
 | DATA-002 | Groww Market Data Adapter | 🟢 | 🟢 | 🟢 | Read-only adapter skeleton + normalization test complete |
 | DATA-003 | Instrument Master / Mapping | 🟢 | 🟢 | 🟢 | Complete; CI green after CASH/FNO fixture alignment |
 | DATA-004 | Data Validation / Staleness | 🟢 | 🟢 | 🟢 | Complete; deterministic validation, staleness detection and service gate verified by CI |
-| DATA-005 | Historical Candle Ingestion | 🟢 | 🟢 | 🟡 | Implementation complete; final automatic CI validation pending |
-| DATA-006 | PostgreSQL Market-Data Persistence | 🟡 | ⚪ | ⚪ | Planned — starts after DATA-005 CI |
+| DATA-005 | Historical Candle Ingestion | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
+| DATA-006 | PostgreSQL Market-Data Persistence | 🟢 | 🟢 | 🟡 | Implementation complete; final automatic CI validation pending |
+| DATA-007 | Data Quality Monitoring | 🟡 | ⚪ | ⚪ | Planned — starts after DATA-006 CI |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | SIG-001 | Signal Engine | ⚪ | ⚪ | ⚪ | Not Started |
@@ -51,14 +52,21 @@
 - Groww historical timestamps are normalized to timezone-aware India Standard Time when the provider response omits timezone information.
 - `MarketDataService.historical()` validates every returned historical candle before downstream use.
 - Historical ingestion tests use a fake Groww client and deterministic fixtures; no live credential is required.
+- DATA-005 automatic CI validation passed.
+- DATA-006 PostgreSQL persistence specification added under `brain/16_POSTGRES_MARKET_DATA_PERSISTENCE_SPECIFICATION.md`.
+- PostgreSQL `candles` schema migration added with fixed-precision OHLC values, non-negative volume, `TIMESTAMPTZ`, uniqueness and lookup indexing.
+- `CandleRepository` persistence boundary added so storage is independent of provider implementations.
+- `PostgresCandleRepository` added with validated idempotent upsert and chronological range retrieval.
+- PostgreSQL driver dependency added without storing database credentials.
+- Deterministic repository tests added with fake database connections; no live database is required by CI.
 
 ## Immediate Next Step
-**DATA-005 CI gate:** push the complete DATA-005 change set to `main`. The automatic GitHub Actions workflow will run once for that coherent commit.
+**DATA-006 CI gate:** push the complete DATA-006 change set to `main`. The automatic GitHub Actions workflow will run once for that coherent commit.
 
-If CI is green, mark DATA-005 complete and advance to **DATA-006 — PostgreSQL Market-Data Persistence**. If CI fails, fix the failure on `main` before adding any new functionality.
+If CI is green, mark DATA-006 complete and advance to **DATA-007 — Data Quality Monitoring**. If CI fails, fix the failure on `main` before adding any new functionality.
 
 ## User Action Required
-No Groww secret or access token is required for DATA-005 unit tests. Do **not** commit credentials. The historical ingestion tests use a fake provider client and do not call Groww.
+No Groww secret or access token is required for DATA-006 unit tests. Do **not** commit credentials. Repository tests use deterministic fake database connections and do not call Groww.
 
 The user does not need to create branches or pull requests. All project development is performed directly on `main`.
 

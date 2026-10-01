@@ -129,21 +129,49 @@ Groww currently documents rate limits by API type and supports up to 1,000 live-
 | 9 | Dashboard & Operations | ⚪ Planned |
 | 10 | Controlled Live Deployment | ⚪ Planned |
 
+## CI / Change Discipline
+
+CI is intentionally **not triggered on every push to `main`**. Earlier development caused unnecessary red runs because multiple related files were committed sequentially while the repository was temporarily between implementation states.
+
+The CI workflow now runs only when:
+
+1. A pull request is opened/updated, or
+2. A workflow run is explicitly started with `workflow_dispatch`.
+
+Development therefore follows a **preflight → batch → CI** rule:
+
+```text
+Plan change
+   ↓
+Implement complete change set
+   ↓
+Review imports / contracts / tests / fixtures
+   ↓
+Update documentation
+   ↓
+Run CI once when the tree is expected to be internally consistent
+   ↓
+If green → proceed
+If red → fix before adding more functionality
+```
+
+We do not intentionally create CI failures merely to discover obvious integration mistakes. CI is the verification gate, not the development loop.
+
 ## Immediate Next Step
 
-### DATA-004 → CI validation
+### DATA-004 → controlled CI validation
 
-DATA-003 is complete: the instrument master model, CSV normalizer, lookup registry and mapping tests now pass in GitHub Actions.
+DATA-003 is complete: the instrument master model, CSV normalizer, lookup registry and mapping tests passed CI.
 
-DATA-004 is now in implementation. The new deterministic validator checks normalized candles for required identity fields, timezone-aware timestamps, positive OHLC values, valid OHLC relationships and non-negative volume. Staleness is evaluated against an explicit caller-supplied freshness threshold. The validator is independent of the AI and does not use live Groww credentials.
+DATA-004 is implemented with deterministic candle validation and staleness detection. Before running CI again, the complete DATA-004 change set must be reviewed for internal consistency. **Do not add another feature before the DATA-004 gate is validated.**
 
-The next gate is the **GitHub Actions run triggered by the DATA-004 implementation**. If it is green, the next code step is to integrate `validate_candle()` into `MarketDataService` as a mandatory fail-closed quality gate, then update this README and `brain/12_BUILD_STATUS.md` immediately.
+If the preflight review is clean, run CI once manually or through the DATA-004 pull request. If it is green, integrate `validate_candle()` into `MarketDataService` as a mandatory fail-closed quality gate. If it fails, fix the failure before moving forward.
 
 ### What you need to do now
 
 You do **not** need to provide the Groww API key for DATA-004. Do not commit credentials, access tokens, secrets or TOTP values.
 
-Open the repository's **Actions** tab and look for the newest CI run. If it is green, tell me **“DATA-004 CI is green.”** If it fails, send the failure screenshot/log and we will fix it before proceeding.
+For the next gate, use the repository's **Actions** tab only when I tell you the change set has passed preflight and is ready for CI. If a run is started and fails, send the failure screenshot/log before we make further changes.
 
 **Rule:** We do not move to the Scanner phase until the market-data foundation passes its deterministic quality gates and the corresponding documentation is updated.
 
@@ -169,5 +197,6 @@ Every completed development step must update:
 3. `README.md` — current status + immediate next step
 4. Relevant `brain/` specification
 5. `brain/12_BUILD_STATUS.md`
+6. CI is run only after the complete change set has passed preflight review
 
 This keeps the repository self-documenting and prevents the implementation from drifting away from the architecture.

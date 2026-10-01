@@ -49,14 +49,13 @@
 - [x] Mock/fixture test for Groww response normalization
 - [x] GitHub Actions test workflow
 - [x] CI import-path configuration added (`pytest.ini`)
-- [x] CI fixes verified by the latest GitHub Actions runs
 - [x] Instrument master model and lookup registry
 - [x] Groww instrument CSV normalization
 - [x] India-first CASH instrument filtering
 - [x] Instrument mapping/validation tests
 - [x] Instrument master specification (`brain/13_INSTRUMENT_MASTER_SPECIFICATION.md`)
 - [x] Groww quantity validation updated to accept provider-supplied zero values
-- [x] Instrument test fixture field alignment corrected
+- [x] CASH and FNO instrument test fixtures aligned to the canonical CSV schema
 - [ ] DATA-003 CI run for instrument master
 - [ ] Data validation/stale-data detection
 - [ ] Historical candle ingestion
@@ -129,9 +128,9 @@ Groww currently documents rate limits by API type and supports up to 1,000 live-
 
 ### DATA-003 → CI validation
 
-The Groww instrument master model, CSV normalizer, canonical lookup registry and local validation tests are implemented. The previous CI failure was traced to a malformed test fixture: the CSV row was missing a field separator, causing `lot_size`, `tick_size`, `freeze_quantity`, and permission columns to shift. The fixture has now been corrected, while the production model continues to permit provider-supplied zero quantities.
+The Groww instrument master model, CSV normalizer, canonical lookup registry and local validation tests are implemented. The production model permits provider-supplied zero values for `lot_size` and `freeze_quantity`. The test fixture has now been corrected for both CASH and FNO rows so all fields align with the canonical Groww CSV schema.
 
-The next gate is the **new GitHub Actions CI run** triggered by the correction. Once the instrument-master tests pass, DATA-003 is complete and we move to deterministic market-data validation and stale-data detection (DATA-004).
+The next gate is the **new GitHub Actions CI run** triggered by the final fixture-alignment correction. Once the instrument-master tests pass, DATA-003 is complete and we move to deterministic market-data validation and stale-data detection (DATA-004).
 
 The instrument identity contract is:
 

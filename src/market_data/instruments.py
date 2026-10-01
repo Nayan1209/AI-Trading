@@ -36,9 +36,9 @@ class Instrument(BaseModel):
     underlying_exchange_token: str | None = None
     expiry_date: date | None = None
     strike_price: Decimal | None = None
-    lot_size: int | None = Field(default=None, ge=1)
+    lot_size: int | None = Field(default=None, ge=0)
     tick_size: Decimal | None = Field(default=None, ge=0)
-    freeze_quantity: int | None = Field(default=None, ge=1)
+    freeze_quantity: int | None = Field(default=None, ge=0)
     is_reserved: bool = False
     buy_allowed: bool = True
     sell_allowed: bool = True

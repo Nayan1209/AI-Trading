@@ -1,6 +1,6 @@
 # Data Validation & Staleness Specification
 **Document ID:** DATA-004
-**Status:** Implementation in progress
+**Status:** CI validation pending
 **Scope:** Deterministic market-data quality gates before scanner/signal consumption
 
 ## Objective
@@ -40,6 +40,12 @@ Both timestamps must be timezone-aware. A candle timestamp in the future relativ
 - Provider outages or stale feeds must fail closed for downstream trading decisions.
 - No live Groww credential is required for validation tests.
 
+## Service Integration
+
+`MarketDataService.latest()` now applies `validate_candle()` immediately after provider retrieval and rejects stale candles using the supplied `max_age` threshold. A caller may provide `reference_time` for deterministic tests; production callers default to the current UTC time.
+
+The service therefore exposes a candle downstream only after both deterministic validation and freshness checks pass.
+
 ## Acceptance Criteria
 
 - Valid candles pass all checks.
@@ -50,8 +56,9 @@ Both timestamps must be timezone-aware. A candle timestamp in the future relativ
 - Future timestamps are rejected.
 - Stale candles are detected using the supplied threshold.
 - Fresh candles are accepted.
+- `MarketDataService` rejects malformed or stale provider output before returning it.
 - Tests use deterministic fixture timestamps and do not call Groww.
 
 ## Next Gate
 
-After CI passes, integrate this validation gate into `MarketDataService` before market data is exposed to scanner/signal components. Then update the build tracker and README before starting historical candle ingestion.
+Run the DATA-004 CI gate only after the complete implementation and documentation change set has passed preflight review. If CI passes, mark DATA-004 complete and proceed to historical candle ingestion. If CI fails, fix the failing test/build before adding new functionality.

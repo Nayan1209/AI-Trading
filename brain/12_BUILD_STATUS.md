@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 0.3
+**Version:** 0.4
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -8,8 +8,8 @@
 | DOC-003 | SRS | 🟢 | — | — | Complete |
 | DOC-004 | Architecture | 🟢 | — | — | Complete |
 | DATA-001 | Market Data Provider Selection | 🟢 | 🟢 | 🟢 | Groww selected and approved |
-| DATA-002 | Groww Market Data Adapter | 🟢 | 🟢 | 🟡 | Read-only skeleton implemented; CI test pending |
-| DATA-003 | Instrument Master / Mapping | 🟡 | ⚪ | ⚪ | Next |
+| DATA-002 | Groww Market Data Adapter | 🟢 | 🟢 | 🟢 | Read-only adapter skeleton + normalization test complete |
+| DATA-003 | Instrument Master / Mapping | 🟢 | 🟢 | 🟡 | In-memory model/registry implemented; CI validation pending |
 | DATA-004 | Data Validation / Staleness | 🟡 | ⚪ | ⚪ | Planned |
 | DATA-005 | Historical Candle Ingestion | 🟡 | ⚪ | ⚪ | Planned |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
@@ -32,12 +32,17 @@
 - Groww rate limits, live-feed subscription boundary and token lifecycle documented from current official provider documentation.
 - Static-IP requirement recorded as a production execution prerequisite.
 - Safety boundary preserved: no live order has been enabled or placed by this project.
+- Instrument master model and lookup registry implemented without requiring live Groww credentials.
+- Groww instrument CSV normalization and India-first CASH filtering implemented.
+- Instrument lookup paths implemented for internal ID, Groww symbol, exchange/trading symbol and exchange token.
+- Instrument validation tests added for mapping, filtering, duplicate detection and required fields.
+- Instrument-master specification added under `brain/13_INSTRUMENT_MASTER_SPECIFICATION.md`.
 
 ## Immediate Next Step
-**DATA-002 completion:** confirm the automated test workflow passes, then move to **DATA-003 Instrument Master / Mapping**. We need a reliable mapping between internal instruments and Groww's exchange/segment/trading-symbol/exchange-token identifiers before live streaming or strategy work.
+**DATA-003 test gate:** inspect the GitHub Actions run triggered by the instrument-master commits. If CI is green, mark DATA-003 complete and proceed to **DATA-004 Data Validation / Staleness**. If CI fails, fix the failing test/build before adding new functionality.
 
 ## User Action Required
-No Groww secret or access token is required for the current skeleton/test milestone. Do **not** commit credentials. When we reach real API connectivity, the token will be supplied through a secure runtime secret or GitHub Actions secret for testing—not in source files.
+No Groww secret or access token is required for DATA-003. Do **not** commit credentials. The instrument-master tests use local fixture data and do not call Groww.
 
 ## Completion Rule
 A feature is complete only after implementation, tests, documentation, and operational checks. The README and this tracker must be updated immediately after each milestone.

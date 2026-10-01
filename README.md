@@ -49,8 +49,13 @@
 - [x] Mock/fixture test for Groww response normalization
 - [x] GitHub Actions test workflow
 - [x] CI import-path configuration added (`pytest.ini`)
-- [ ] Confirm CI passes
-- [ ] Instrument master mapping
+- [x] CI fixes verified by the latest GitHub Actions runs
+- [x] Instrument master model and lookup registry
+- [x] Groww instrument CSV normalization
+- [x] India-first CASH instrument filtering
+- [x] Instrument mapping/validation tests
+- [x] Instrument master specification (`brain/13_INSTRUMENT_MASTER_SPECIFICATION.md`)
+- [ ] DATA-003 CI run for instrument master
 - [ ] Data validation/stale-data detection
 - [ ] Historical candle ingestion
 - [ ] PostgreSQL market-data persistence
@@ -68,6 +73,8 @@ Groww credentials, access tokens, secrets and TOTP values are never stored in Gi
 
 ```text
 Market Data
+    ↓
+Instrument Master
     ↓
 Normalization / Validation
     ↓
@@ -96,6 +103,8 @@ Groww is the first broker/market-data integration for the India-first phase. Cur
 
 The first adapter milestone is deliberately **read-only**. The current implementation converts Groww `get_quote` data into the project's internal market-data model. Groww's current-day OHLC snapshot is explicitly labelled `1d_snapshot`; it is not treated as an interval candle. Historical interval candles will use a separate adapter path.
 
+Groww's instrument master is now normalized into an internal `Instrument` model and `InstrumentMaster` registry. The registry supports lookup by internal ID, Groww symbol, exchange/trading symbol and exchange token. The first India-first operational scope is CASH/equity; derivative-specific fields are retained in the model so F&O can be added without redesigning the identity layer.
+
 Groww currently documents rate limits by API type and supports up to 1,000 live-feed instrument subscriptions at a time. Its current trading-API guidance also requires API order placement to originate from a registered static IP. These limits and requirements are treated as provider configuration and must be re-verified before production.
 
 ## Development Phases
@@ -104,7 +113,7 @@ Groww currently documents rate limits by API type and supports up to 1,000 live-
 |---|---|---|
 | 0 | Foundation & specifications | 🟢 Complete |
 | 1 | Market Data Engine | 🟡 In Progress |
-| 2 | Instrument Master & Data Storage | ⚪ Next |
+| 2 | Instrument Master & Data Storage | 🟡 Instrument identity implemented; persistence pending |
 | 3 | Scanner & Signal Engine | ⚪ Planned |
 | 4 | AI Analysis Engine | ⚪ Planned |
 | 5 | Trade Planner & Risk Engine | ⚪ Planned |
@@ -116,13 +125,13 @@ Groww currently documents rate limits by API type and supports up to 1,000 live-
 
 ## Immediate Next Step
 
-### DATA-002 → DATA-003: Instrument Master / Mapping
+### DATA-003 → DATA-004: Data Validation / Staleness
 
-The Groww adapter skeleton is now in the repository. The first CI run exposed an import-path issue: GitHub Actions could not import the repository's `src` package during pytest collection. This has been fixed by adding `pytest.ini` with the repository root on pytest's Python path. No trading logic or credentials were changed.
+The Groww instrument master model, CSV normalizer, canonical lookup registry and local validation tests are now implemented. No Groww credential is required because the current tests use fixture data only.
 
-The next job is to make the CI run green and then build a reliable **instrument master**.
+The next gate is **GitHub Actions CI for DATA-003**. Once the new instrument-master tests pass, DATA-003 is complete and we move to deterministic market-data validation and stale-data detection.
 
-We will map:
+The instrument identity contract is:
 
 ```text
 Internal Instrument ID
@@ -138,15 +147,13 @@ Groww Symbol
 Exchange Token
 ```
 
-This mapping becomes the single source of truth for market-data subscriptions, historical candles and—later—order execution.
+This mapping is the single source of truth for future market-data subscriptions, historical candles and—later—order execution.
 
 ### What you need to do now
 
-**Nothing with your Groww credentials.** Do not paste the API key, secret, access token or TOTP into GitHub, chat, README files or source code.
+**Do not provide or commit your Groww API key, secret, access token or TOTP.** DATA-003 does not require live credentials.
 
-Open the repository's **Actions** tab and wait for the new CI run triggered by the `pytest.ini` fix. If it becomes green, tell me **“CI is green.”** If it fails, send the new failure screenshot/log and I will fix it before we proceed.
-
-If CI is green, our next implementation step is **DATA-003: Groww instrument master ingestion and mapping**.
+Open the repository's **Actions** tab and look for the workflow run triggered by the latest DATA-003 commits. If it is green, tell me **“DATA-003 CI is green.”** If it fails, send the failure screenshot/log and we will fix it before proceeding.
 
 **Rule:** We do not move to the Scanner phase until the market-data foundation passes its tests and the corresponding documentation is updated.
 

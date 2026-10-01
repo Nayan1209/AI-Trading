@@ -6,8 +6,8 @@ from src.market_data.instruments import Instrument, InstrumentMaster, load_groww
 
 
 CSV = """exchange,exchange_token,trading_symbol,groww_symbol,name,instrument_type,segment,series,isin,underlying_symbol,underlying_exchange_token,expiry_date,strike_price,lot_size,tick_size,freeze_quantity,is_reserved,buy_allowed,sell_allowed
-NSE,2885,RELIANCE,NSE-RELIANCE,Reliance Industries,EQ,CASH,EQ,INE002A01018,,,,1,0.05,100000,0,1,1
-BSE,500325,RELIANCE,BSE-RELIANCE,Reliance Industries,EQ,CASH,A,INE002A01018,,,,1,0.05,100000,0,1,1
+NSE,2885,RELIANCE,NSE-RELIANCE,Reliance Industries,EQ,CASH,EQ,INE002A01018,,,,,1,0.05,100000,1,1,1
+BSE,500325,RELIANCE,BSE-RELIANCE,Reliance Industries,EQ,CASH,A,INE002A01018,,,,,1,0.05,100000,1,1,1
 NSE,35241,NIFTY25DEC27000PE,NSE-NIFTY-24Dec25-27000-PE,,PE,FNO,,,,NIFTY,26009,2025-12-24,27000,65,0.05,601,1,1,1
 """
 

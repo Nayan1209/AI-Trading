@@ -1,5 +1,5 @@
 # API Specification
-**Version:** 0.2 | **Status:** Active Draft
+**Version:** 0.3 | **Status:** Active Draft
 
 ## Internal API
 REST/JSON control APIs use `/api/v1`. Real-time internal updates may use WebSockets/events. Use UUIDs and correlation IDs.
@@ -35,9 +35,17 @@ Required adapter capabilities:
 - reconcile broker state
 
 ## Groww Mapping Notes
-Groww currently exposes REST endpoints under `https://api.groww.in/v1/...` and a Python SDK. Authentication uses a runtime access token. The exact endpoint schemas must be implemented behind the adapter and must not leak into the core domain model.
+Groww's current Python SDK is installed as `growwapi` and initializes with a runtime access token. The documented SDK methods used by the first read-only milestone are:
 
-Groww order fields include trading symbol, quantity, price, trigger price, validity, exchange, segment, product, order type, transaction type and an optional order reference ID. The adapter must generate and persist an internal correlation ID and provider reference separately.
+- `GrowwAPI(access_token)` — client initialization
+- `get_quote(exchange, segment, trading_symbol)` — complete live quote snapshot
+- `get_ltp(segment, exchange_trading_symbols)` — batched LTP, up to 50 instruments per call
+- `get_ohlc(segment, exchange_trading_symbols)` — current-time OHLC snapshot, up to 50 instruments per call
+- `GrowwFeed` — streaming market data; exchange tokens come from the Groww instrument master
+
+The adapter must translate provider responses into internal domain objects. Groww-specific constants, payloads and exceptions must not leak into strategy, signal, AI, risk or UI layers.
+
+**Important distinction:** Groww's `get_ohlc` is a real-time/current-day snapshot, not an interval candle. Interval candles must use the historical-data adapter. This prevents the system from accidentally treating daily snapshots as 1-minute/5-minute candles.
 
 ## Market Data Contract
 Internal normalized market-data event:
@@ -62,6 +70,11 @@ Internal normalized market-data event:
 
 Fields unavailable from a specific provider are nullable rather than fabricated.
 
+## Current Implementation Boundary
+`src/market_data/groww_provider.py` is **read-only**. It converts Groww `get_quote` output into the project's `Candle` model for the initial connectivity milestone. It does not import or expose order-placement methods.
+
+The current normalized `Candle` uses `timeframe="1d_snapshot"` for this Groww quote path. This label is deliberate: it must not be interpreted as an interval candle.
+
 ## Example Risk Request
 ```json
 {
@@ -84,5 +97,7 @@ Fields unavailable from a specific provider are nullable rather than fabricated.
 
 ## Safety
 No API route may directly bypass the Risk Engine. Broker execution is unavailable in development unless an explicit environment and safety gate permits it.
+
+No credential value, access token, API secret or TOTP is stored in source control. Real credentials must be supplied through a secure runtime secret mechanism.
 
 Final broker schemas must always be reconciled with current official Groww documentation before implementation or production deployment.

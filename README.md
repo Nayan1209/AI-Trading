@@ -44,8 +44,11 @@
 - [x] Groww broker/order capabilities documented
 - [x] Groww rate limits documented
 - [x] Static-IP production requirement documented
-- [ ] Groww adapter skeleton
-- [ ] Read-only market-data connectivity
+- [x] Groww Python SDK dependency added
+- [x] Read-only Groww market-data adapter skeleton
+- [x] Mock/fixture test for Groww response normalization
+- [x] GitHub Actions test workflow
+- [ ] Confirm CI passes
 - [ ] Instrument master mapping
 - [ ] Data validation/stale-data detection
 - [ ] Historical candle ingestion
@@ -90,6 +93,8 @@ Trade Journal / Analytics
 
 Groww is the first broker/market-data integration for the India-first phase. Current official documentation provides live quote/LTP/OHLC APIs, a streaming feed, historical candles, instrument data, portfolio/position APIs and order lifecycle APIs. The integration is deliberately isolated behind an adapter so future providers can be added without changing strategy logic.
 
+The first adapter milestone is deliberately **read-only**. The current implementation converts Groww `get_quote` data into the project's internal market-data model. Groww's current-day OHLC snapshot is explicitly labelled `1d_snapshot`; it is not treated as an interval candle. Historical interval candles will use a separate adapter path.
+
 Groww currently documents rate limits by API type and supports up to 1,000 live-feed instrument subscriptions at a time. Its current trading-API guidance also requires API order placement to originate from a registered static IP. These limits and requirements are treated as provider configuration and must be re-verified before production.
 
 ## Development Phases
@@ -110,17 +115,35 @@ Groww currently documents rate limits by API type and supports up to 1,000 live-
 
 ## Immediate Next Step
 
-### Phase 1 — Groww Adapter Skeleton
+### DATA-002 → DATA-003: Instrument Master / Mapping
 
-Build the provider-agnostic interfaces and Groww adapter skeleton first. The first implementation milestone is **read-only market-data connectivity and normalization** using mock/fixture tests. No live order placement is part of this step.
+The Groww adapter skeleton is now in the repository. Before connecting to real market data, the next job is to build a reliable **instrument master**.
 
-1. Define provider interfaces.
-2. Add Groww SDK/API adapter boundary.
-3. Implement credential configuration without committing secrets.
-4. Add token/session lifecycle handling.
-5. Implement read-only LTP/quote/OHLC path.
-6. Add normalized market-data events.
-7. Add mocked provider tests.
+We will map:
+
+```text
+Internal Instrument ID
+        ↓
+Exchange (NSE/BSE)
+        ↓
+Segment (CASH/FNO)
+        ↓
+Trading Symbol
+        ↓
+Groww Symbol
+        ↓
+Exchange Token
+```
+
+This mapping becomes the single source of truth for market-data subscriptions, historical candles and—later—order execution.
+
+### What you need to do now
+
+**Nothing with your Groww credentials yet.** Do not paste the API key, secret, access token or TOTP into GitHub, chat, README files or source code.
+
+For this step, simply open the repository's **Actions** tab and check whether the new **CI** workflow passes. If it fails, send me the failure screenshot/log and I will fix it before we proceed.
+
+If CI is green, our next implementation step is **DATA-003: Groww instrument master ingestion and mapping**.
 
 **Rule:** We do not move to the Scanner phase until the market-data foundation passes its tests and the corresponding documentation is updated.
 

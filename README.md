@@ -56,11 +56,16 @@
 - [x] Instrument master specification (`brain/13_INSTRUMENT_MASTER_SPECIFICATION.md`)
 - [x] Groww quantity validation updated to accept provider-supplied zero values
 - [x] CASH and FNO instrument test fixtures aligned to the canonical CSV schema
-- [ ] DATA-003 CI run for instrument master
-- [ ] Data validation/stale-data detection
+- [x] DATA-003 CI validation — green
+- [x] DATA-004 validation/staleness specification (`brain/14_DATA_VALIDATION_STALENESS_SPECIFICATION.md`)
+- [x] Deterministic candle validation implementation
+- [x] Deterministic staleness detection implementation
+- [x] DATA-004 unit tests added
+- [ ] DATA-004 CI validation
+- [ ] MarketDataService validation gate integration
 - [ ] Historical candle ingestion
 - [ ] PostgreSQL market-data persistence
-- [ ] Data-quality tests/monitoring
+- [ ] Data-quality monitoring
 
 ## Safety Boundary
 
@@ -126,37 +131,21 @@ Groww currently documents rate limits by API type and supports up to 1,000 live-
 
 ## Immediate Next Step
 
-### DATA-003 → CI validation
+### DATA-004 → CI validation
 
-The Groww instrument master model, CSV normalizer, canonical lookup registry and local validation tests are implemented. The production model permits provider-supplied zero values for `lot_size` and `freeze_quantity`. The test fixture has now been corrected for both CASH and FNO rows so all fields align with the canonical Groww CSV schema.
+DATA-003 is complete: the instrument master model, CSV normalizer, lookup registry and mapping tests now pass in GitHub Actions.
 
-The next gate is the **new GitHub Actions CI run** triggered by the final fixture-alignment correction. Once the instrument-master tests pass, DATA-003 is complete and we move to deterministic market-data validation and stale-data detection (DATA-004).
+DATA-004 is now in implementation. The new deterministic validator checks normalized candles for required identity fields, timezone-aware timestamps, positive OHLC values, valid OHLC relationships and non-negative volume. Staleness is evaluated against an explicit caller-supplied freshness threshold. The validator is independent of the AI and does not use live Groww credentials.
 
-The instrument identity contract is:
-
-```text
-Internal Instrument ID
-        ↓
-Exchange (NSE/BSE)
-        ↓
-Segment (CASH/FNO)
-        ↓
-Trading Symbol
-        ↓
-Groww Symbol
-        ↓
-Exchange Token
-```
-
-This mapping is the single source of truth for future market-data subscriptions, historical candles and—later—order execution.
+The next gate is the **GitHub Actions run triggered by the DATA-004 implementation**. If it is green, the next code step is to integrate `validate_candle()` into `MarketDataService` as a mandatory fail-closed quality gate, then update this README and `brain/12_BUILD_STATUS.md` immediately.
 
 ### What you need to do now
 
-**Do not provide or commit your Groww API key, secret, access token or TOTP.** DATA-003 does not require live credentials.
+You do **not** need to provide the Groww API key for DATA-004. Do not commit credentials, access tokens, secrets or TOTP values.
 
-Open the repository's **Actions** tab and look for the workflow run triggered by the latest fixture-correction commit. If it is green, tell me **“DATA-003 CI is green.”** If it fails, send the failure screenshot/log and we will fix it before proceeding.
+Open the repository's **Actions** tab and look for the newest CI run. If it is green, tell me **“DATA-004 CI is green.”** If it fails, send the failure screenshot/log and we will fix it before proceeding.
 
-**Rule:** We do not move to the Scanner phase until the market-data foundation passes its tests and the corresponding documentation is updated.
+**Rule:** We do not move to the Scanner phase until the market-data foundation passes its deterministic quality gates and the corresponding documentation is updated.
 
 ## Repository Structure
 

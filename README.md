@@ -61,8 +61,8 @@
 - [x] Deterministic candle validation implementation
 - [x] Deterministic staleness detection implementation
 - [x] DATA-004 unit tests added
-- [ ] DATA-004 CI validation
-- [ ] MarketDataService validation gate integration
+- [x] `MarketDataService` validation/staleness gate implemented
+- [ ] DATA-004 final CI validation
 - [ ] Historical candle ingestion
 - [ ] PostgreSQL market-data persistence
 - [ ] Data-quality monitoring
@@ -138,12 +138,14 @@ The CI workflow now runs only when:
 1. A pull request is opened/updated, or
 2. A workflow run is explicitly started with `workflow_dispatch`.
 
+For this project, development work is performed directly on `main`; pull requests and development branches are not part of the normal workflow.
+
 Development therefore follows a **preflight → batch → CI** rule:
 
 ```text
 Plan change
    ↓
-Implement complete change set
+Implement complete change set on main
    ↓
 Review imports / contracts / tests / fixtures
    ↓
@@ -152,26 +154,28 @@ Update documentation
 Run CI once when the tree is expected to be internally consistent
    ↓
 If green → proceed
-If red → fix before adding more functionality
+If red → fix on main before adding more functionality
 ```
 
 We do not intentionally create CI failures merely to discover obvious integration mistakes. CI is the verification gate, not the development loop.
 
 ## Immediate Next Step
 
-### DATA-004 → controlled CI validation
+### DATA-004 → final controlled CI validation
 
 DATA-003 is complete: the instrument master model, CSV normalizer, lookup registry and mapping tests passed CI.
 
-DATA-004 is implemented with deterministic candle validation and staleness detection. Before running CI again, the complete DATA-004 change set must be reviewed for internal consistency. **Do not add another feature before the DATA-004 gate is validated.**
+DATA-004 is implemented with deterministic candle validation, staleness detection, and a mandatory fail-closed `MarketDataService` quality gate. The implementation and documentation are now aligned for the final verification.
 
-If the preflight review is clean, run CI once manually or through the DATA-004 pull request. If it is green, integrate `validate_candle()` into `MarketDataService` as a mandatory fail-closed quality gate. If it fails, fix the failure before moving forward.
+**Next action: run the existing CI workflow manually from GitHub Actions. Do not create a pull request or another branch.**
+
+If CI is green, mark DATA-004 complete and advance to **DATA-005 — Historical Candle Ingestion**. If CI fails, fix the failure on `main` before adding new functionality.
 
 ### What you need to do now
 
 You do **not** need to provide the Groww API key for DATA-004. Do not commit credentials, access tokens, secrets or TOTP values.
 
-For the next gate, use the repository's **Actions** tab only when I tell you the change set has passed preflight and is ready for CI. If a run is started and fails, send the failure screenshot/log before we make further changes.
+The project is being developed directly on `main`. No new branch or pull request is required for the next step.
 
 **Rule:** We do not move to the Scanner phase until the market-data foundation passes its deterministic quality gates and the corresponding documentation is updated.
 

@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 0.7
+**Version:** 0.8
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -10,7 +10,7 @@
 | DATA-001 | Market Data Provider Selection | 🟢 | 🟢 | 🟢 | Groww selected and approved |
 | DATA-002 | Groww Market Data Adapter | 🟢 | 🟢 | 🟢 | Read-only adapter skeleton + normalization test complete |
 | DATA-003 | Instrument Master / Mapping | 🟢 | 🟢 | 🟢 | Complete; CI green after CASH/FNO fixture alignment |
-| DATA-004 | Data Validation / Staleness | 🟢 | 🟢 | 🟡 | Validator + deterministic tests implemented; CI validation pending |
+| DATA-004 | Data Validation / Staleness | 🟢 | 🟢 | 🟡 | Service gate integrated; CI validation pending |
 | DATA-005 | Historical Candle Ingestion | 🟡 | ⚪ | ⚪ | Planned |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
@@ -43,12 +43,14 @@
 - Deterministic candle validation added for identity, timezone, positive OHLC, OHLC relationships and non-negative volume.
 - Deterministic staleness detection added using caller-supplied freshness thresholds.
 - DATA-004 unit tests added without live Groww credentials.
+- `MarketDataService.latest()` integrated with deterministic validation and fail-closed staleness checks.
+- Service-level tests added for fresh and stale provider output using deterministic timestamps.
 
 ## Immediate Next Step
-**DATA-004 CI gate:** wait for the GitHub Actions run triggered by the new validation implementation. If CI is green, integrate `validate_candle()` into `MarketDataService` as a mandatory gate and update the README/tracker. If CI fails, fix the failing test/build before adding new functionality.
+**DATA-004 CI gate:** run the GitHub Actions test suite against the complete DATA-004 change set. If CI is green, mark DATA-004 complete and begin DATA-005 historical candle ingestion. If CI fails, fix the failing test/build before adding new functionality.
 
 ## User Action Required
-No Groww secret or access token is required for DATA-004. Do **not** commit credentials. The validation tests are deterministic and do not call Groww.
+No Groww secret or access token is required for DATA-004. Do **not** commit credentials. The validation and service tests are deterministic and do not call Groww.
 
 ## Completion Rule
 A feature is complete only after implementation, tests, documentation, and operational checks. The README and this tracker must be updated immediately after each milestone.

@@ -55,6 +55,8 @@
 - [x] India-first CASH instrument filtering
 - [x] Instrument mapping/validation tests
 - [x] Instrument master specification (`brain/13_INSTRUMENT_MASTER_SPECIFICATION.md`)
+- [x] Groww quantity validation updated to accept provider-supplied zero values
+- [x] Instrument test fixture field alignment corrected
 - [ ] DATA-003 CI run for instrument master
 - [ ] Data validation/stale-data detection
 - [ ] Historical candle ingestion
@@ -125,11 +127,11 @@ Groww currently documents rate limits by API type and supports up to 1,000 live-
 
 ## Immediate Next Step
 
-### DATA-003 → DATA-004: Data Validation / Staleness
+### DATA-003 → CI validation
 
-The Groww instrument master model, CSV normalizer, canonical lookup registry and local validation tests are now implemented. No Groww credential is required because the current tests use fixture data only.
+The Groww instrument master model, CSV normalizer, canonical lookup registry and local validation tests are implemented. The previous CI failure was traced to a malformed test fixture: the CSV row was missing a field separator, causing `lot_size`, `tick_size`, `freeze_quantity`, and permission columns to shift. The fixture has now been corrected, while the production model continues to permit provider-supplied zero quantities.
 
-The next gate is **GitHub Actions CI for DATA-003**. Once the new instrument-master tests pass, DATA-003 is complete and we move to deterministic market-data validation and stale-data detection.
+The next gate is the **new GitHub Actions CI run** triggered by the correction. Once the instrument-master tests pass, DATA-003 is complete and we move to deterministic market-data validation and stale-data detection (DATA-004).
 
 The instrument identity contract is:
 
@@ -153,7 +155,7 @@ This mapping is the single source of truth for future market-data subscriptions,
 
 **Do not provide or commit your Groww API key, secret, access token or TOTP.** DATA-003 does not require live credentials.
 
-Open the repository's **Actions** tab and look for the workflow run triggered by the latest DATA-003 commits. If it is green, tell me **“DATA-003 CI is green.”** If it fails, send the failure screenshot/log and we will fix it before proceeding.
+Open the repository's **Actions** tab and look for the workflow run triggered by the latest fixture-correction commit. If it is green, tell me **“DATA-003 CI is green.”** If it fails, send the failure screenshot/log and we will fix it before proceeding.
 
 **Rule:** We do not move to the Scanner phase until the market-data foundation passes its tests and the corresponding documentation is updated.
 

@@ -61,8 +61,9 @@
 - [x] Deterministic candle validation implementation
 - [x] Deterministic staleness detection implementation
 - [x] DATA-004 unit tests added
+- [x] `MarketDataService` validation/staleness gate integrated
+- [x] Service-level fresh/stale gate tests added
 - [ ] DATA-004 CI validation
-- [ ] MarketDataService validation gate integration
 - [ ] Historical candle ingestion
 - [ ] PostgreSQL market-data persistence
 - [ ] Data-quality monitoring
@@ -105,13 +106,13 @@ Trade Journal / Analytics
 
 ## Initial Provider: Groww
 
-Groww is the first broker/market-data integration for the India-first phase. Current official documentation provides live quote/LTP/OHLC APIs, a streaming feed, historical candles, instrument data, portfolio/position APIs and order lifecycle APIs. The integration is deliberately isolated behind an adapter so future providers can be added without changing strategy logic.
+Groww is the first broker/market-data integration for the India-first phase. The integration is isolated behind an adapter so future providers can be added without changing strategy logic.
 
-The first adapter milestone is deliberately **read-only**. The current implementation converts Groww `get_quote` data into the project's internal market-data model. Groww's current-day OHLC snapshot is explicitly labelled `1d_snapshot`; it is not treated as an interval candle. Historical interval candles will use a separate adapter path.
+The first adapter milestone is deliberately **read-only**. Groww quote data is normalized into the project's internal market-data model. Current-day OHLC snapshots are not treated as interval candles; historical interval candles will use a separate adapter path.
 
-Groww's instrument master is now normalized into an internal `Instrument` model and `InstrumentMaster` registry. The registry supports lookup by internal ID, Groww symbol, exchange/trading symbol and exchange token. The first India-first operational scope is CASH/equity; derivative-specific fields are retained in the model so F&O can be added without redesigning the identity layer.
+Groww's instrument master is normalized into an internal `Instrument` model and `InstrumentMaster` registry. The registry supports lookup by internal ID, Groww symbol, exchange/trading symbol and exchange token. The first operational scope is CASH/equity; derivative-specific fields are retained for future F&O support.
 
-Groww currently documents rate limits by API type and supports up to 1,000 live-feed instrument subscriptions at a time. Its current trading-API guidance also requires API order placement to originate from a registered static IP. These limits and requirements are treated as provider configuration and must be re-verified before production.
+Provider limits and the static-IP requirement are treated as provider configuration and must be re-verified before production.
 
 ## Development Phases
 
@@ -119,7 +120,7 @@ Groww currently documents rate limits by API type and supports up to 1,000 live-
 |---|---|---|
 | 0 | Foundation & specifications | 🟢 Complete |
 | 1 | Market Data Engine | 🟡 In Progress |
-| 2 | Instrument Master & Data Storage | 🟡 Instrument identity implemented; persistence pending |
+| 2 | Instrument Master & Data Storage | 🟡 Identity implemented; persistence pending |
 | 3 | Scanner & Signal Engine | ⚪ Planned |
 | 4 | AI Analysis Engine | ⚪ Planned |
 | 5 | Trade Planner & Risk Engine | ⚪ Planned |
@@ -131,14 +132,9 @@ Groww currently documents rate limits by API type and supports up to 1,000 live-
 
 ## CI / Change Discipline
 
-CI is intentionally **not triggered on every push to `main`**. Earlier development caused unnecessary red runs because multiple related files were committed sequentially while the repository was temporarily between implementation states.
+CI is intentionally **not triggered on every push to `main`**. Related implementation files are developed as a complete change set so CI does not repeatedly test temporary intermediate states.
 
-The CI workflow now runs only when:
-
-1. A pull request is opened/updated, or
-2. A workflow run is explicitly started with `workflow_dispatch`.
-
-Development therefore follows a **preflight → batch → CI** rule:
+The CI workflow runs on pull requests or explicit `workflow_dispatch` runs.
 
 ```text
 Plan change
@@ -149,31 +145,29 @@ Review imports / contracts / tests / fixtures
    ↓
 Update documentation
    ↓
-Run CI once when the tree is expected to be internally consistent
+Preflight review
    ↓
-If green → proceed
-If red → fix before adding more functionality
+CI once
+   ↓
+Green → next milestone
+Red → fix before adding functionality
 ```
 
-We do not intentionally create CI failures merely to discover obvious integration mistakes. CI is the verification gate, not the development loop.
+**CI is the verification gate, not the development loop.**
 
 ## Immediate Next Step
 
 ### DATA-004 → controlled CI validation
 
-DATA-003 is complete: the instrument master model, CSV normalizer, lookup registry and mapping tests passed CI.
+DATA-004 now contains deterministic candle validation, staleness detection, and a fail-closed `MarketDataService` gate. The service returns provider data only after validation and freshness checks pass.
 
-DATA-004 is implemented with deterministic candle validation and staleness detection. Before running CI again, the complete DATA-004 change set must be reviewed for internal consistency. **Do not add another feature before the DATA-004 gate is validated.**
-
-If the preflight review is clean, run CI once manually or through the DATA-004 pull request. If it is green, integrate `validate_candle()` into `MarketDataService` as a mandatory fail-closed quality gate. If it fails, fix the failure before moving forward.
+The complete DATA-004 implementation and tests have been reviewed for obvious contract/import/test consistency. The next action is the **single CI verification gate**. If green, DATA-004 becomes complete and we start **DATA-005 — Historical Candle Ingestion**. If red, we fix the failure before adding anything else.
 
 ### What you need to do now
 
-You do **not** need to provide the Groww API key for DATA-004. Do not commit credentials, access tokens, secrets or TOTP values.
+**Nothing.** No Groww API key is required for this CI gate. Do not commit credentials, access tokens, secrets or TOTP values.
 
-For the next gate, use the repository's **Actions** tab only when I tell you the change set has passed preflight and is ready for CI. If a run is started and fails, send the failure screenshot/log before we make further changes.
-
-**Rule:** We do not move to the Scanner phase until the market-data foundation passes its deterministic quality gates and the corresponding documentation is updated.
+I will control when CI is run. You do not need to manually start it.
 
 ## Repository Structure
 
@@ -197,6 +191,6 @@ Every completed development step must update:
 3. `README.md` — current status + immediate next step
 4. Relevant `brain/` specification
 5. `brain/12_BUILD_STATUS.md`
-6. CI is run only after the complete change set has passed preflight review
+6. CI only after the complete change set has passed preflight review
 
-This keeps the repository self-documenting and prevents the implementation from drifting away from the architecture.
+This keeps the repository self-documenting and prevents implementation drift.

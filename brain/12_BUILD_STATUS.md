@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 0.6
+**Version:** 0.7
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -9,8 +9,8 @@
 | DOC-004 | Architecture | 🟢 | — | — | Complete |
 | DATA-001 | Market Data Provider Selection | 🟢 | 🟢 | 🟢 | Groww selected and approved |
 | DATA-002 | Groww Market Data Adapter | 🟢 | 🟢 | 🟢 | Read-only adapter skeleton + normalization test complete |
-| DATA-003 | Instrument Master / Mapping | 🟢 | 🟢 | 🟡 | Model/registry implemented; CI validation pending after complete fixture alignment |
-| DATA-004 | Data Validation / Staleness | 🟡 | ⚪ | ⚪ | Planned |
+| DATA-003 | Instrument Master / Mapping | 🟢 | 🟢 | 🟢 | Complete; CI green after CASH/FNO fixture alignment |
+| DATA-004 | Data Validation / Staleness | 🟢 | 🟢 | 🟡 | Validator + deterministic tests implemented; CI validation pending |
 | DATA-005 | Historical Candle Ingestion | 🟡 | ⚪ | ⚪ | Planned |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
@@ -37,14 +37,18 @@
 - Instrument lookup paths implemented for internal ID, Groww symbol, exchange/trading symbol and exchange token.
 - Instrument validation tests added for mapping, filtering, duplicate detection and required fields.
 - Instrument-master specification added under `brain/13_INSTRUMENT_MASTER_SPECIFICATION.md`.
-- Groww instrument fixture rows corrected so CASH and FNO columns align with the canonical CSV schema.
+- Groww CASH and FNO instrument fixture rows corrected and CI validated.
 - Instrument model permits provider-supplied zero values for `lot_size` and `freeze_quantity`.
+- DATA-004 validation/staleness specification added under `brain/14_DATA_VALIDATION_STALENESS_SPECIFICATION.md`.
+- Deterministic candle validation added for identity, timezone, positive OHLC, OHLC relationships and non-negative volume.
+- Deterministic staleness detection added using caller-supplied freshness thresholds.
+- DATA-004 unit tests added without live Groww credentials.
 
 ## Immediate Next Step
-**DATA-003 test gate:** wait for the GitHub Actions run triggered by the final fixture-alignment correction. If CI is green, mark DATA-003 complete and proceed to **DATA-004 Data Validation / Staleness**. If CI fails, fix the failing test/build before adding new functionality.
+**DATA-004 CI gate:** wait for the GitHub Actions run triggered by the new validation implementation. If CI is green, integrate `validate_candle()` into `MarketDataService` as a mandatory gate and update the README/tracker. If CI fails, fix the failing test/build before adding new functionality.
 
 ## User Action Required
-No Groww secret or access token is required for DATA-003. Do **not** commit credentials. The instrument-master tests use local fixture data and do not call Groww.
+No Groww secret or access token is required for DATA-004. Do **not** commit credentials. The validation tests are deterministic and do not call Groww.
 
 ## Completion Rule
 A feature is complete only after implementation, tests, documentation, and operational checks. The README and this tracker must be updated immediately after each milestone.

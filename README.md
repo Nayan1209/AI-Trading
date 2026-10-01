@@ -48,6 +48,7 @@
 - [x] Read-only Groww market-data adapter skeleton
 - [x] Mock/fixture test for Groww response normalization
 - [x] GitHub Actions test workflow
+- [x] CI import-path configuration added (`pytest.ini`)
 - [ ] Confirm CI passes
 - [ ] Instrument master mapping
 - [ ] Data validation/stale-data detection
@@ -117,7 +118,9 @@ Groww currently documents rate limits by API type and supports up to 1,000 live-
 
 ### DATA-002 → DATA-003: Instrument Master / Mapping
 
-The Groww adapter skeleton is now in the repository. Before connecting to real market data, the next job is to build a reliable **instrument master**.
+The Groww adapter skeleton is now in the repository. The first CI run exposed an import-path issue: GitHub Actions could not import the repository's `src` package during pytest collection. This has been fixed by adding `pytest.ini` with the repository root on pytest's Python path. No trading logic or credentials were changed.
+
+The next job is to make the CI run green and then build a reliable **instrument master**.
 
 We will map:
 
@@ -139,9 +142,9 @@ This mapping becomes the single source of truth for market-data subscriptions, h
 
 ### What you need to do now
 
-**Nothing with your Groww credentials yet.** Do not paste the API key, secret, access token or TOTP into GitHub, chat, README files or source code.
+**Nothing with your Groww credentials.** Do not paste the API key, secret, access token or TOTP into GitHub, chat, README files or source code.
 
-For this step, simply open the repository's **Actions** tab and check whether the new **CI** workflow passes. If it fails, send me the failure screenshot/log and I will fix it before we proceed.
+Open the repository's **Actions** tab and wait for the new CI run triggered by the `pytest.ini` fix. If it becomes green, tell me **“CI is green.”** If it fails, send the new failure screenshot/log and I will fix it before we proceed.
 
 If CI is green, our next implementation step is **DATA-003: Groww instrument master ingestion and mapping**.
 

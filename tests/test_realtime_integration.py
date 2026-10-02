@@ -64,7 +64,7 @@ def test_ltp_is_resolved_to_canonical_instrument_and_persisted() -> None:
     assert resolved[0].internal_id == "NSE:CASH:RELIANCE"
     assert resolved[0].trading_symbol == "RELIANCE"
     assert resolved[0].event.ltp == Decimal("149.5")
-    assert repository.events == resolved
+    assert tuple(repository.events) == resolved
 
 
 def test_unknown_exchange_token_fails_closed_and_is_not_persisted() -> None:

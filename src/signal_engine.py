@@ -76,6 +76,13 @@ class SignalEngine:
         if len(signal_types) != len(set(signal_types)):
             raise ValueError("signal strategies must have unique signal types")
 
+    @classmethod
+    def with_momentum_strategy(cls) -> "SignalEngine":
+        """Build SIG-001 with the first concrete deterministic strategy."""
+        from src.signal_strategies import MomentumSignalStrategy
+
+        return cls((MomentumSignalStrategy(),))
+
     def generate(
         self,
         shortlist: tuple[ScannerRankedCandidate, ...] | list[ScannerRankedCandidate],

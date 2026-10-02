@@ -1,10 +1,12 @@
-"""PostgreSQL persistence for instrument-resolved real-time LTP events."""
+"""PostgreSQL persistence and controlled reads for instrument-resolved LTP events."""
 
+from datetime import datetime, timezone
 from typing import Any, Sequence
 
 import psycopg
 
 from src.market_data.realtime import ResolvedLtp
+from src.market_data.stream import LtpEvent
 
 
 CREATE_LTP_TABLE_SQL = """
@@ -41,9 +43,28 @@ DO UPDATE SET
     ltp = EXCLUDED.ltp
 """
 
+SELECT_LTP_RANGE_SQL = """
+SELECT internal_id, trading_symbol, exchange, segment,
+       exchange_token, timestamp, ltp
+FROM ltp_events
+WHERE internal_id = %s
+  AND timestamp >= %s
+  AND timestamp < %s
+ORDER BY timestamp ASC
+"""
+
+SELECT_LATEST_LTP_SQL = """
+SELECT internal_id, trading_symbol, exchange, segment,
+       exchange_token, timestamp, ltp
+FROM ltp_events
+WHERE internal_id = %s
+ORDER BY timestamp DESC
+LIMIT 1
+"""
+
 
 class PostgresLtpRepository:
-    """Store only normalized and instrument-resolved LTP events."""
+    """Store and read only normalized, instrument-resolved LTP events."""
 
     def __init__(self, connection: Any):
         self._connection = connection
@@ -78,6 +99,62 @@ class PostgresLtpRepository:
             cursor.executemany(UPSERT_LTP_SQL, rows)
         self._connection.commit()
         return len(rows)
+
+    def get_ltp(
+        self,
+        internal_id: str,
+        start_time: datetime,
+        end_time: datetime,
+    ) -> list[ResolvedLtp]:
+        """Read persisted LTP events for one canonical instrument and time range."""
+        self._validate_time_range(start_time, end_time)
+
+        with self._connection.cursor() as cursor:
+            cursor.execute(
+                SELECT_LTP_RANGE_SQL,
+                (
+                    internal_id,
+                    start_time.astimezone(timezone.utc),
+                    end_time.astimezone(timezone.utc),
+                ),
+            )
+            rows = cursor.fetchall()
+
+        return [self._row_to_resolved_ltp(row) for row in rows]
+
+    def get_latest_ltp(self, internal_id: str) -> ResolvedLtp | None:
+        """Read the newest persisted LTP for one canonical instrument."""
+        with self._connection.cursor() as cursor:
+            cursor.execute(SELECT_LATEST_LTP_SQL, (internal_id,))
+            row = cursor.fetchone()
+
+        return None if row is None else self._row_to_resolved_ltp(row)
+
+    @staticmethod
+    def _validate_time_range(start_time: datetime, end_time: datetime) -> None:
+        if start_time.tzinfo is None or start_time.utcoffset() is None:
+            raise ValueError("start_time must be timezone-aware")
+        if end_time.tzinfo is None or end_time.utcoffset() is None:
+            raise ValueError("end_time must be timezone-aware")
+        if end_time <= start_time:
+            raise ValueError("end_time must be after start_time")
+
+    @staticmethod
+    def _row_to_resolved_ltp(row: Sequence[Any]) -> ResolvedLtp:
+        timestamp = row[5]
+        if timestamp.tzinfo is None or timestamp.utcoffset() is None:
+            raise ValueError("persisted LTP timestamp must be timezone-aware")
+        return ResolvedLtp(
+            internal_id=row[0],
+            trading_symbol=row[1],
+            event=LtpEvent(
+                exchange=row[2],
+                segment=row[3],
+                exchange_token=row[4],
+                timestamp=timestamp.astimezone(timezone.utc),
+                ltp=row[6],
+            ),
+        )
 
     def close(self) -> None:
         self._connection.close()

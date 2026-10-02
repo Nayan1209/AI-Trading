@@ -27,34 +27,35 @@
 | AI-001 | AI Analyst | 🟢 | 🟢 | 🟢 | Complete; provider-independent structured contract |
 | AI-002 | AI Context Builder | 🟢 | 🟢 | 🟢 | Complete; deterministic signal-to-context adapter |
 | AI-003 | AI Analysis Orchestration | 🟢 | 🟢 | 🟢 | Complete; deterministic orchestration boundary, CI green |
-| AI-004 | AI Prompt Construction | 🟢 | 🟢 | 🟡 | In progress; deterministic prompt artifact + tests prepared for CI |
+| AI-004 | AI Prompt Construction | 🟢 | 🟢 | 🟢 | Complete; deterministic prompt artifact + revalidation, CI green |
+| AI-005 | AI Model Adapter | 🟢 | 🟢 | 🟢 | In progress; provider-independent adapter boundary |
 | RISK-001 | Risk Engine | ⚪ | ⚪ | ⚪ | Not Started |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 | TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
-## Current milestone: AI-004
+## Current milestone: AI-005
 
-AI-004 introduces a deterministic prompt-construction boundary between AI-003 orchestration and any future model adapter. It accepts only validated `AIAnalysisContext`, keeps system instructions separate from caller-supplied data, serializes mappings with stable key ordering, preserves `Decimal` values as exact strings, and carries an explicit prompt version.
+AI-005 introduces a provider-independent model-adapter boundary after deterministic prompt construction. The core contract accepts only the immutable `AIPrompt` artifact and returns opaque `AIModelResponse` text with explicit model and prompt versions. No provider SDK, network call, credentials, trading interpretation, risk override, broker access, or execution is introduced.
 
 ### Files added
 
-- `brain/34_AI_PROMPT_CONSTRUCTION_SPECIFICATION.md`
-- `src/ai_prompt.py`
-- `tests/test_ai_prompt.py`
+- `brain/35_AI_MODEL_ADAPTER_SPECIFICATION.md`
+- `src/ai_model.py`
+- `tests/test_ai_model.py`
 
 ### Safety
 
-No live model call, network request, broker access, order execution, credential handling, risk override, or market-data retrieval is introduced. External context remains untrusted data.
+The model response is untrusted text. AI-005 does not interpret it as a trade decision and does not execute orders. Provider-specific network and credential handling remain outside the core contract.
 
 ## Immediate Next Step
 
-Run the automatic GitHub Actions CI for the complete AI-004 change set. If green, mark AI-004 complete and define the next AI-analysis boundary before implementing further functionality.
+Run the automatic GitHub Actions CI for the complete AI-005 change set. If green, mark AI-005 complete and define the next AI-analysis boundary before implementing further functionality.
 
 ## User Action Required
 
-No Groww secret, access token, broker credential, or model API key is required for AI-004. Do not commit credentials.
+No Groww secret, access token, broker credential, or model API key is required for AI-005. Do not commit credentials.
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 

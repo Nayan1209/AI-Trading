@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 1.3
+**Version:** 1.4
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -15,7 +15,8 @@
 | DATA-006 | PostgreSQL Market-Data Persistence | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
 | DATA-007 | Data Quality Monitoring | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
 | DATA-008 | Real-Time LTP Feed Normalization | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
-| DATA-009 | Real-Time LTP Integration | 🟢 | 🟢 | 🟡 | Implementation and deterministic tests complete; automatic CI validation pending |
+| DATA-009 | Real-Time LTP Integration | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
+| DATA-010 | Real-Time LTP Read Path | 🟢 | 🟢 | 🟢 | Complete; controlled latest/range reads with deterministic CI coverage |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | SIG-001 | Signal Engine | ⚪ | ⚪ | ⚪ | Not Started |
@@ -79,14 +80,20 @@
 - `PostgresLtpRepository` added as the provider-independent persistence boundary for resolved real-time LTP events.
 - `ltp_events` PostgreSQL migration added with positive-LTP validation, UTC-capable timestamps and idempotent event identity.
 - Deterministic integration and PostgreSQL persistence tests added without live Groww or production PostgreSQL services.
+- DATA-009 automatic CI validation completed successfully on `main`.
+- DATA-010 controlled read path added to `PostgresLtpRepository` for latest and bounded time-range LTP retrieval by canonical internal instrument ID.
+- DATA-010 read results return provider-independent `ResolvedLtp` values; raw database rows are not exposed downstream.
+- DATA-010 deterministic tests cover latest reads, chronological range reads, empty reads, invalid time ranges and naive persisted timestamps.
+- DATA-010 specification added under `brain/20_REALTIME_LTP_READ_PATH_SPECIFICATION.md`.
+- DATA-010 automatic CI validation completed successfully.
 
 ## Immediate Next Step
-**DATA-009 CI gate:** let the automatic GitHub Actions workflow verify the complete DATA-009 change set on `main`.
+**Scanner-ready market-data consumer:** use the DATA-010 controlled read boundary as the input to the first scanner component. Scanner logic must remain downstream of validated, instrument-resolved and persisted market data.
 
-If CI is green, mark DATA-009 complete and expose a controlled read path for persisted real-time market data before scanner/signal work. If CI fails, fix the failure on `main` before adding any new functionality.
+Before any signal-generation logic is added, the next implementation should define the scanner input contract and deterministic eligibility rules without placing orders or bypassing the risk/execution boundaries.
 
 ## User Action Required
-No Groww secret or access token is required for DATA-009 unit tests. Do **not** commit credentials. Real-time integration tests use deterministic payload fixtures and fake persistence connections; they do not call Groww or a production database.
+No Groww secret or access token is required for the deterministic market-data tests. Do **not** commit credentials.
 
 The user does not need to create branches or pull requests. All project development is performed directly on `main`.
 

@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 1.8
+**Version:** 1.9
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -20,7 +20,8 @@
 | DATA-011 | Scanner-Ready Market-Data Consumer | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
 | DATA-012 | Scanner Universe / Market-Data Window | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
 | DATA-013 | Scanner Feature Snapshot | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
-| DATA-014 | Scanner Feature Quality Gate | 🟢 | 🟢 | 🟡 | Implementation complete; automatic CI validation pending |
+| DATA-014 | Scanner Feature Quality Gate | 🟢 | 🟢 | 🟢 | Complete; automatic CI green after deterministic non-positive-price fixture correction |
+| DATA-015 | Scanner Candidate Ranking | 🟢 | 🟢 | 🟡 | Implementation complete; automatic CI validation pending |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | SIG-001 | Signal Engine | ⚪ | ⚪ | ⚪ | Not Started |
@@ -109,10 +110,16 @@
 - `ScannerFeatureQualityGate` validates identity, uniqueness, minimum sample count, positive prices, high/low consistency and exact Decimal percentage-change arithmetic.
 - DATA-014 returns accepted snapshots in deterministic lexical `internal_id` order for downstream scanner consumption.
 - DATA-014 deterministic quality-gate tests added without Groww credentials or production PostgreSQL.
-- DATA-014 automatic CI validation is pending.
+- DATA-014 automatic CI validation completed successfully after the non-positive-price fixture was corrected to avoid constructing an invalid `change_pct` before the quality gate.
+- DATA-015 specification added under `brain/25_SCANNER_CANDIDATE_RANKING_SPECIFICATION.md`.
+- `ScannerRankingService` composes the DATA-014 quality gate before ranking.
+- DATA-015 ranks candidates by descriptive `change_pct` descending, then sample count descending, then canonical `internal_id` ascending.
+- `ScannerRankedCandidate` exposes a one-based deterministic rank and the original validated snapshot.
+- DATA-015 deterministic ranking tests added for ordering, tie-breaking, empty input, fail-closed validation and minimum samples.
+- DATA-015 automatic CI validation is pending.
 
 ## Immediate Next Step
-**DATA-014 automatic CI validation:** verify the complete scanner feature-quality change set on `main` before advancing to the next scanner milestone.
+**DATA-015 automatic CI validation:** verify the complete deterministic scanner-ranking change set on `main` before adding any signal-generation logic.
 
 ## User Action Required
 No Groww secret or access token is required for the deterministic market-data tests. **Do not commit credentials.**

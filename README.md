@@ -114,7 +114,11 @@
 - [x] DATA-015 deterministic scanner candidate ranking
 - [x] DATA-015 ranking consumes only DATA-014-approved snapshots
 - [x] DATA-015 deterministic ordering and tie-break tests (`brain/25_SCANNER_CANDIDATE_RANKING_SPECIFICATION.md`)
-- [ ] DATA-015 automatic CI validation — pending
+- [x] DATA-015 automatic CI validation — green
+- [x] DATA-016 deterministic scanner candidate shortlist
+- [x] DATA-016 bounded top-N selection from DATA-015-ranked candidates
+- [x] DATA-016 fail-closed shortlist validation and deterministic tests (`brain/26_SCANNER_CANDIDATE_SHORTLIST_SPECIFICATION.md`)
+- [ ] DATA-016 automatic CI validation — pending
 
 ## Safety Boundary
 
@@ -204,9 +208,11 @@ DATA-014 adds a fail-closed quality gate on DATA-013 snapshots. `ScannerFeatureQ
 
 DATA-015 adds deterministic scanner candidate ranking after the DATA-014 quality boundary. `ScannerRankingService` ranks validated snapshots by descriptive percentage change descending, then sample count descending, then canonical internal ID ascending. The result is one-based and deterministic; it introduces no predictive score or trading signal.
 
+DATA-016 adds a deterministic scanner candidate shortlist after DATA-015. `ScannerCandidateShortlistService` accepts only DATA-015-ranked candidates, validates their contiguous one-based ranks and unique canonical identities, and returns a caller-defined positive top-N prefix without reordering or inventing candidates. It remains scanner infrastructure only and does not generate trading signals.
+
 The implementation does not open a live Groww connection and requires no credentials in CI. Groww-specific feed nesting remains isolated at the normalization boundary.
 
-The specifications are versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION.md`, `brain/19_REALTIME_LTP_INTEGRATION_SPECIFICATION.md`, `brain/20_REALTIME_LTP_READ_PATH_SPECIFICATION.md`, `brain/21_SCANNER_MARKET_DATA_SPECIFICATION.md`, `brain/22_SCANNER_UNIVERSE_WINDOW_SPECIFICATION.md`, `brain/23_SCANNER_FEATURE_SNAPSHOT_SPECIFICATION.md`, `brain/24_SCANNER_FEATURE_QUALITY_GATE_SPECIFICATION.md` and `brain/25_SCANNER_CANDIDATE_RANKING_SPECIFICATION.md`.
+The specifications are versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION.md`, `brain/19_REALTIME_LTP_INTEGRATION_SPECIFICATION.md`, `brain/20_REALTIME_LTP_READ_PATH_SPECIFICATION.md`, `brain/21_SCANNER_MARKET_DATA_SPECIFICATION.md`, `brain/22_SCANNER_UNIVERSE_WINDOW_SPECIFICATION.md`, `brain/23_SCANNER_FEATURE_SNAPSHOT_SPECIFICATION.md`, `brain/24_SCANNER_FEATURE_QUALITY_GATE_SPECIFICATION.md`, `brain/25_SCANNER_CANDIDATE_RANKING_SPECIFICATION.md` and `brain/26_SCANNER_CANDIDATE_SHORTLIST_SPECIFICATION.md`.
 
 ## Development Phases
 
@@ -215,7 +221,7 @@ The specifications are versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION
 | 0 | Foundation & specifications | 🟢 Complete |
 | 1 | Market Data Engine | 🟡 In Progress |
 | 2 | Instrument Master & Data Storage | 🟢 Instrument identity, persistence and data-quality monitoring complete |
-| 3 | Scanner & Signal Engine | 🟡 Scanner ranking boundary in progress |
+| 3 | Scanner & Signal Engine | 🟡 Scanner shortlist boundary in progress |
 | 4 | AI Analysis Engine | ⚪ Planned |
 | 5 | Trade Planner & Risk Engine | ⚪ Planned |
 | 6 | Paper Execution | ⚪ Planned |

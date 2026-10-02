@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 1.4
+**Version:** 1.5
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -17,6 +17,7 @@
 | DATA-008 | Real-Time LTP Feed Normalization | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
 | DATA-009 | Real-Time LTP Integration | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
 | DATA-010 | Real-Time LTP Read Path | 🟢 | 🟢 | 🟢 | Complete; controlled latest/range reads with deterministic CI coverage |
+| DATA-011 | Scanner-Ready Market-Data Consumer | 🟢 | 🟢 | 🟡 | Implementation complete; automatic CI validation pending |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | SIG-001 | Signal Engine | ⚪ | ⚪ | ⚪ | Not Started |
@@ -73,7 +74,6 @@
 - Groww nested LTP payload normalization added for multi-instrument feed responses.
 - Deterministic LTP validation rejects empty identity, missing fields and non-positive prices.
 - Deterministic freshness gate rejects future-dated and stale LTP events.
-- DATA-008 tests added using deterministic payload fixtures only.
 - DATA-009 specification added under `brain/19_REALTIME_LTP_INTEGRATION_SPECIFICATION.md`.
 - `RealtimeLtpService` resolves normalized LTP events through `InstrumentMaster` by exchange/token.
 - Segment mismatches and unknown instruments fail closed before persistence.
@@ -86,14 +86,18 @@
 - DATA-010 deterministic tests cover latest reads, chronological range reads, empty reads, invalid time ranges and naive persisted timestamps.
 - DATA-010 specification added under `brain/20_REALTIME_LTP_READ_PATH_SPECIFICATION.md`.
 - DATA-010 automatic CI validation completed successfully.
+- DATA-011 specification added under `brain/21_SCANNER_MARKET_DATA_SPECIFICATION.md`.
+- `ScannerMarketDataService` consumes only the DATA-010 `get_latest_ltp()` read contract.
+- DATA-011 scanner eligibility is deterministic: canonical identity match, CASH segment, positive LTP, timezone-aware non-future timestamp and caller-defined freshness.
+- Missing and stale market data is excluded rather than invented.
+- DATA-011 deterministic tests added using an in-memory fake reader; no Groww credentials or PostgreSQL service required.
+- DATA-011 automatic CI validation is pending.
 
 ## Immediate Next Step
-**Scanner-ready market-data consumer:** use the DATA-010 controlled read boundary as the input to the first scanner component. Scanner logic must remain downstream of validated, instrument-resolved and persisted market data.
-
-Before any signal-generation logic is added, the next implementation should define the scanner input contract and deterministic eligibility rules without placing orders or bypassing the risk/execution boundaries.
+**Scanner universe and deterministic market-data window:** build the next scanner boundary on top of `ScannerMarketDataService`, organizing eligible instruments and bounded read windows without generating signals or placing orders.
 
 ## User Action Required
-No Groww secret or access token is required for the deterministic market-data tests. Do **not** commit credentials.
+No Groww secret or access token is required for the deterministic market-data tests. **Do not commit credentials.**
 
 The user does not need to create branches or pull requests. All project development is performed directly on `main`.
 

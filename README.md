@@ -95,6 +95,10 @@
 - [x] Deterministic DATA-010 repository read tests
 - [x] DATA-010 specification (`brain/20_REALTIME_LTP_READ_PATH_SPECIFICATION.md`)
 - [x] DATA-010 automatic CI validation — green
+- [x] DATA-011 scanner-ready market-data consumer
+- [x] DATA-011 deterministic scanner eligibility rules
+- [x] DATA-011 scanner contract and tests (`brain/21_SCANNER_MARKET_DATA_SPECIFICATION.md`)
+- [x] DATA-011 automatic CI validation — pending
 
 ## Safety Boundary
 
@@ -174,9 +178,11 @@ Real-time events are stored in the PostgreSQL `ltp_events` table with an idempot
 
 DATA-010 exposes a controlled read path through `PostgresLtpRepository`. Consumers retrieve the latest event or a bounded chronological range by canonical `internal_id`, receiving provider-independent `ResolvedLtp` objects rather than database rows or Groww SDK objects. Read ranges require timezone-aware timestamps and invalid ranges fail closed.
 
+DATA-011 adds the first scanner-ready consumer on top of that read boundary. `ScannerMarketDataService` accepts canonical instrument IDs, retrieves only the latest persisted `ResolvedLtp`, and returns deterministic `ScannerCandidate` values only for fresh, non-future, positive-LTP CASH instruments. Missing or stale data is excluded rather than invented.
+
 The implementation does not open a live Groww connection and requires no credentials in CI. Groww-specific feed nesting remains isolated at the normalization boundary.
 
-The specifications are versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION.md`, `brain/19_REALTIME_LTP_INTEGRATION_SPECIFICATION.md` and `brain/20_REALTIME_LTP_READ_PATH_SPECIFICATION.md`.
+The specifications are versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION.md`, `brain/19_REALTIME_LTP_INTEGRATION_SPECIFICATION.md`, `brain/20_REALTIME_LTP_READ_PATH_SPECIFICATION.md` and `brain/21_SCANNER_MARKET_DATA_SPECIFICATION.md`.
 
 ## Development Phases
 
@@ -185,7 +191,7 @@ The specifications are versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION
 | 0 | Foundation & specifications | 🟢 Complete |
 | 1 | Market Data Engine | 🟡 In Progress |
 | 2 | Instrument Master & Data Storage | 🟢 Instrument identity, persistence and data-quality monitoring complete |
-| 3 | Scanner & Signal Engine | ⚪ Planned |
+| 3 | Scanner & Signal Engine | 🟡 Scanner market-data boundary started |
 | 4 | AI Analysis Engine | ⚪ Planned |
 | 5 | Trade Planner & Risk Engine | ⚪ Planned |
 | 6 | Paper Execution | ⚪ Planned |
@@ -223,13 +229,11 @@ We do not use CI as the development loop. It is the final verification gate for 
 
 ## Immediate Next Step
 
-### DATA-011 → scanner-ready market-data consumer
+### DATA-012 → scanner universe and deterministic market-data window
 
-DATA-009 and DATA-010 are complete and green. The persisted real-time LTP stream now has a controlled, provider-independent read boundary.
+DATA-011 defines the first scanner-ready consumer and its deterministic eligibility boundary.
 
-**Next action: define and implement the first scanner-ready market-data consumer using the DATA-010 read contract.** Scanner eligibility rules must be deterministic and must operate only on validated, instrument-resolved market data.
-
-No signal-generation, AI decision, order, withdrawal or live execution functionality should be introduced in this step.
+**Next action: define the scanner universe and bounded market-data window on top of `ScannerMarketDataService`.** This step may organize eligible instruments and read windows, but must not generate trading signals, invoke AI decisions, place orders, or bypass risk controls.
 
 ### What you need to do now
 

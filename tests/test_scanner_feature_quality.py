@@ -54,9 +54,10 @@ def test_quality_gate_enforces_minimum_samples() -> None:
 
 def test_quality_gate_rejects_non_positive_prices() -> None:
     gate = ScannerFeatureQualityGate()
+    invalid = replace(snapshot(), first_ltp=Decimal("0"))
 
     with pytest.raises(ValueError, match="prices must be positive"):
-        gate.validate((snapshot(first="0"),))
+        gate.validate((invalid,))
 
 
 def test_quality_gate_rejects_inconsistent_change() -> None:

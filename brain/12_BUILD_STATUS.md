@@ -22,10 +22,10 @@
 | DATA-013 | Scanner Feature Snapshot | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
 | DATA-014 | Scanner Feature Quality Gate | 🟢 | 🟢 | 🟢 | Complete; automatic CI green after deterministic non-positive-price fixture correction |
 | DATA-015 | Scanner Candidate Ranking | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
-| DATA-016 | Scanner Candidate Shortlist | 🟢 | 🟢 | 🟡 | Implementation complete; automatic CI validation pending |
+| DATA-016 | Scanner Candidate Shortlist | 🟢 | 🟢 | 🟢 | Complete; implementation and deterministic CI validation completed |
+| SIG-001 | Signal Engine | 🟢 | 🟢 | 🟢 | Complete; deterministic engine and momentum strategy implemented |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
-| SIG-001 | Signal Engine | ⚪ | ⚪ | ⚪ | Not Started |
 | AI-001 | AI Analyst | ⚪ | ⚪ | ⚪ | Not Started |
 | RISK-001 | Risk Engine | ⚪ | ⚪ | ⚪ | Not Started |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
@@ -122,13 +122,21 @@
 - `ScannerCandidateShortlistService` accepts only DATA-015-ranked candidates and preserves their deterministic rank order.
 - DATA-016 requires a positive integer top-N limit and returns the bounded prefix without reordering or inventing candidates.
 - DATA-016 fail-closed tests cover rank continuity, duplicate identities, invalid limits and empty input.
-- DATA-016 automatic CI validation is pending.
+- DATA-016 automatic CI validation completed successfully on `main`.
+- SIG-001 specification added under `brain/27_SIGNAL_ENGINE_SPECIFICATION.md`.
+- `SignalEngine` orchestration boundary implemented over DATA-016 ranked candidates.
+- SIG-001 rejects duplicate strategy types and validates strategy output identity/rank/type.
+- Deterministic momentum strategy added under `brain/28_MOMENTUM_SIGNAL_SPECIFICATION.md`.
+- Momentum strategy uses a strict configurable percentage-change threshold and emits observation-only LONG/SHORT signals.
+- `SignalEngine.with_momentum_strategy()` wires the concrete momentum strategy into the engine.
+- SIG-001 deterministic engine and momentum tests added using in-memory fixtures only.
+- SIG-001 implementation completed; automatic CI validation is the final operational verification for this documentation milestone.
 
 ## Immediate Next Step
-**DATA-016 automatic CI validation:** verify the complete deterministic scanner-shortlist change set on `main` before advancing to signal-generation work.
+**SIG-001 automatic CI validation:** verify the completed signal-engine documentation update on `main`. After CI is green, select and specify the next deterministic strategy family under SIG-001 before implementing it.
 
 ## User Action Required
-No Groww secret or access token is required for the deterministic market-data tests. **Do not commit credentials.**
+No Groww secret or access token is required for the deterministic market-data or signal-engine tests. **Do not commit credentials.**
 
 The user does not need to create branches or pull requests. All project development is performed directly on `main`.
 

@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 1.5
+**Version:** 1.6
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -17,7 +17,8 @@
 | DATA-008 | Real-Time LTP Feed Normalization | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
 | DATA-009 | Real-Time LTP Integration | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
 | DATA-010 | Real-Time LTP Read Path | 🟢 | 🟢 | 🟢 | Complete; controlled latest/range reads with deterministic CI coverage |
-| DATA-011 | Scanner-Ready Market-Data Consumer | 🟢 | 🟢 | 🟡 | Implementation complete; automatic CI validation pending |
+| DATA-011 | Scanner-Ready Market-Data Consumer | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
+| DATA-012 | Scanner Universe / Market-Data Window | 🟢 | 🟢 | 🟡 | Implementation complete; automatic CI validation pending |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | SIG-001 | Signal Engine | ⚪ | ⚪ | ⚪ | Not Started |
@@ -91,10 +92,16 @@
 - DATA-011 scanner eligibility is deterministic: canonical identity match, CASH segment, positive LTP, timezone-aware non-future timestamp and caller-defined freshness.
 - Missing and stale market data is excluded rather than invented.
 - DATA-011 deterministic tests added using an in-memory fake reader; no Groww credentials or PostgreSQL service required.
-- DATA-011 automatic CI validation is pending.
+- DATA-011 automatic CI validation completed successfully.
+- DATA-012 specification added under `brain/22_SCANNER_UNIVERSE_WINDOW_SPECIFICATION.md`.
+- `ScannerUniverse` enforces non-empty, duplicate-free, CASH-only canonical internal IDs and deterministic ordering.
+- `MarketDataWindow` enforces timezone-aware reference time and non-negative freshness with explicit inclusive bounds.
+- `ScannerUniverseService` composes DATA-012 boundaries with `ScannerMarketDataService` without introducing signal or execution logic.
+- DATA-012 deterministic tests added for universe validation, ordering, window boundaries and service integration.
+- DATA-012 automatic CI validation is pending.
 
 ## Immediate Next Step
-**Scanner universe and deterministic market-data window:** build the next scanner boundary on top of `ScannerMarketDataService`, organizing eligible instruments and bounded read windows without generating signals or placing orders.
+**DATA-012 automatic CI validation:** verify the complete scanner universe/window change set on `main` before advancing to the next scanner milestone.
 
 ## User Action Required
 No Groww secret or access token is required for the deterministic market-data tests. **Do not commit credentials.**

@@ -98,7 +98,11 @@
 - [x] DATA-011 scanner-ready market-data consumer
 - [x] DATA-011 deterministic scanner eligibility rules
 - [x] DATA-011 scanner contract and tests (`brain/21_SCANNER_MARKET_DATA_SPECIFICATION.md`)
-- [x] DATA-011 automatic CI validation — pending
+- [x] DATA-011 automatic CI validation — green
+- [x] DATA-012 deterministic scanner universe construction
+- [x] DATA-012 bounded market-data window contract
+- [x] DATA-012 deterministic universe/window tests (`brain/22_SCANNER_UNIVERSE_WINDOW_SPECIFICATION.md`)
+- [ ] DATA-012 automatic CI validation — pending
 
 ## Safety Boundary
 
@@ -180,9 +184,11 @@ DATA-010 exposes a controlled read path through `PostgresLtpRepository`. Consume
 
 DATA-011 adds the first scanner-ready consumer on top of that read boundary. `ScannerMarketDataService` accepts canonical instrument IDs, retrieves only the latest persisted `ResolvedLtp`, and returns deterministic `ScannerCandidate` values only for fresh, non-future, positive-LTP CASH instruments. Missing or stale data is excluded rather than invented.
 
+DATA-012 adds the deterministic scanner input envelope on top of DATA-011. `ScannerUniverse` enforces a non-empty, duplicate-free, CASH-only canonical instrument set in stable order. `MarketDataWindow` defines an explicit timezone-aware inclusive window from `reference_time - max_age` through `reference_time`. `ScannerUniverseService` composes these boundaries without generating signals or making execution decisions.
+
 The implementation does not open a live Groww connection and requires no credentials in CI. Groww-specific feed nesting remains isolated at the normalization boundary.
 
-The specifications are versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION.md`, `brain/19_REALTIME_LTP_INTEGRATION_SPECIFICATION.md`, `brain/20_REALTIME_LTP_READ_PATH_SPECIFICATION.md` and `brain/21_SCANNER_MARKET_DATA_SPECIFICATION.md`.
+The specifications are versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION.md`, `brain/19_REALTIME_LTP_INTEGRATION_SPECIFICATION.md`, `brain/20_REALTIME_LTP_READ_PATH_SPECIFICATION.md`, `brain/21_SCANNER_MARKET_DATA_SPECIFICATION.md` and `brain/22_SCANNER_UNIVERSE_WINDOW_SPECIFICATION.md`.
 
 ## Development Phases
 
@@ -191,7 +197,7 @@ The specifications are versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION
 | 0 | Foundation & specifications | 🟢 Complete |
 | 1 | Market Data Engine | 🟡 In Progress |
 | 2 | Instrument Master & Data Storage | 🟢 Instrument identity, persistence and data-quality monitoring complete |
-| 3 | Scanner & Signal Engine | 🟡 Scanner market-data boundary started |
+| 3 | Scanner & Signal Engine | 🟡 Scanner input boundary in progress |
 | 4 | AI Analysis Engine | ⚪ Planned |
 | 5 | Trade Planner & Risk Engine | ⚪ Planned |
 | 6 | Paper Execution | ⚪ Planned |
@@ -229,11 +235,11 @@ We do not use CI as the development loop. It is the final verification gate for 
 
 ## Immediate Next Step
 
-### DATA-012 → scanner universe and deterministic market-data window
+### DATA-012 → automatic CI validation
 
-DATA-011 defines the first scanner-ready consumer and its deterministic eligibility boundary.
+DATA-012 defines the scanner universe and bounded market-data window on top of `ScannerMarketDataService`.
 
-**Next action: define the scanner universe and bounded market-data window on top of `ScannerMarketDataService`.** This step may organize eligible instruments and read windows, but must not generate trading signals, invoke AI decisions, place orders, or bypass risk controls.
+**Next action: let the automatic CI run against the complete DATA-012 change set.** If green, advance to the next scanner milestone. If red, fix the failing contract/test on `main` before adding more functionality.
 
 ### What you need to do now
 

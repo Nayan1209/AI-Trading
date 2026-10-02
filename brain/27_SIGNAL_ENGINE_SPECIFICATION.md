@@ -1,6 +1,6 @@
 # Signal Engine Specification
 **Document ID:** SIG-001  
-**Status:** Implementation expanded — deterministic engine with momentum and reversal strategies  
+**Status:** Implementation expanded — deterministic engine with momentum, reversal and breakout strategies  
 **Scope:** Deterministic strategy orchestration over the DATA-016 scanner shortlist
 
 ## Objective
@@ -29,7 +29,7 @@ The initial contract reserves five strategy families: breakout, pullback, moment
 
 Strategies implement a small evaluation protocol and return either a `SignalCandidate` or `None`. The engine rejects duplicate strategy types and rejects strategy output that does not match the candidate identity, rank, symbol, or strategy type supplied to it.
 
-The concrete deterministic strategies currently implemented are momentum and reversal. Their rules are defined separately in `brain/28_MOMENTUM_SIGNAL_SPECIFICATION.md` and `brain/29_REVERSAL_SIGNAL_SPECIFICATION.md` and are evaluated only after the DATA-016 shortlist boundary.
+The concrete deterministic strategies currently implemented are momentum, reversal and breakout. Their rules are defined separately in `brain/28_MOMENTUM_SIGNAL_SPECIFICATION.md`, `brain/29_REVERSAL_SIGNAL_SPECIFICATION.md` and `brain/30_BREAKOUT_SIGNAL_SPECIFICATION.md` and are evaluated only after the DATA-016 shortlist boundary.
 
 ## Determinism
 
@@ -48,7 +48,9 @@ SIG-001 does not call an AI model, create an executable trade plan, override ris
 - `SignalEngine.with_momentum_strategy()` wires the momentum strategy into the engine.
 - Deterministic reversal strategy implemented with its own acceptance tests.
 - `SignalEngine.with_reversal_strategy()` wires the reversal strategy into the engine.
-- Engine tests cover deterministic candidate order and both concrete strategy factory paths.
+- Deterministic breakout strategy implemented with its own acceptance tests.
+- `SignalEngine.with_breakout_strategy()` wires the breakout strategy into the engine.
+- Engine tests cover deterministic candidate order and all three concrete strategy factory paths.
 
 ## Acceptance Criteria
 
@@ -58,6 +60,6 @@ SIG-001 does not call an AI model, create an executable trade plan, override ris
 - Strategy types must be unique.
 - Signal scores are constrained to `0..100`.
 - Strategy output must match the input candidate identity and rank.
-- Concrete momentum and reversal strategies emit only when their strict deterministic thresholds are crossed.
+- Concrete momentum, reversal and breakout strategies emit only when their strict deterministic thresholds and strategy-specific conditions are satisfied.
 - Tests require no Groww credentials or production PostgreSQL service.
 - Additional strategy rules are added only with their own deterministic acceptance criteria.

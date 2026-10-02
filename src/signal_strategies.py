@@ -70,3 +70,45 @@ class ReversalSignalStrategy:
             strategy_score=score,
             reason_codes=(reason,),
         )
+
+
+class BreakoutSignalStrategy:
+    """Emit a deterministic breakout observation from the feature extremes.
+
+    A breakout is recognized only when the latest LTP is exactly at the
+    observed high/low and the absolute percentage change clears the strict
+    configurable threshold. The strategy remains observation-only.
+    """
+
+    signal_type = SignalType.BREAKOUT
+
+    def __init__(self, threshold_pct: Decimal = Decimal("1")) -> None:
+        if threshold_pct <= Decimal("0"):
+            raise ValueError("breakout threshold_pct must be positive")
+        self.threshold_pct = threshold_pct
+
+    def evaluate(self, candidate: ScannerRankedCandidate) -> SignalCandidate | None:
+        snapshot = candidate.snapshot
+        change_pct = snapshot.change_pct
+        if abs(change_pct) <= self.threshold_pct:
+            return None
+
+        if change_pct > 0 and snapshot.latest_ltp == snapshot.high_ltp:
+            direction = SignalDirection.LONG
+            reason = "latest_ltp_at_high_breakout_threshold"
+        elif change_pct < 0 and snapshot.latest_ltp == snapshot.low_ltp:
+            direction = SignalDirection.SHORT
+            reason = "latest_ltp_at_low_breakout_threshold"
+        else:
+            return None
+
+        score = min(abs(change_pct), Decimal("100"))
+        return SignalCandidate(
+            rank=candidate.rank,
+            internal_id=snapshot.internal_id,
+            trading_symbol=snapshot.trading_symbol,
+            signal_type=SignalType.BREAKOUT,
+            direction=direction,
+            strategy_score=score,
+            reason_codes=(reason,),
+        )

@@ -23,7 +23,7 @@
 | DATA-014 | Scanner Feature Quality Gate | 🟢 | 🟢 | 🟢 | Complete; automatic CI green after deterministic non-positive-price fixture correction |
 | DATA-015 | Scanner Candidate Ranking | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
 | DATA-016 | Scanner Candidate Shortlist | 🟢 | 🟢 | 🟢 | Complete; implementation and deterministic CI validation completed |
-| SIG-001 | Signal Engine | 🟢 | 🟢 | 🟡 | Momentum + reversal strategies implemented; automatic CI validation pending |
+| SIG-001 | Signal Engine | 🟢 | 🟢 | 🟡 | Momentum + reversal + breakout strategies implemented; automatic CI validation pending |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | AI-001 | AI Analyst | ⚪ | ⚪ | ⚪ | Not Started |
@@ -132,10 +132,13 @@
 - Deterministic reversal strategy added under `brain/29_REVERSAL_SIGNAL_SPECIFICATION.md`.
 - Reversal strategy uses a strict configurable percentage-change threshold and emits observation-only inverse-direction LONG/SHORT signals.
 - `SignalEngine.with_reversal_strategy()` wires the concrete reversal strategy into the engine.
-- SIG-001 deterministic engine, momentum and reversal tests added using in-memory fixtures only.
+- Deterministic breakout strategy added under `brain/30_BREAKOUT_SIGNAL_SPECIFICATION.md`.
+- Breakout strategy requires a strict percentage-change threshold plus latest-LTP-at-high/low confirmation and emits observation-only LONG/SHORT signals.
+- `SignalEngine.with_breakout_strategy()` wires the concrete breakout strategy into the engine.
+- SIG-001 deterministic engine, momentum, reversal and breakout tests added using in-memory fixtures only.
 
 ## Immediate Next Step
-**SIG-001 automatic CI validation:** verify the completed deterministic reversal-strategy change set on `main`. If green, select and specify the next deterministic strategy family before implementing it.
+**SIG-001 automatic CI validation:** verify the completed deterministic breakout-strategy change set on `main`. If green, select and specify the next deterministic strategy family before implementing it.
 
 ## User Action Required
 No Groww secret or access token is required for the deterministic market-data or signal-engine tests. **Do not commit credentials.**

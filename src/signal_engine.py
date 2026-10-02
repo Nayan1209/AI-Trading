@@ -78,7 +78,7 @@ class SignalEngine:
 
     @classmethod
     def with_momentum_strategy(cls) -> "SignalEngine":
-        """Build SIG-001 with the first concrete deterministic strategy."""
+        """Build SIG-001 with the deterministic momentum strategy."""
         from src.signal_strategies import MomentumSignalStrategy
 
         return cls((MomentumSignalStrategy(),))
@@ -89,6 +89,13 @@ class SignalEngine:
         from src.signal_strategies import ReversalSignalStrategy
 
         return cls((ReversalSignalStrategy(),))
+
+    @classmethod
+    def with_breakout_strategy(cls) -> "SignalEngine":
+        """Build SIG-001 with the deterministic breakout strategy."""
+        from src.signal_strategies import BreakoutSignalStrategy
+
+        return cls((BreakoutSignalStrategy(),))
 
     def generate(
         self,

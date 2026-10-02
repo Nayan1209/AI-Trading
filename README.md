@@ -125,8 +125,10 @@
 - [x] SIG-001 momentum strategy wired into the signal engine
 - [x] SIG-001 reversal strategy (`brain/29_REVERSAL_SIGNAL_SPECIFICATION.md`)
 - [x] SIG-001 reversal strategy wired into the signal engine
-- [x] SIG-001 deterministic engine, momentum and reversal tests
-- [ ] SIG-001 automatic CI validation — pending for the reversal implementation commit
+- [x] SIG-001 breakout strategy (`brain/30_BREAKOUT_SIGNAL_SPECIFICATION.md`)
+- [x] SIG-001 breakout strategy wired into the signal engine
+- [x] SIG-001 deterministic engine, momentum, reversal and breakout tests
+- [ ] SIG-001 automatic CI validation — pending for the breakout implementation commit
 
 ## Safety Boundary
 
@@ -226,7 +228,9 @@ The first concrete strategy is deterministic momentum. `MomentumSignalStrategy` 
 
 The second concrete strategy is deterministic reversal. `ReversalSignalStrategy` uses the same validated percentage-change feature as a deliberately contrasting mean-reversion observation: a change above the strict positive threshold produces a SHORT observation, a change below the negative threshold produces a LONG observation, and changes inside the threshold produce no signal. Its default threshold is 2%, and its score is the absolute change capped at 100.
 
-The strategy rules are versioned under `brain/28_MOMENTUM_SIGNAL_SPECIFICATION.md` and `brain/29_REVERSAL_SIGNAL_SPECIFICATION.md`, while the signal-engine contract is versioned under `brain/27_SIGNAL_ENGINE_SPECIFICATION.md`.
+The third concrete strategy is deterministic breakout. `BreakoutSignalStrategy` requires the percentage-change threshold to be crossed and the latest LTP to be exactly at the corresponding observed high or low. Positive threshold-crossing changes at the high produce LONG observations; negative threshold-crossing changes at the low produce SHORT observations. Its default threshold is 1%, and its score is the absolute change capped at 100.
+
+The strategy rules are versioned under `brain/28_MOMENTUM_SIGNAL_SPECIFICATION.md`, `brain/29_REVERSAL_SIGNAL_SPECIFICATION.md` and `brain/30_BREAKOUT_SIGNAL_SPECIFICATION.md`, while the signal-engine contract is versioned under `brain/27_SIGNAL_ENGINE_SPECIFICATION.md`.
 
 The implementation does not open a live Groww connection and requires no credentials in CI. Groww-specific feed nesting remains isolated at the normalization boundary.
 
@@ -237,7 +241,7 @@ The implementation does not open a live Groww connection and requires no credent
 | 0 | Foundation & specifications | 🟢 Complete |
 | 1 | Market Data Engine | 🟡 In Progress |
 | 2 | Instrument Master & Data Storage | 🟢 Instrument identity, persistence and data-quality monitoring complete |
-| 3 | Scanner & Signal Engine | 🟡 Signal engine with momentum + reversal strategies implemented; CI pending |
+| 3 | Scanner & Signal Engine | 🟡 Signal engine with momentum + reversal + breakout strategies implemented; CI pending |
 | 4 | AI Analysis Engine | ⚪ Planned |
 | 5 | Trade Planner & Risk Engine | ⚪ Planned |
 | 6 | Paper Execution | ⚪ Planned |

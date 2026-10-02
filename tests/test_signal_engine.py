@@ -10,18 +10,18 @@ from src.signal_engine import (
     SignalEngine,
     SignalType,
 )
-from src.signal_strategies import MomentumSignalStrategy, ReversalSignalStrategy
+from src.signal_strategies import BreakoutSignalStrategy, MomentumSignalStrategy, ReversalSignalStrategy
 
 
-def candidate(rank: int, internal_id: str, symbol: str = "RELIANCE", change_pct: str = "5") -> ScannerRankedCandidate:
+def candidate(rank: int, internal_id: str, symbol: str = "RELIANCE", change_pct: str = "5", *, latest_ltp: str = "105", high_ltp: str = "106", low_ltp: str = "99") -> ScannerRankedCandidate:
     snapshot = ScannerFeatureSnapshot(
         internal_id=internal_id,
         trading_symbol=symbol,
         sample_count=3,
         first_ltp=Decimal("100"),
-        latest_ltp=Decimal("105"),
-        high_ltp=Decimal("106"),
-        low_ltp=Decimal("99"),
+        latest_ltp=Decimal(latest_ltp),
+        high_ltp=Decimal(high_ltp),
+        low_ltp=Decimal(low_ltp),
         change_pct=Decimal(change_pct),
     )
     return ScannerRankedCandidate(rank=rank, snapshot=snapshot)
@@ -75,6 +75,21 @@ def test_signal_engine_reversal_factory_wires_concrete_strategy() -> None:
     assert tuple((signal.trading_symbol, signal.direction) for signal in result) == (
         ("RELIANCE", SignalDirection.SHORT),
         ("TCS", SignalDirection.LONG),
+    )
+
+
+def test_signal_engine_breakout_factory_wires_concrete_strategy() -> None:
+    ranked = (
+        candidate(1, "NSE:CASH:RELIANCE", change_pct="2", latest_ltp="102", high_ltp="102"),
+        candidate(2, "NSE:CASH:INFY", symbol="INFY", change_pct="2", latest_ltp="102", high_ltp="103"),
+        candidate(3, "NSE:CASH:TCS", symbol="TCS", change_pct="-2", latest_ltp="98", low_ltp="98"),
+    )
+
+    result = SignalEngine.with_breakout_strategy().generate(ranked)
+
+    assert tuple((signal.trading_symbol, signal.direction) for signal in result) == (
+        ("RELIANCE", SignalDirection.LONG),
+        ("TCS", SignalDirection.SHORT),
     )
 
 

@@ -77,7 +77,10 @@
 - [x] DATA-007 deterministic data-quality monitoring implementation
 - [x] DATA-007 tests for completeness, duplicates, gaps, invalid candles and persistence health
 - [x] DATA-007 specification (`brain/17_DATA_QUALITY_MONITORING_SPECIFICATION.md`)
-- [ ] DATA-007 final automatic CI validation
+- [x] DATA-007 final automatic CI validation — green
+- [x] DATA-008 real-time LTP feed normalization contract
+- [x] DATA-008 deterministic LTP normalization and freshness tests
+- [x] DATA-008 specification (`brain/18_REALTIME_LTP_FEED_SPECIFICATION.md`)
 
 ## Safety Boundary
 
@@ -147,13 +150,21 @@ DATA-007 adds a provider-independent deterministic quality boundary around norma
 
 The specification is versioned under `brain/17_DATA_QUALITY_MONITORING_SPECIFICATION.md`.
 
+## Real-Time LTP Feed
+
+DATA-008 adds the first controlled real-time market-data boundary. Groww LTP feed payloads are normalized into immutable provider-independent `LtpEvent` objects with exchange, segment, exchange token, UTC timestamp and `Decimal` LTP. The boundary rejects malformed events and provides a deterministic freshness gate for future-dated or stale events.
+
+The implementation does not open a live Groww connection and requires no credentials in CI. Groww-specific feed nesting remains isolated at the normalization boundary.
+
+The specification is versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION.md`.
+
 ## Development Phases
 
 | Phase | Name | Status |
 |---|---|---|
 | 0 | Foundation & specifications | 🟢 Complete |
 | 1 | Market Data Engine | 🟡 In Progress |
-| 2 | Instrument Master & Data Storage | 🟡 Persistence + data-quality monitoring implemented; DATA-007 CI gate pending |
+| 2 | Instrument Master & Data Storage | 🟢 Instrument identity, persistence and data-quality monitoring complete |
 | 3 | Scanner & Signal Engine | ⚪ Planned |
 | 4 | AI Analysis Engine | ⚪ Planned |
 | 5 | Trade Planner & Risk Engine | ⚪ Planned |
@@ -192,19 +203,19 @@ We do not use CI as the development loop. It is the final verification gate for 
 
 ## Immediate Next Step
 
-### DATA-007 → final controlled CI validation
+### DATA-008 → final controlled CI validation
 
-DATA-006 is complete: PostgreSQL persistence is implemented and its automatic CI validation is green.
+DATA-007 is complete: deterministic data-quality monitoring and its automatic CI validation are green.
 
-DATA-007 is now implemented as a deterministic data-quality monitoring boundary. It checks candle validity, duplicates, caller-defined completeness/gaps and persistence health without requiring live services.
+DATA-008 is implemented as a read-only real-time LTP normalization boundary. It converts Groww's nested LTP feed payload into immutable internal events and applies deterministic freshness checks without requiring live services.
 
-**Next action: push this complete DATA-007 change set to `main` and let the automatic GitHub Actions workflow verify it. Do not create a pull request or another branch.**
+**Next action: push this complete DATA-008 change set to `main` and let the automatic GitHub Actions workflow verify it. Do not create a pull request or another branch.**
 
-If CI is green, mark DATA-007 complete and proceed to the next market-data integration milestone before scanner/signal work. If CI fails, fix the failure on `main` before adding new functionality.
+If CI is green, mark DATA-008 complete and proceed to integrate the normalized LTP stream with the instrument registry, quality boundary and persistence path before scanner/signal work. If CI fails, fix the failure on `main` before adding new functionality.
 
 ### What you need to do now
 
-You do **not** need to provide the Groww API key for DATA-007 unit tests. Do not commit credentials, access tokens, secrets or TOTP values.
+You do **not** need to provide the Groww API key for DATA-008 unit tests. Do not commit credentials, access tokens, secrets or TOTP values.
 
 The project is being developed directly on `main`. No new branch or pull request is required.
 

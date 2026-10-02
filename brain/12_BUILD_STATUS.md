@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 1.1
+**Version:** 1.2
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -13,7 +13,8 @@
 | DATA-004 | Data Validation / Staleness | 🟢 | 🟢 | 🟢 | Complete; deterministic validation, staleness detection and service gate verified by CI |
 | DATA-005 | Historical Candle Ingestion | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
 | DATA-006 | PostgreSQL Market-Data Persistence | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
-| DATA-007 | Data Quality Monitoring | 🟢 | 🟢 | 🟡 | Implementation complete; final automatic CI validation pending |
+| DATA-007 | Data Quality Monitoring | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
+| DATA-008 | Real-Time LTP Feed Normalization | 🟢 | 🟢 | 🟡 | Implementation and deterministic tests complete; automatic CI validation pending |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | SIG-001 | Signal Engine | ⚪ | ⚪ | ⚪ | Not Started |
@@ -64,14 +65,21 @@
 - Deterministic quality report added for candle validity, duplicates, caller-defined completeness and gaps.
 - Persistence health check boundary added without coupling monitoring to PostgreSQL implementation.
 - DATA-007 tests added using deterministic in-memory fixtures only.
+- DATA-007 automatic CI validation passed.
+- DATA-008 specification added under `brain/18_REALTIME_LTP_FEED_SPECIFICATION.md`.
+- Provider-independent `LtpEvent` model added for Groww real-time LTP data.
+- Groww nested LTP payload normalization added for multi-instrument feed responses.
+- Deterministic LTP validation rejects empty identity, missing fields and non-positive prices.
+- Deterministic freshness gate rejects future-dated and stale LTP events.
+- DATA-008 tests added using deterministic payload fixtures only.
 
 ## Immediate Next Step
-**DATA-007 CI gate:** push the complete DATA-007 change set to `main`. The automatic GitHub Actions workflow will run once for that coherent commit.
+**DATA-008 CI gate:** push the complete DATA-008 change set to `main`. The automatic GitHub Actions workflow will run once for that coherent commit.
 
-If CI is green, mark DATA-007 complete and proceed to the next market-data integration milestone. If CI fails, fix the failure on `main` before adding any new functionality.
+If CI is green, mark DATA-008 complete and integrate the normalized LTP stream with the instrument registry, quality boundary and persistence path before scanner/signal work. If CI fails, fix the failure on `main` before adding any new functionality.
 
 ## User Action Required
-No Groww secret or access token is required for DATA-007 unit tests. Do **not** commit credentials. Quality tests use deterministic candle fixtures and a fake persistence health check; they do not call Groww or a production database.
+No Groww secret or access token is required for DATA-008 unit tests. Do **not** commit credentials. Real-time feed tests use deterministic payload fixtures and do not call Groww.
 
 The user does not need to create branches or pull requests. All project development is performed directly on `main`.
 

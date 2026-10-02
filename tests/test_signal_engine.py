@@ -10,7 +10,7 @@ from src.signal_engine import (
     SignalEngine,
     SignalType,
 )
-from src.signal_strategies import MomentumSignalStrategy
+from src.signal_strategies import MomentumSignalStrategy, ReversalSignalStrategy
 
 
 def candidate(rank: int, internal_id: str, symbol: str = "RELIANCE", change_pct: str = "5") -> ScannerRankedCandidate:
@@ -60,6 +60,21 @@ def test_signal_engine_momentum_factory_wires_concrete_strategy() -> None:
     assert tuple((signal.trading_symbol, signal.direction) for signal in result) == (
         ("RELIANCE", SignalDirection.LONG),
         ("TCS", SignalDirection.SHORT),
+    )
+
+
+def test_signal_engine_reversal_factory_wires_concrete_strategy() -> None:
+    ranked = (
+        candidate(1, "NSE:CASH:RELIANCE", change_pct="3"),
+        candidate(2, "NSE:CASH:INFY", symbol="INFY", change_pct="1.5"),
+        candidate(3, "NSE:CASH:TCS", symbol="TCS", change_pct="-3"),
+    )
+
+    result = SignalEngine.with_reversal_strategy().generate(ranked)
+
+    assert tuple((signal.trading_symbol, signal.direction) for signal in result) == (
+        ("RELIANCE", SignalDirection.SHORT),
+        ("TCS", SignalDirection.LONG),
     )
 
 

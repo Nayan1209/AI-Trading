@@ -23,7 +23,7 @@
 | DATA-014 | Scanner Feature Quality Gate | 🟢 | 🟢 | 🟢 | Complete; automatic CI green after deterministic non-positive-price fixture correction |
 | DATA-015 | Scanner Candidate Ranking | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
 | DATA-016 | Scanner Candidate Shortlist | 🟢 | 🟢 | 🟢 | Complete; implementation and deterministic CI validation completed |
-| SIG-001 | Signal Engine | 🟢 | 🟢 | 🟢 | Complete; deterministic engine and momentum strategy implemented |
+| SIG-001 | Signal Engine | 🟢 | 🟢 | 🟡 | Momentum + reversal strategies implemented; automatic CI validation pending |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | AI-001 | AI Analyst | ⚪ | ⚪ | ⚪ | Not Started |
@@ -129,11 +129,13 @@
 - Deterministic momentum strategy added under `brain/28_MOMENTUM_SIGNAL_SPECIFICATION.md`.
 - Momentum strategy uses a strict configurable percentage-change threshold and emits observation-only LONG/SHORT signals.
 - `SignalEngine.with_momentum_strategy()` wires the concrete momentum strategy into the engine.
-- SIG-001 deterministic engine and momentum tests added using in-memory fixtures only.
-- SIG-001 implementation completed; automatic CI validation is the final operational verification for this documentation milestone.
+- Deterministic reversal strategy added under `brain/29_REVERSAL_SIGNAL_SPECIFICATION.md`.
+- Reversal strategy uses a strict configurable percentage-change threshold and emits observation-only inverse-direction LONG/SHORT signals.
+- `SignalEngine.with_reversal_strategy()` wires the concrete reversal strategy into the engine.
+- SIG-001 deterministic engine, momentum and reversal tests added using in-memory fixtures only.
 
 ## Immediate Next Step
-**SIG-001 automatic CI validation:** verify the completed signal-engine documentation update on `main`. After CI is green, select and specify the next deterministic strategy family under SIG-001 before implementing it.
+**SIG-001 automatic CI validation:** verify the completed deterministic reversal-strategy change set on `main`. If green, select and specify the next deterministic strategy family before implementing it.
 
 ## User Action Required
 No Groww secret or access token is required for the deterministic market-data or signal-engine tests. **Do not commit credentials.**

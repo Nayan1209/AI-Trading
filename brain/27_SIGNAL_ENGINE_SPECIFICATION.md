@@ -1,11 +1,11 @@
 # Signal Engine Specification
 **Document ID:** SIG-001  
-**Status:** Implemented — deterministic engine with first concrete momentum strategy  
+**Status:** Implementation expanded — deterministic engine with momentum and reversal strategies  
 **Scope:** Deterministic strategy orchestration over the DATA-016 scanner shortlist
 
 ## Objective
 
-Create the first signal-engine boundary after the deterministic scanner shortlist. SIG-001 separates scanner selection from strategy observations and from later AI analysis, trade planning, risk and execution.
+Create the signal-engine boundary after the deterministic scanner shortlist. SIG-001 separates scanner selection from strategy observations and from later AI analysis, trade planning, risk and execution.
 
 ## Input Contract
 
@@ -29,7 +29,7 @@ The initial contract reserves five strategy families: breakout, pullback, moment
 
 Strategies implement a small evaluation protocol and return either a `SignalCandidate` or `None`. The engine rejects duplicate strategy types and rejects strategy output that does not match the candidate identity, rank, symbol, or strategy type supplied to it.
 
-The first concrete strategy is deterministic momentum. Its rules are defined separately in `brain/28_MOMENTUM_SIGNAL_SPECIFICATION.md` and are evaluated only after the DATA-016 shortlist boundary.
+The concrete deterministic strategies currently implemented are momentum and reversal. Their rules are defined separately in `brain/28_MOMENTUM_SIGNAL_SPECIFICATION.md` and `brain/29_REVERSAL_SIGNAL_SPECIFICATION.md` and are evaluated only after the DATA-016 shortlist boundary.
 
 ## Determinism
 
@@ -45,8 +45,10 @@ SIG-001 does not call an AI model, create an executable trade plan, override ris
 - Duplicate strategy-type protection implemented.
 - Signal identity/rank/type validation implemented.
 - Deterministic momentum strategy implemented with its own acceptance tests.
-- `SignalEngine.with_momentum_strategy()` wires the concrete momentum strategy into the engine.
-- Engine tests cover deterministic candidate order and the concrete momentum factory path.
+- `SignalEngine.with_momentum_strategy()` wires the momentum strategy into the engine.
+- Deterministic reversal strategy implemented with its own acceptance tests.
+- `SignalEngine.with_reversal_strategy()` wires the reversal strategy into the engine.
+- Engine tests cover deterministic candidate order and both concrete strategy factory paths.
 
 ## Acceptance Criteria
 
@@ -56,6 +58,6 @@ SIG-001 does not call an AI model, create an executable trade plan, override ris
 - Strategy types must be unique.
 - Signal scores are constrained to `0..100`.
 - Strategy output must match the input candidate identity and rank.
-- The concrete momentum strategy emits only when its strict deterministic threshold is crossed.
+- Concrete momentum and reversal strategies emit only when their strict deterministic thresholds are crossed.
 - Tests require no Groww credentials or production PostgreSQL service.
 - Additional strategy rules are added only with their own deterministic acceptance criteria.

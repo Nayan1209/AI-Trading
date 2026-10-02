@@ -83,6 +83,13 @@ class SignalEngine:
 
         return cls((MomentumSignalStrategy(),))
 
+    @classmethod
+    def with_reversal_strategy(cls) -> "SignalEngine":
+        """Build SIG-001 with the deterministic reversal strategy."""
+        from src.signal_strategies import ReversalSignalStrategy
+
+        return cls((ReversalSignalStrategy(),))
+
     def generate(
         self,
         shortlist: tuple[ScannerRankedCandidate, ...] | list[ScannerRankedCandidate],

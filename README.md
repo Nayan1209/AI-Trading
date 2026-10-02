@@ -123,8 +123,10 @@
 - [x] SIG-001 DATA-016 shortlist input boundary and deterministic orchestration
 - [x] SIG-001 momentum strategy (`brain/28_MOMENTUM_SIGNAL_SPECIFICATION.md`)
 - [x] SIG-001 momentum strategy wired into the signal engine
-- [x] SIG-001 deterministic engine and momentum tests
-- [x] SIG-001 automatic CI validation — pending for the final documentation commit
+- [x] SIG-001 reversal strategy (`brain/29_REVERSAL_SIGNAL_SPECIFICATION.md`)
+- [x] SIG-001 reversal strategy wired into the signal engine
+- [x] SIG-001 deterministic engine, momentum and reversal tests
+- [ ] SIG-001 automatic CI validation — pending for the reversal implementation commit
 
 ## Safety Boundary
 
@@ -218,11 +220,13 @@ DATA-016 adds a deterministic scanner candidate shortlist after DATA-015. `Scann
 
 ## Signal Engine
 
-SIG-001 adds the first deterministic signal-engine boundary after the DATA-016 scanner shortlist. The engine accepts only DATA-016-ranked candidates, preserves candidate identity and rank, validates strategy output, and evaluates configured strategies in stable order. It does not call AI, create trade plans, bypass risk controls, connect to Groww, or execute trades.
+SIG-001 adds the deterministic signal-engine boundary after the DATA-016 scanner shortlist. The engine accepts only DATA-016-ranked candidates, preserves candidate identity and rank, validates strategy output, and evaluates configured strategies in stable order. It does not call AI, create trade plans, bypass risk controls, connect to Groww, or execute trades.
 
 The first concrete strategy is deterministic momentum. `MomentumSignalStrategy` uses the DATA-013 percentage-change feature carried through the DATA-014 quality gate, DATA-015 ranking and DATA-016 shortlist. A change above the strict positive threshold produces a LONG observation, a change below the negative threshold produces a SHORT observation, and changes inside the threshold produce no signal. The strategy score is the absolute change capped at 100.
 
-The momentum rules are versioned under `brain/28_MOMENTUM_SIGNAL_SPECIFICATION.md`, while the signal-engine contract is versioned under `brain/27_SIGNAL_ENGINE_SPECIFICATION.md`.
+The second concrete strategy is deterministic reversal. `ReversalSignalStrategy` uses the same validated percentage-change feature as a deliberately contrasting mean-reversion observation: a change above the strict positive threshold produces a SHORT observation, a change below the negative threshold produces a LONG observation, and changes inside the threshold produce no signal. Its default threshold is 2%, and its score is the absolute change capped at 100.
+
+The strategy rules are versioned under `brain/28_MOMENTUM_SIGNAL_SPECIFICATION.md` and `brain/29_REVERSAL_SIGNAL_SPECIFICATION.md`, while the signal-engine contract is versioned under `brain/27_SIGNAL_ENGINE_SPECIFICATION.md`.
 
 The implementation does not open a live Groww connection and requires no credentials in CI. Groww-specific feed nesting remains isolated at the normalization boundary.
 
@@ -233,7 +237,7 @@ The implementation does not open a live Groww connection and requires no credent
 | 0 | Foundation & specifications | 🟢 Complete |
 | 1 | Market Data Engine | 🟡 In Progress |
 | 2 | Instrument Master & Data Storage | 🟢 Instrument identity, persistence and data-quality monitoring complete |
-| 3 | Scanner & Signal Engine | 🟡 Signal engine foundation + momentum strategy implemented |
+| 3 | Scanner & Signal Engine | 🟡 Signal engine with momentum + reversal strategies implemented; CI pending |
 | 4 | AI Analysis Engine | ⚪ Planned |
 | 5 | Trade Planner & Risk Engine | ⚪ Planned |
 | 6 | Paper Execution | ⚪ Planned |

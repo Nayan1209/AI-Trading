@@ -87,6 +87,14 @@
 - [x] DATA-009 PostgreSQL LTP persistence boundary
 - [x] DATA-009 deterministic integration and persistence tests
 - [x] DATA-009 specification (`brain/19_REALTIME_LTP_INTEGRATION_SPECIFICATION.md`)
+- [x] DATA-009 automatic CI validation — green
+- [x] DATA-010 controlled real-time LTP read path
+- [x] Latest LTP retrieval by canonical internal instrument ID
+- [x] Bounded chronological LTP range retrieval
+- [x] Timezone and invalid-range fail-closed checks
+- [x] Deterministic DATA-010 repository read tests
+- [x] DATA-010 specification (`brain/20_REALTIME_LTP_READ_PATH_SPECIFICATION.md`)
+- [x] DATA-010 automatic CI validation — green
 
 ## Safety Boundary
 
@@ -164,9 +172,11 @@ DATA-009 connects those normalized events to the canonical `InstrumentMaster`. `
 
 Real-time events are stored in the PostgreSQL `ltp_events` table with an idempotent `(internal_id, timestamp)` identity. The migration is versioned under `database/migrations/002_ltp_events.sql`.
 
+DATA-010 exposes a controlled read path through `PostgresLtpRepository`. Consumers retrieve the latest event or a bounded chronological range by canonical `internal_id`, receiving provider-independent `ResolvedLtp` objects rather than database rows or Groww SDK objects. Read ranges require timezone-aware timestamps and invalid ranges fail closed.
+
 The implementation does not open a live Groww connection and requires no credentials in CI. Groww-specific feed nesting remains isolated at the normalization boundary.
 
-The specifications are versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION.md` and `brain/19_REALTIME_LTP_INTEGRATION_SPECIFICATION.md`.
+The specifications are versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION.md`, `brain/19_REALTIME_LTP_INTEGRATION_SPECIFICATION.md` and `brain/20_REALTIME_LTP_READ_PATH_SPECIFICATION.md`.
 
 ## Development Phases
 
@@ -213,21 +223,21 @@ We do not use CI as the development loop. It is the final verification gate for 
 
 ## Immediate Next Step
 
-### DATA-009 → final controlled CI validation
+### DATA-011 → scanner-ready market-data consumer
 
-DATA-008 is complete and green. DATA-009 now connects normalized real-time LTP events to the canonical instrument registry and PostgreSQL persistence path.
+DATA-009 and DATA-010 are complete and green. The persisted real-time LTP stream now has a controlled, provider-independent read boundary.
 
-**Next action: let the automatic GitHub Actions workflow verify the complete DATA-009 change set on `main`. Do not create a pull request or another branch.**
+**Next action: define and implement the first scanner-ready market-data consumer using the DATA-010 read contract.** Scanner eligibility rules must be deterministic and must operate only on validated, instrument-resolved market data.
 
-If CI is green, the next milestone is a controlled read path for persisted real-time market data before scanner/signal work. If CI fails, fix the failure on `main` before adding new functionality.
+No signal-generation, AI decision, order, withdrawal or live execution functionality should be introduced in this step.
 
 ### What you need to do now
 
-You do **not** need to provide the Groww API key for DATA-009 unit tests. Do not commit credentials, access tokens, secrets or TOTP values.
+You do **not** need to provide the Groww API key for deterministic market-data tests. Do not commit credentials, access tokens, secrets or TOTP values.
 
 The project is being developed directly on `main`. No new branch or pull request is required.
 
-**Rule:** We do not move to the Scanner phase until the market-data foundation passes its deterministic quality gates and the corresponding documentation is updated.
+**Rule:** We do not move into trading decisions or execution until the market-data foundation and scanner inputs pass their deterministic quality gates and the corresponding documentation is updated.
 
 ## Repository Structure
 

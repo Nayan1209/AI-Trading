@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 1.7
+**Version:** 1.8
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -19,7 +19,8 @@
 | DATA-010 | Real-Time LTP Read Path | 🟢 | 🟢 | 🟢 | Complete; controlled latest/range reads with deterministic CI coverage |
 | DATA-011 | Scanner-Ready Market-Data Consumer | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
 | DATA-012 | Scanner Universe / Market-Data Window | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
-| DATA-013 | Scanner Feature Snapshot | 🟢 | 🟢 | 🟡 | Implementation complete; automatic CI validation pending |
+| DATA-013 | Scanner Feature Snapshot | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
+| DATA-014 | Scanner Feature Quality Gate | 🟢 | 🟢 | 🟡 | Implementation complete; automatic CI validation pending |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | SIG-001 | Signal Engine | ⚪ | ⚪ | ⚪ | Not Started |
@@ -54,7 +55,7 @@
 - DATA-004 final CI validation passed.
 - DATA-005 historical candle ingestion contract added under `brain/15_HISTORICAL_CANDLE_INGESTION_SPECIFICATION.md`.
 - Groww `get_historical_candles()` response normalization implemented for OHLCV rows.
-- Historical ingestion tests use a fake Groww client and deterministic fixtures; no live credential is required.
+- Historical ingestion tests use a fake Groww client and deterministic fixtures; no live credential is required by CI.
 - DATA-005 automatic CI validation passed.
 - DATA-006 PostgreSQL persistence specification added under `brain/16_POSTGRES_MARKET_DATA_PERSISTENCE_SPECIFICATION.md`.
 - PostgreSQL candle schema migration added with fixed-precision OHLC values, non-negative volume, `TIMESTAMPTZ`, uniqueness and lookup indexing.
@@ -103,10 +104,15 @@
 - Future, out-of-window, non-CASH and non-positive rows are excluded without invention.
 - Percentage change uses `Decimal` arithmetic.
 - DATA-013 deterministic feature tests added without Groww credentials or production PostgreSQL.
-- DATA-013 automatic CI validation is pending.
+- DATA-013 automatic CI validation completed successfully.
+- DATA-014 specification added under `brain/24_SCANNER_FEATURE_QUALITY_GATE_SPECIFICATION.md`.
+- `ScannerFeatureQualityGate` validates identity, uniqueness, minimum sample count, positive prices, high/low consistency and exact Decimal percentage-change arithmetic.
+- DATA-014 returns accepted snapshots in deterministic lexical `internal_id` order for downstream scanner consumption.
+- DATA-014 deterministic quality-gate tests added without Groww credentials or production PostgreSQL.
+- DATA-014 automatic CI validation is pending.
 
 ## Immediate Next Step
-**DATA-013 automatic CI validation:** verify the complete scanner feature-snapshot change set on `main` before advancing to the next scanner milestone.
+**DATA-014 automatic CI validation:** verify the complete scanner feature-quality change set on `main` before advancing to the next scanner milestone.
 
 ## User Action Required
 No Groww secret or access token is required for the deterministic market-data tests. **Do not commit credentials.**

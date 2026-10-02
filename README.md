@@ -106,7 +106,11 @@
 - [x] DATA-013 deterministic scanner feature snapshot
 - [x] DATA-013 bounded LTP-history feature extraction
 - [x] DATA-013 deterministic feature tests (`brain/23_SCANNER_FEATURE_SNAPSHOT_SPECIFICATION.md`)
-- [ ] DATA-013 automatic CI validation — pending
+- [x] DATA-013 automatic CI validation — green
+- [x] DATA-014 deterministic scanner feature quality gate
+- [x] DATA-014 fail-closed feature consistency validation
+- [x] DATA-014 deterministic quality-gate tests (`brain/24_SCANNER_FEATURE_QUALITY_GATE_SPECIFICATION.md`)
+- [ ] DATA-014 automatic CI validation — pending
 
 ## Safety Boundary
 
@@ -192,9 +196,11 @@ DATA-012 adds the deterministic scanner input envelope on top of DATA-011. `Scan
 
 DATA-013 adds descriptive scanner features on top of DATA-010 and DATA-012. `ScannerFeatureService` reads bounded persisted LTP history and produces deterministic `ScannerFeatureSnapshot` values for sample count, first/latest price, high/low and percentage change. It uses Decimal arithmetic and excludes missing, future, out-of-window, non-CASH and non-positive observations. It remains descriptive only and does not rank or generate signals.
 
+DATA-014 adds a fail-closed quality gate on DATA-013 snapshots. `ScannerFeatureQualityGate` validates feature identity, uniqueness, minimum sample count, positive prices, high/low consistency and exact Decimal percentage-change arithmetic, then returns deterministic lexical ordering for downstream scanner consumers. It does not rank instruments or generate signals.
+
 The implementation does not open a live Groww connection and requires no credentials in CI. Groww-specific feed nesting remains isolated at the normalization boundary.
 
-The specifications are versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION.md`, `brain/19_REALTIME_LTP_INTEGRATION_SPECIFICATION.md`, `brain/20_REALTIME_LTP_READ_PATH_SPECIFICATION.md`, `brain/21_SCANNER_MARKET_DATA_SPECIFICATION.md`, `brain/22_SCANNER_UNIVERSE_WINDOW_SPECIFICATION.md` and `brain/23_SCANNER_FEATURE_SNAPSHOT_SPECIFICATION.md`.
+The specifications are versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION.md`, `brain/19_REALTIME_LTP_INTEGRATION_SPECIFICATION.md`, `brain/20_REALTIME_LTP_READ_PATH_SPECIFICATION.md`, `brain/21_SCANNER_MARKET_DATA_SPECIFICATION.md`, `brain/22_SCANNER_UNIVERSE_WINDOW_SPECIFICATION.md`, `brain/23_SCANNER_FEATURE_SNAPSHOT_SPECIFICATION.md` and `brain/24_SCANNER_FEATURE_QUALITY_GATE_SPECIFICATION.md`.
 
 ## Development Phases
 
@@ -203,7 +209,7 @@ The specifications are versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION
 | 0 | Foundation & specifications | 🟢 Complete |
 | 1 | Market Data Engine | 🟡 In Progress |
 | 2 | Instrument Master & Data Storage | 🟢 Instrument identity, persistence and data-quality monitoring complete |
-| 3 | Scanner & Signal Engine | 🟡 Scanner feature boundary in progress |
+| 3 | Scanner & Signal Engine | 🟡 Scanner feature-quality boundary in progress |
 | 4 | AI Analysis Engine | ⚪ Planned |
 | 5 | Trade Planner & Risk Engine | ⚪ Planned |
 | 6 | Paper Execution | ⚪ Planned |
@@ -217,67 +223,3 @@ The specifications are versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION
 CI runs **automatically on every push to `main`** and can also be started with `workflow_dispatch`. There is no pull-request requirement for this project.
 
 Development work is performed directly on `main`; pull requests and development branches are not part of the normal workflow.
-
-Because CI is automatic, we do not intentionally push half-built changes. Development follows a **preflight → batch → push** rule:
-
-```text
-Plan change
-   ↓
-Implement complete change set on main
-   ↓
-Review imports / contracts / tests / fixtures
-   ↓
-Update documentation
-   ↓
-Push once
-   ↓
-Automatic CI
-   ↓
-If green → proceed
-If red → fix on main before adding more functionality
-```
-
-We do not use CI as the development loop. It is the final verification gate for a coherent commit.
-
-## Immediate Next Step
-
-### DATA-013 → automatic CI validation
-
-DATA-013 defines deterministic descriptive scanner features from bounded persisted LTP history for the DATA-012 universe and window.
-
-**Next action: let the automatic CI run against the complete DATA-013 change set.** If green, advance to the next scanner milestone. If red, fix the failing contract/test on `main` before adding more functionality.
-
-### What you need to do now
-
-You do **not** need to provide the Groww API key for deterministic market-data tests. Do not commit credentials, access tokens, secrets or TOTP values.
-
-The project is being developed directly on `main`. No new branch or pull request is required.
-
-**Rule:** We do not move into trading decisions or execution until the market-data foundation and scanner inputs pass their deterministic quality gates and the corresponding documentation is updated.
-
-## Repository Structure
-
-```text
-AI-Trading/
-├── brain/                 # authoritative specifications and rules
-├── database/              # versioned database migrations
-├── src/                   # application code
-├── tests/                 # automated tests
-├── infrastructure/       # local/dev infrastructure
-├── scripts/               # developer utilities
-├── README.md              # live project status + next step
-└── BUILD_STATUS.md        # implementation tracker
-```
-
-## Change Discipline
-
-Every completed development step must update:
-
-1. Code
-2. Tests
-3. `README.md` — current status + immediate next step
-4. Relevant `brain/` specification
-5. `brain/12_BUILD_STATUS.md`
-6. Push the complete change set once so automatic CI verifies the commit
-
-This keeps the repository self-documenting and prevents the implementation from drifting away from the architecture.

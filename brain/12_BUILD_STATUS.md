@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 1.2
+**Version:** 1.3
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -14,7 +14,8 @@
 | DATA-005 | Historical Candle Ingestion | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
 | DATA-006 | PostgreSQL Market-Data Persistence | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
 | DATA-007 | Data Quality Monitoring | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
-| DATA-008 | Real-Time LTP Feed Normalization | 🟢 | 🟢 | 🟡 | Implementation and deterministic tests complete; automatic CI validation pending |
+| DATA-008 | Real-Time LTP Feed Normalization | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
+| DATA-009 | Real-Time LTP Integration | 🟢 | 🟢 | 🟡 | Implementation and deterministic tests complete; automatic CI validation pending |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | SIG-001 | Signal Engine | ⚪ | ⚪ | ⚪ | Not Started |
@@ -72,14 +73,20 @@
 - Deterministic LTP validation rejects empty identity, missing fields and non-positive prices.
 - Deterministic freshness gate rejects future-dated and stale LTP events.
 - DATA-008 tests added using deterministic payload fixtures only.
+- DATA-009 specification added under `brain/19_REALTIME_LTP_INTEGRATION_SPECIFICATION.md`.
+- `RealtimeLtpService` resolves normalized LTP events through `InstrumentMaster` by exchange/token.
+- Segment mismatches and unknown instruments fail closed before persistence.
+- `PostgresLtpRepository` added as the provider-independent persistence boundary for resolved real-time LTP events.
+- `ltp_events` PostgreSQL migration added with positive-LTP validation, UTC-capable timestamps and idempotent event identity.
+- Deterministic integration and PostgreSQL persistence tests added without live Groww or production PostgreSQL services.
 
 ## Immediate Next Step
-**DATA-008 CI gate:** push the complete DATA-008 change set to `main`. The automatic GitHub Actions workflow will run once for that coherent commit.
+**DATA-009 CI gate:** let the automatic GitHub Actions workflow verify the complete DATA-009 change set on `main`.
 
-If CI is green, mark DATA-008 complete and integrate the normalized LTP stream with the instrument registry, quality boundary and persistence path before scanner/signal work. If CI fails, fix the failure on `main` before adding any new functionality.
+If CI is green, mark DATA-009 complete and expose a controlled read path for persisted real-time market data before scanner/signal work. If CI fails, fix the failure on `main` before adding any new functionality.
 
 ## User Action Required
-No Groww secret or access token is required for DATA-008 unit tests. Do **not** commit credentials. Real-time feed tests use deterministic payload fixtures and do not call Groww.
+No Groww secret or access token is required for DATA-009 unit tests. Do **not** commit credentials. Real-time integration tests use deterministic payload fixtures and fake persistence connections; they do not call Groww or a production database.
 
 The user does not need to create branches or pull requests. All project development is performed directly on `main`.
 

@@ -81,6 +81,12 @@
 - [x] DATA-008 real-time LTP feed normalization contract
 - [x] DATA-008 deterministic LTP normalization and freshness tests
 - [x] DATA-008 specification (`brain/18_REALTIME_LTP_FEED_SPECIFICATION.md`)
+- [x] DATA-008 automatic CI validation — green
+- [x] DATA-009 normalized LTP → instrument registry integration
+- [x] DATA-009 fail-closed instrument and segment resolution
+- [x] DATA-009 PostgreSQL LTP persistence boundary
+- [x] DATA-009 deterministic integration and persistence tests
+- [x] DATA-009 specification (`brain/19_REALTIME_LTP_INTEGRATION_SPECIFICATION.md`)
 
 ## Safety Boundary
 
@@ -154,9 +160,13 @@ The specification is versioned under `brain/17_DATA_QUALITY_MONITORING_SPECIFICA
 
 DATA-008 adds the first controlled real-time market-data boundary. Groww LTP feed payloads are normalized into immutable provider-independent `LtpEvent` objects with exchange, segment, exchange token, UTC timestamp and `Decimal` LTP. The boundary rejects malformed events and provides a deterministic freshness gate for future-dated or stale events.
 
+DATA-009 connects those normalized events to the canonical `InstrumentMaster`. `RealtimeLtpService` resolves each event by exchange/token, rejects unknown instruments and segment mismatches, reuses the freshness gate, and persists only resolved events through `PostgresLtpRepository`.
+
+Real-time events are stored in the PostgreSQL `ltp_events` table with an idempotent `(internal_id, timestamp)` identity. The migration is versioned under `database/migrations/002_ltp_events.sql`.
+
 The implementation does not open a live Groww connection and requires no credentials in CI. Groww-specific feed nesting remains isolated at the normalization boundary.
 
-The specification is versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION.md`.
+The specifications are versioned under `brain/18_REALTIME_LTP_FEED_SPECIFICATION.md` and `brain/19_REALTIME_LTP_INTEGRATION_SPECIFICATION.md`.
 
 ## Development Phases
 
@@ -203,19 +213,17 @@ We do not use CI as the development loop. It is the final verification gate for 
 
 ## Immediate Next Step
 
-### DATA-008 → final controlled CI validation
+### DATA-009 → final controlled CI validation
 
-DATA-007 is complete: deterministic data-quality monitoring and its automatic CI validation are green.
+DATA-008 is complete and green. DATA-009 now connects normalized real-time LTP events to the canonical instrument registry and PostgreSQL persistence path.
 
-DATA-008 is implemented as a read-only real-time LTP normalization boundary. It converts Groww's nested LTP feed payload into immutable internal events and applies deterministic freshness checks without requiring live services.
+**Next action: let the automatic GitHub Actions workflow verify the complete DATA-009 change set on `main`. Do not create a pull request or another branch.**
 
-**Next action: push this complete DATA-008 change set to `main` and let the automatic GitHub Actions workflow verify it. Do not create a pull request or another branch.**
-
-If CI is green, mark DATA-008 complete and proceed to integrate the normalized LTP stream with the instrument registry, quality boundary and persistence path before scanner/signal work. If CI fails, fix the failure on `main` before adding new functionality.
+If CI is green, the next milestone is a controlled read path for persisted real-time market data before scanner/signal work. If CI fails, fix the failure on `main` before adding new functionality.
 
 ### What you need to do now
 
-You do **not** need to provide the Groww API key for DATA-008 unit tests. Do not commit credentials, access tokens, secrets or TOTP values.
+You do **not** need to provide the Groww API key for DATA-009 unit tests. Do not commit credentials, access tokens, secrets or TOTP values.
 
 The project is being developed directly on `main`. No new branch or pull request is required.
 

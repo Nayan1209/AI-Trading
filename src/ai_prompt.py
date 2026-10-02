@@ -72,7 +72,10 @@ class AIPromptBuilder:
 
     def build(self, context: AIAnalysisContext) -> AIPrompt:
         """Validate and serialize one AI context without calling a model."""
-        validated = AIAnalysisContext.model_validate(context)
+        # Rebuild from dumped data so Pydantic validators run even when callers
+        # pass a model instance produced by model_copy(update=...), which can
+        # contain deliberately invalid unvalidated fields.
+        validated = AIAnalysisContext.model_validate(context.model_dump())
         return AIPrompt(
             system_instructions=_SYSTEM_INSTRUCTIONS,
             user_payload=self._serialize_context(validated),

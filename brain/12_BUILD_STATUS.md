@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 1.6
+**Version:** 1.7
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -18,7 +18,8 @@
 | DATA-009 | Real-Time LTP Integration | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
 | DATA-010 | Real-Time LTP Read Path | 🟢 | 🟢 | 🟢 | Complete; controlled latest/range reads with deterministic CI coverage |
 | DATA-011 | Scanner-Ready Market-Data Consumer | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
-| DATA-012 | Scanner Universe / Market-Data Window | 🟢 | 🟢 | 🟡 | Implementation complete; automatic CI validation pending |
+| DATA-012 | Scanner Universe / Market-Data Window | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
+| DATA-013 | Scanner Feature Snapshot | 🟢 | 🟢 | 🟡 | Implementation complete; automatic CI validation pending |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | SIG-001 | Signal Engine | ⚪ | ⚪ | ⚪ | Not Started |
@@ -49,17 +50,14 @@
 - DATA-004 validation/staleness specification added under `brain/14_DATA_VALIDATION_STALENESS_SPECIFICATION.md`.
 - Deterministic candle validation added for identity, timezone, positive OHLC, OHLC relationships and non-negative volume.
 - Deterministic staleness detection added using caller-supplied freshness thresholds.
-- DATA-004 unit tests added without live Groww credentials.
 - `MarketDataService.latest()` applies `validate_candle()` as a mandatory fail-closed quality gate and rejects stale candles.
 - DATA-004 final CI validation passed.
 - DATA-005 historical candle ingestion contract added under `brain/15_HISTORICAL_CANDLE_INGESTION_SPECIFICATION.md`.
 - Groww `get_historical_candles()` response normalization implemented for OHLCV rows.
-- Groww historical timestamps are normalized to timezone-aware India Standard Time when the provider response omits timezone information.
-- `MarketDataService.historical()` validates every returned historical candle before downstream use.
 - Historical ingestion tests use a fake Groww client and deterministic fixtures; no live credential is required.
 - DATA-005 automatic CI validation passed.
 - DATA-006 PostgreSQL persistence specification added under `brain/16_POSTGRES_MARKET_DATA_PERSISTENCE_SPECIFICATION.md`.
-- PostgreSQL `candles` schema migration added with fixed-precision OHLC values, non-negative volume, `TIMESTAMPTZ`, uniqueness and lookup indexing.
+- PostgreSQL candle schema migration added with fixed-precision OHLC values, non-negative volume, `TIMESTAMPTZ`, uniqueness and lookup indexing.
 - `CandleRepository` persistence boundary added so storage is independent of provider implementations.
 - `PostgresCandleRepository` added with validated idempotent upsert and chronological range retrieval.
 - PostgreSQL driver dependency added without storing database credentials.
@@ -98,10 +96,17 @@
 - `MarketDataWindow` enforces timezone-aware reference time and non-negative freshness with explicit inclusive bounds.
 - `ScannerUniverseService` composes DATA-012 boundaries with `ScannerMarketDataService` without introducing signal or execution logic.
 - DATA-012 deterministic tests added for universe validation, ordering, window boundaries and service integration.
-- DATA-012 automatic CI validation is pending.
+- DATA-012 automatic CI validation completed successfully.
+- DATA-013 specification added under `brain/23_SCANNER_FEATURE_SNAPSHOT_SPECIFICATION.md`.
+- `ScannerFeatureSnapshot` provides deterministic first/latest/high/low LTP, sample count and percentage change features.
+- `ScannerFeatureService` reads only the DATA-010 bounded LTP history boundary using the DATA-012 universe and window.
+- Future, out-of-window, non-CASH and non-positive rows are excluded without invention.
+- Percentage change uses `Decimal` arithmetic.
+- DATA-013 deterministic feature tests added without Groww credentials or production PostgreSQL.
+- DATA-013 automatic CI validation is pending.
 
 ## Immediate Next Step
-**DATA-012 automatic CI validation:** verify the complete scanner universe/window change set on `main` before advancing to the next scanner milestone.
+**DATA-013 automatic CI validation:** verify the complete scanner feature-snapshot change set on `main` before advancing to the next scanner milestone.
 
 ## User Action Required
 No Groww secret or access token is required for the deterministic market-data tests. **Do not commit credentials.**

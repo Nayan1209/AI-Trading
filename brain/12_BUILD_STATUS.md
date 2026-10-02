@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 1.0
+**Version:** 1.1
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -12,8 +12,8 @@
 | DATA-003 | Instrument Master / Mapping | 🟢 | 🟢 | 🟢 | Complete; CI green after CASH/FNO fixture alignment |
 | DATA-004 | Data Validation / Staleness | 🟢 | 🟢 | 🟢 | Complete; deterministic validation, staleness detection and service gate verified by CI |
 | DATA-005 | Historical Candle Ingestion | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
-| DATA-006 | PostgreSQL Market-Data Persistence | 🟢 | 🟢 | 🟡 | Implementation complete; final automatic CI validation pending |
-| DATA-007 | Data Quality Monitoring | 🟡 | ⚪ | ⚪ | Planned — starts after DATA-006 CI |
+| DATA-006 | PostgreSQL Market-Data Persistence | 🟢 | 🟢 | 🟢 | Complete; automatic CI green |
+| DATA-007 | Data Quality Monitoring | 🟢 | 🟢 | 🟡 | Implementation complete; final automatic CI validation pending |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | SIG-001 | Signal Engine | ⚪ | ⚪ | ⚪ | Not Started |
@@ -59,14 +59,19 @@
 - `PostgresCandleRepository` added with validated idempotent upsert and chronological range retrieval.
 - PostgreSQL driver dependency added without storing database credentials.
 - Deterministic repository tests added with fake database connections; no live database is required by CI.
+- DATA-006 automatic CI validation passed.
+- DATA-007 specification added under `brain/17_DATA_QUALITY_MONITORING_SPECIFICATION.md`.
+- Deterministic quality report added for candle validity, duplicates, caller-defined completeness and gaps.
+- Persistence health check boundary added without coupling monitoring to PostgreSQL implementation.
+- DATA-007 tests added using deterministic in-memory fixtures only.
 
 ## Immediate Next Step
-**DATA-006 CI gate:** push the complete DATA-006 change set to `main`. The automatic GitHub Actions workflow will run once for that coherent commit.
+**DATA-007 CI gate:** push the complete DATA-007 change set to `main`. The automatic GitHub Actions workflow will run once for that coherent commit.
 
-If CI is green, mark DATA-006 complete and advance to **DATA-007 — Data Quality Monitoring**. If CI fails, fix the failure on `main` before adding any new functionality.
+If CI is green, mark DATA-007 complete and proceed to the next market-data integration milestone. If CI fails, fix the failure on `main` before adding any new functionality.
 
 ## User Action Required
-No Groww secret or access token is required for DATA-006 unit tests. Do **not** commit credentials. Repository tests use deterministic fake database connections and do not call Groww.
+No Groww secret or access token is required for DATA-007 unit tests. Do **not** commit credentials. Quality tests use deterministic candle fixtures and a fake persistence health check; they do not call Groww or a production database.
 
 The user does not need to create branches or pull requests. All project development is performed directly on `main`.
 

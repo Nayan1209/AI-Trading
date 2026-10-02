@@ -73,8 +73,11 @@
 - [x] Validated candle repository with idempotent upsert
 - [x] Historical candle range retrieval from PostgreSQL
 - [x] Deterministic PostgreSQL repository tests without external services
-- [ ] DATA-006 final automatic CI validation
-- [ ] Data-quality monitoring
+- [x] DATA-006 automatic CI validation — green
+- [x] DATA-007 deterministic data-quality monitoring implementation
+- [x] DATA-007 tests for completeness, duplicates, gaps, invalid candles and persistence health
+- [x] DATA-007 specification (`brain/17_DATA_QUALITY_MONITORING_SPECIFICATION.md`)
+- [ ] DATA-007 final automatic CI validation
 
 ## Safety Boundary
 
@@ -94,6 +97,8 @@ Instrument Master
 Normalization / Validation
     ↓
 PostgreSQL Persistence
+    ↓
+Data Quality Monitoring
     ↓
 Scanner
     ↓
@@ -134,13 +139,21 @@ The persistence layer validates every candle before writing and never accepts ra
 
 The SQL schema is versioned under `database/migrations/001_candles.sql`.
 
+## Data Quality Monitoring
+
+DATA-007 adds a provider-independent deterministic quality boundary around normalized candles. `assess_candles()` reuses the existing validation rules and reports invalid candles, duplicate identities, caller-defined missing timestamps and completeness ratio. The monitor deliberately does not invent a market calendar, so overnight, weekend and exchange-holiday gaps are not falsely classified as missing data.
+
+`assess_persistence_health()` provides a small persistence-independent health contract. Both quality reporting and persistence-health checks are deterministic and require no Groww credentials or production database in CI.
+
+The specification is versioned under `brain/17_DATA_QUALITY_MONITORING_SPECIFICATION.md`.
+
 ## Development Phases
 
 | Phase | Name | Status |
 |---|---|---|
 | 0 | Foundation & specifications | 🟢 Complete |
 | 1 | Market Data Engine | 🟡 In Progress |
-| 2 | Instrument Master & Data Storage | 🟡 Instrument identity + historical ingestion + persistence implemented; CI gate pending |
+| 2 | Instrument Master & Data Storage | 🟡 Persistence + data-quality monitoring implemented; DATA-007 CI gate pending |
 | 3 | Scanner & Signal Engine | ⚪ Planned |
 | 4 | AI Analysis Engine | ⚪ Planned |
 | 5 | Trade Planner & Risk Engine | ⚪ Planned |
@@ -179,19 +192,19 @@ We do not use CI as the development loop. It is the final verification gate for 
 
 ## Immediate Next Step
 
-### DATA-006 → final controlled CI validation
+### DATA-007 → final controlled CI validation
 
-DATA-005 is complete: historical candle ingestion, normalization, service validation and deterministic tests are implemented, and the latest automatic CI run is green.
+DATA-006 is complete: PostgreSQL persistence is implemented and its automatic CI validation is green.
 
-DATA-006 is now implemented as a PostgreSQL persistence boundary for validated candles. The schema is versioned, writes are idempotent, range reads reconstruct the internal `Candle` model, and repository tests use deterministic fakes without an external database.
+DATA-007 is now implemented as a deterministic data-quality monitoring boundary. It checks candle validity, duplicates, caller-defined completeness/gaps and persistence health without requiring live services.
 
-**Next action: push this complete DATA-006 change set to `main` and let the automatic CI workflow verify it. Do not create a pull request or another branch.**
+**Next action: push this complete DATA-007 change set to `main` and let the automatic GitHub Actions workflow verify it. Do not create a pull request or another branch.**
 
-If CI is green, mark DATA-006 complete and advance to **DATA-007 — Data Quality Monitoring**. If CI fails, fix the failure on `main` before adding new functionality.
+If CI is green, mark DATA-007 complete and proceed to the next market-data integration milestone before scanner/signal work. If CI fails, fix the failure on `main` before adding new functionality.
 
 ### What you need to do now
 
-You do **not** need to provide the Groww API key for DATA-006 unit tests. Do not commit credentials, access tokens, secrets or TOTP values.
+You do **not** need to provide the Groww API key for DATA-007 unit tests. Do not commit credentials, access tokens, secrets or TOTP values.
 
 The project is being developed directly on `main`. No new branch or pull request is required.
 

@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 3.6
+**Version:** 3.7
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -37,7 +37,8 @@
 | EXEC-001 | Groww Broker Adapter | 🟢 | 🟢 | 🟢 | Complete; safe provider boundary with submission disabled by default, CI green |
 | EXEC-002 | Static-IP Production Runtime | 🟢 | 🟢 | 🟢 | Complete; deterministic production-runtime readiness gate, CI green |
 | EXEC-003 | Controlled Deployment Authorization | 🟢 | 🟢 | 🟢 | Complete; deterministic deployment-evidence gate, CI green |
-| PAPER-001 | Paper Execution Boundary | 🟢 | 🟡 | 🟡 | In progress; deterministic broker-independent simulation |
+| PAPER-001 | Paper Execution Boundary | 🟢 | 🟢 | 🟢 | Complete; deterministic broker-independent simulation, CI green |
+| PAPER-002 | Paper Order Ledger | 🟢 | 🟡 | 🟡 | In progress; deterministic in-process order history and duplicate protection |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 | TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
@@ -49,25 +50,25 @@
 - **Phase 3 — Scanner & Signal Engine:** 🟢 Complete
 - **Phase 4 — AI Analysis Engine:** 🟢 Complete through AI-007
 - **Phase 5 — Trade Planner, Risk & Execution Controls:** 🟢 Complete through EXEC-003
-- **Phase 6 — Paper Execution:** 🟡 PAPER-001 in progress
+- **Phase 6 — Paper Execution:** 🟡 PAPER-002 in progress
 
-## Current milestone: PAPER-001
+## Current milestone: PAPER-002
 
-PAPER-001 introduces the first broker-independent paper/simulation execution boundary. It consumes an immutable PLAN-001 `TradePlan` and returns a deterministic simulated fill only when the explicit environment is `paper`.
+PAPER-002 adds a deterministic in-process ledger for completed PAPER-001 simulated orders. It preserves immutable order records, insertion order, lookup by deterministic order ID, and duplicate-order protection.
 
 ### Files added
 
-- `brain/44_PAPER_EXECUTION_SPECIFICATION.md`
-- `src/paper_execution.py`
-- `tests/test_paper_execution.py`
+- `brain/45_PAPER_ORDER_LEDGER_SPECIFICATION.md`
+- `src/paper_order_ledger.py`
+- `tests/test_paper_order_ledger.py`
 
 ### Safety
 
-PAPER-001 does not call Groww, access credentials, use network transport, enable live trading, or place real orders. Development and paper environments cannot place live orders.
+PAPER-002 does not call Groww, access credentials, use network transport, enable live trading, modify the production execution lock, or persist data outside the process.
 
 ### Completion rule
 
-PAPER-001 becomes complete only after implementation, deterministic tests, documentation, and automatic CI validation are green.
+PAPER-002 becomes complete only after implementation, deterministic tests, documentation, and automatic CI validation are green.
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 
@@ -77,4 +78,4 @@ A feature is complete only after implementation, deterministic tests, documentat
 
 ## User Action Required
 
-No Groww secret, access token, broker credential, or model API key is required for PAPER-001. Do not commit credentials.
+No Groww secret, access token, broker credential, or model API key is required for PAPER-002. Do not commit credentials.

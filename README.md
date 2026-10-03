@@ -10,7 +10,7 @@
 **Phase 3 — Scanner & Signal Engine: 🟢 Complete**  
 **Phase 4 — AI Analysis Engine: 🟢 Complete through AI-007**  
 **Phase 5 — Trade Planner, Risk & Execution Controls: 🟢 Complete through EXEC-003**  
-**Phase 6 — Paper Execution: 🟡 In Progress — PAPER-004**
+**Phase 6 — Paper Execution: 🟡 In Progress — PAPER-005**
 
 ### Foundation completed
 
@@ -241,9 +241,27 @@ PAPER-004 composes the existing paper boundaries into one complete deterministic
 - [x] Return an immutable `PaperExecutionSessionResult`
 - [x] No broker/network access
 - [x] No credentials or secrets
-- [ ] Automatic CI validation — pending for current milestone
+- [x] Automatic CI validation — green
 
 PAPER-004 does not implement exchange matching, slippage, partial fills, portfolio/P&L accounting, database persistence, or live broker submission.
+
+### PAPER-005 — Deterministic Paper Position Accounting
+
+PAPER-005 adds deterministic in-process position accounting on top of completed paper fills. It maintains explicit long-only position state, weighted-average entry pricing, realized P&L, duplicate-order protection, and immutable snapshots.
+
+- [x] Explicit caller-supplied position key
+- [x] Accept only filled `PaperOrder` records
+- [x] Weighted-average entry price for BUY accumulation
+- [x] SELL only against an existing long position
+- [x] Reject SELL quantities larger than the current position
+- [x] Deterministic realized P&L calculation
+- [x] Duplicate order-ID protection
+- [x] Immutable deterministic position snapshots
+- [x] No broker/network access
+- [x] No credentials or secrets
+- [ ] Automatic CI validation — pending for current milestone
+
+PAPER-005 does not implement exchange matching, slippage, fees/taxes, partial fills, short selling, mark-to-market valuation, unrealized P&L, database persistence, or live broker submission.
 
 ## Safety Boundary
 
@@ -286,6 +304,8 @@ Paper Order Reconciliation
     ↓
 Paper Execution Session
     ↓
+Paper Position Accounting
+    ↓
 Reconciliation / Monitoring
     ↓
 Trade Journal / Analytics
@@ -303,7 +323,7 @@ Controlled Live Execution (future)
 | 3 | Scanner & Signal Engine | 🟢 Complete |
 | 4 | AI Analysis Engine | 🟢 Complete through AI-007 |
 | 5 | Trade Planner, Risk & Execution Controls | 🟢 Complete through EXEC-003 |
-| 6 | Paper Execution | 🟡 PAPER-004 in progress |
+| 6 | Paper Execution | 🟡 PAPER-005 in progress |
 | 7 | Backtesting | ⚪ Planned |
 | 8 | Broker Integration | 🟡 Groww selected; execution gated |
 | 9 | Dashboard & Operations | ⚪ Planned |
@@ -338,10 +358,12 @@ PAPER-002 🟢
         ↓
 PAPER-003 🟢
         ↓
-PAPER-004 🟡
+PAPER-004 🟢
+        ↓
+PAPER-005 🟡
 ```
 
-The deterministic data, scanner, signal, AI, risk, planning, portfolio-risk, broker-adapter, runtime-readiness, controlled-deployment, paper-execution, paper-order-ledger, and paper-order-reconciliation boundaries are complete. The current milestone is the deterministic paper-execution session boundary.
+The deterministic data, scanner, signal, AI, risk, planning, portfolio-risk, broker-adapter, runtime-readiness, controlled-deployment, paper-execution, paper-order-ledger, paper-order-reconciliation, and paper-execution-session boundaries are complete. The current milestone is the deterministic paper-position accounting boundary.
 
 ## CI / Change Discipline
 
@@ -368,4 +390,4 @@ If red → fix on main before adding more functionality
 
 ## Immediate Next Step
 
-**PAPER-004 — deterministic paper-execution session.** Wait for automatic CI to turn green, then proceed to the next paper-execution boundary.
+**PAPER-005 — deterministic paper-position accounting.** Wait for automatic CI to turn green, then proceed to the next paper-execution boundary.

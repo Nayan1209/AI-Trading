@@ -41,7 +41,8 @@
 | PAPER-002 | Paper Order Ledger | 🟢 | 🟢 | 🟢 | Complete; deterministic in-process order history and duplicate protection, CI green |
 | PAPER-003 | Paper Order Reconciliation | 🟢 | 🟢 | 🟢 | Complete; deterministic read-only ledger reconciliation, CI green |
 | PAPER-004 | Paper Execution Session | 🟢 | 🟢 | 🟢 | Complete; deterministic execution → ledger → reconciliation orchestration, CI green |
-| PAPER-005 | Paper Position Accounting | 🟢 | 🟡 | 🟡 | In progress; deterministic long-only position state and realized P&L |
+| PAPER-005 | Paper Position Accounting | 🟢 | 🟢 | 🟢 | Complete; deterministic long-only position state, weighted-average pricing, and realized P&L |
+| PAPER-006 | Paper Position Valuation | 🟢 | 🟢 | 🟡 | In progress; deterministic mark-to-market value and unrealized P&L |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 | TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
@@ -53,25 +54,25 @@
 - **Phase 3 — Scanner & Signal Engine:** 🟢 Complete
 - **Phase 4 — AI Analysis Engine:** 🟢 Complete through AI-007
 - **Phase 5 — Trade Planner, Risk & Execution Controls:** 🟢 Complete through EXEC-003
-- **Phase 6 — Paper Execution:** 🟡 PAPER-005 in progress
+- **Phase 6 — Paper Execution:** 🟡 PAPER-006 in progress
 
-## Current milestone: PAPER-005
+## Current milestone: PAPER-006
 
-PAPER-005 adds deterministic position accounting on top of completed paper fills. It maintains explicit long-only position state, weighted-average entry pricing, realized P&L, duplicate-order protection, and immutable deterministic snapshots.
+PAPER-006 adds deterministic mark-to-market valuation on top of completed PAPER-005 position accounting. It calculates market value, unrealized P&L, and total P&L from an immutable position snapshot and a caller-supplied positive market price.
 
 ### Files added
 
-- `brain/48_PAPER_POSITION_ACCOUNTING_SPECIFICATION.md`
-- `src/paper_position_ledger.py`
-- `tests/test_paper_position_ledger.py`
+- `brain/49_PAPER_POSITION_VALUATION_SPECIFICATION.md`
+- `src/paper_position_valuation.py`
+- `tests/test_paper_position_valuation.py`
 
 ### Safety
 
-PAPER-005 does not call Groww, access credentials, use network transport, enable live trading, persist to a database, calculate unrealized P&L, support short positions, or apply fees/slippage/taxes.
+PAPER-006 does not call Groww, access credentials, use network transport, enable live trading, mutate the position ledger, persist to a database, execute orders, or make trading decisions.
 
 ### Completion rule
 
-PAPER-005 becomes complete only after implementation, deterministic tests, documentation, and automatic CI validation are green.
+PAPER-006 becomes complete only after implementation, deterministic tests, documentation, and automatic CI validation are green.
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 
@@ -81,4 +82,4 @@ A feature is complete only after implementation, deterministic tests, documentat
 
 ## User Action Required
 
-No Groww secret, access token, broker credential, or model API key is required for PAPER-005. Do not commit credentials.
+No Groww secret, access token, broker credential, or model API key is required for PAPER-006. Do not commit credentials.

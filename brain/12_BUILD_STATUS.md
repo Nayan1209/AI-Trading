@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 3.7
+**Version:** 3.8
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -38,7 +38,8 @@
 | EXEC-002 | Static-IP Production Runtime | 🟢 | 🟢 | 🟢 | Complete; deterministic production-runtime readiness gate, CI green |
 | EXEC-003 | Controlled Deployment Authorization | 🟢 | 🟢 | 🟢 | Complete; deterministic deployment-evidence gate, CI green |
 | PAPER-001 | Paper Execution Boundary | 🟢 | 🟢 | 🟢 | Complete; deterministic broker-independent simulation, CI green |
-| PAPER-002 | Paper Order Ledger | 🟢 | 🟡 | 🟡 | In progress; deterministic in-process order history and duplicate protection |
+| PAPER-002 | Paper Order Ledger | 🟢 | 🟢 | 🟢 | Complete; deterministic in-process order history and duplicate protection, CI green |
+| PAPER-003 | Paper Order Reconciliation | 🟢 | 🟢 | 🟡 | In progress; deterministic read-only ledger reconciliation |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 | TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
@@ -50,32 +51,32 @@
 - **Phase 3 — Scanner & Signal Engine:** 🟢 Complete
 - **Phase 4 — AI Analysis Engine:** 🟢 Complete through AI-007
 - **Phase 5 — Trade Planner, Risk & Execution Controls:** 🟢 Complete through EXEC-003
-- **Phase 6 — Paper Execution:** 🟡 PAPER-002 in progress
+- **Phase 6 — Paper Execution:** 🟡 PAPER-003 in progress
 
-## Current milestone: PAPER-002
+## Current milestone: PAPER-003
 
-PAPER-002 adds a deterministic in-process ledger for completed PAPER-001 simulated orders. It preserves immutable order records, insertion order, lookup by deterministic order ID, and duplicate-order protection.
+PAPER-003 adds a deterministic, read-only reconciliation boundary over the PAPER-002 in-process order ledger. It compares expected immutable `PaperOrder` records with the ledger snapshot and reports missing, unexpected, or mismatched orders without mutating state.
 
 ### Files added
 
-- `brain/45_PAPER_ORDER_LEDGER_SPECIFICATION.md`
-- `src/paper_order_ledger.py`
-- `tests/test_paper_order_ledger.py`
+- `brain/46_PAPER_ORDER_RECONCILIATION_SPECIFICATION.md`
+- `src/paper_order_reconciliation.py`
+- `tests/test_paper_order_reconciliation.py`
 
 ### Safety
 
-PAPER-002 does not call Groww, access credentials, use network transport, enable live trading, modify the production execution lock, or persist data outside the process.
+PAPER-003 does not call Groww, access credentials, use network transport, enable live trading, modify the production execution lock, or persist data outside the process.
 
 ### Completion rule
 
-PAPER-002 becomes complete only after implementation, deterministic tests, documentation, and automatic CI validation are green.
+PAPER-003 becomes complete only after implementation, deterministic tests, documentation, and automatic CI validation are green.
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 
 ## Completion Rule
 
-A feature is complete only after implementation, deterministic tests, documentation, and operational checks. CI is the final verification gate and should receive only one coherent, preflight-reviewed commit for each milestone.
+A feature is complete only after implementation, deterministic tests, documentation, and operational checks. CI is the final verification gate.
 
 ## User Action Required
 
-No Groww secret, access token, broker credential, or model API key is required for PAPER-002. Do not commit credentials.
+No Groww secret, access token, broker credential, or model API key is required for PAPER-003. Do not commit credentials.

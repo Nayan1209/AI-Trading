@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 3.0
+**Version:** 3.1
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -30,34 +30,34 @@
 | AI-004 | AI Prompt Construction | 🟢 | 🟢 | 🟢 | Complete; deterministic prompt artifact + revalidation, CI green |
 | AI-005 | AI Model Adapter | 🟢 | 🟢 | 🟢 | Complete; provider-independent adapter boundary, CI green |
 | AI-006 | AI Response Parsing | 🟢 | 🟢 | 🟢 | Complete; deterministic response parsing boundary, CI green |
-| AI-007 | AI Analysis Integrity Gate | 🟢 | 🟢 | 🟡 | In progress; deterministic internal-consistency gate |
-| RISK-001 | Risk Engine | ⚪ | ⚪ | ⚪ | Not Started |
+| AI-007 | AI Analysis Integrity Gate | 🟢 | 🟢 | 🟢 | Complete; deterministic internal-consistency gate, CI green |
+| RISK-001 | Risk Engine | 🟢 | 🟢 | 🟡 | In progress; deterministic risk budget and quantity gate |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 | TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
-## Current milestone: AI-007
+## Current milestone: RISK-001
 
-AI-007 introduces a deterministic post-parsing integrity gate after AI-006. It checks internal consistency of the already-validated `AIAnalysis` contract without interpreting model output, calculating risk, or authorizing execution.
+RISK-001 introduces the mandatory deterministic safety gate after AI-007. It bounds BUY/SELL quantity using explicit account equity, risk percentage, maximum notional exposure, stop-loss distance, and lot size. It does not execute orders.
 
 ### Files added
 
-- `brain/37_AI_ANALYSIS_INTEGRITY_SPECIFICATION.md`
-- `src/ai_integrity.py`
-- `tests/test_ai_integrity.py`
+- `brain/38_RISK_ENGINE_SPECIFICATION.md`
+- `src/risk_engine.py`
+- `tests/test_risk_engine.py`
 
 ### Safety
 
-AI-007 is not a risk engine. It does not calculate position size, risk budget, leverage, order quantity, or execution approval. The RISK-001 safety gate remains mandatory.
+RISK-001 is the mandatory risk gate. AI confidence cannot override it. No leverage, hidden account state, broker calls, order placement, or credential access is used.
 
 ## Immediate Next Step
 
-Run the automatic GitHub Actions CI for the complete AI-007 change set. If green, mark AI-007 complete and define the next AI-analysis boundary before implementing further functionality.
+Run the automatic GitHub Actions CI for the complete RISK-001 change set. If green, mark RISK-001 complete and proceed to the deterministic trade-planning boundary.
 
 ## User Action Required
 
-No Groww secret, access token, broker credential, or model API key is required for AI-007. Do not commit credentials.
+No Groww secret, access token, broker credential, or model API key is required for RISK-001. Do not commit credentials.
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 

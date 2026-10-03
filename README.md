@@ -7,7 +7,8 @@
 **Phase 0 — Foundation: COMPLETE**  
 **Phase 1 — Market Data Engine: 🟡 In Progress**  
 **Phase 3 — Scanner & Signal Engine: 🟢 Complete**  
-**Phase 4 — AI Analysis Engine: 🟡 In Progress**
+**Phase 4 — AI Analysis Engine: 🟢 Complete**  
+**Phase 5 — Trade Planner & Risk Engine: 🟡 In Progress**
 
 ### Foundation completed
 
@@ -68,17 +69,17 @@
 
 ## AI Analysis Engine
 
-The AI layer is being built as deterministic boundaries first. The project does not connect to a live model, broker, or execution path merely because an AI interface exists.
+The AI layer is built as deterministic boundaries first. No live model, broker, or execution path is connected merely because an AI interface exists.
 
 - [x] AI-001 provider-independent analyst contract and structured output validation
 - [x] AI-002 deterministic signal-to-analysis context builder
-- [x] AI-003 deterministic analysis orchestration from signal → context → analyst
+- [x] AI-003 deterministic analysis orchestration
 - [x] AI-004 deterministic prompt construction boundary
 - [x] AI-005 provider-independent model adapter boundary
 - [x] AI-006 deterministic response parsing boundary
-- [ ] AI-007 deterministic analysis integrity gate — implementation in progress
+- [x] AI-007 deterministic analysis integrity gate
 
-### AI-007 target flow
+### AI flow
 
 ```text
 SignalCandidate
@@ -100,7 +101,21 @@ AI-007 Analysis Integrity Gate
 Trade Planner / RISK-001
 ```
 
-AI-007 performs deterministic internal-consistency checks only. BUY/SELL analyses must have coherent entry, stop-loss, and target ordering; WATCH/NO_TRADE analyses cannot carry execution prices. Passing AI-007 does **not** approve a trade, calculate risk, or authorize execution.
+AI-007 performs deterministic internal-consistency checks only. Passing AI-007 does not approve a trade or calculate risk.
+
+## RISK-001 — Risk Engine
+
+RISK-001 is the mandatory deterministic safety gate after AI analysis.
+
+- [x] Explicit equity and risk-budget inputs
+- [x] Stop-loss based per-unit risk calculation
+- [x] Maximum notional exposure cap
+- [x] Lot-size aligned quantity rounding
+- [x] Zero-quantity rejection
+- [x] BUY/SELL-only planning gate
+- [ ] Automatic CI validation — pending for current change
+
+RISK-001 never places an order and never lets AI confidence override deterministic limits.
 
 ## Safety Boundary
 
@@ -142,10 +157,6 @@ Reconciliation / Monitoring
 Trade Journal / Analytics
 ```
 
-## Initial Provider: Groww
-
-Groww is the first broker/market-data integration for the India-first phase. The integration is deliberately isolated behind an adapter so future providers can be added without changing strategy logic. The first adapter milestone remains read-only.
-
 ## Development Phases
 
 | Phase | Name | Status |
@@ -154,8 +165,8 @@ Groww is the first broker/market-data integration for the India-first phase. The
 | 1 | Market Data Engine | 🟡 In Progress |
 | 2 | Instrument Master & Data Storage | 🟢 Complete through DATA-016 |
 | 3 | Scanner & Signal Engine | 🟢 Complete |
-| 4 | AI Analysis Engine | 🟡 AI-001 → AI-007 in progress |
-| 5 | Trade Planner & Risk Engine | ⚪ Planned |
+| 4 | AI Analysis Engine | 🟢 Complete through AI-007 |
+| 5 | Trade Planner & Risk Engine | 🟡 RISK-001 in progress |
 | 6 | Paper Execution | ⚪ Planned |
 | 7 | Backtesting | ⚪ Planned |
 | 8 | Broker Integration | 🟡 Groww selected; implementation gated |
@@ -187,4 +198,4 @@ If red → fix on main before adding more functionality
 
 ## Immediate Next Step
 
-**AI-007 — deterministic analysis integrity gate.** Complete the integrity checks and deterministic tests, then let the automatic CI verify the coherent change set. If CI is green, mark AI-007 complete and define the next AI-analysis boundary.
+**RISK-001 — deterministic risk engine.** Run automatic CI for the complete change set. If green, proceed to the deterministic trade-planning boundary.

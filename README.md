@@ -161,9 +161,21 @@ EXEC-001 establishes the provider-facing adapter boundary while keeping provider
 - [x] Explicit execution-control lock
 - [x] Broker transport isolated behind a small protocol
 - [x] No credentials or access tokens in source control
-- [ ] Automatic CI validation — pending for current change
+- [x] Automatic CI validation — green
 
 EXEC-001 does not bypass RISK-001 or RISK-002. EXEC-002 remains responsible for production runtime/static-IP controls before any real-money execution capability is considered.
+
+### EXEC-002 — Static-IP Production Runtime
+
+EXEC-002 defines the deterministic readiness gate for a controlled production runtime. It does not discover the public IP, read secrets, call Groww, or authorize live orders.
+
+- [x] Production environment requirement
+- [x] Registered static-IP evidence
+- [x] Observed public-IP match validation
+- [x] Execution lock remains enabled during readiness evaluation
+- [x] Independent kill-switch readiness
+- [x] Credential reference presence without storing credentials
+- [ ] Automatic CI validation — pending for current change
 
 ## Safety Boundary
 
@@ -216,7 +228,7 @@ Trade Journal / Analytics
 | 2 | Instrument Master & Data Storage | 🟢 Complete through DATA-016 |
 | 3 | Scanner & Signal Engine | 🟢 Complete |
 | 4 | AI Analysis Engine | 🟢 Complete through AI-007 |
-| 5 | Trade Planner & Risk Engine | 🟡 EXEC-001 in progress |
+| 5 | Trade Planner & Risk Engine | 🟡 EXEC-002 in progress |
 | 6 | Paper Execution | ⚪ Planned |
 | 7 | Backtesting | ⚪ Planned |
 | 8 | Broker Integration | 🟡 Groww selected; execution gated |
@@ -248,4 +260,4 @@ If red → fix on main before adding more functionality
 
 ## Immediate Next Step
 
-**EXEC-001 — Groww broker adapter boundary.** Keep provider submission disabled by default and complete deterministic boundary tests before moving to EXEC-002.
+**EXEC-002 — static-IP production runtime readiness gate.** Complete deterministic runtime tests and automatic CI before considering any later controlled-deployment work.

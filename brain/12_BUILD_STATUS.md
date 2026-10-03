@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 3.3
+**Version:** 3.4
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -34,22 +34,24 @@
 | RISK-001 | Risk Engine | 🟢 | 🟢 | 🟢 | Complete; deterministic risk budget and quantity gate, CI green |
 | PLAN-001 | Trade Planner | 🟢 | 🟢 | 🟢 | Complete; deterministic broker-independent trade plan, CI green |
 | RISK-002 | Portfolio Risk Gate | 🟢 | 🟢 | 🟢 | Complete; deterministic exposure, concentration, and open-position gate, CI green |
-| EXEC-001 | Groww Broker Adapter | 🟢 | 🟡 | 🟡 | In progress; safe provider boundary with submission disabled by default |
-| EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before any real-money execution capability |
+| EXEC-001 | Groww Broker Adapter | 🟢 | 🟢 | 🟢 | Complete; safe provider boundary with submission disabled by default, CI green |
+| EXEC-002 | Static-IP Production Runtime | 🟢 | 🟡 | 🟡 | In progress; deterministic production-runtime readiness gate |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 | TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
-## Current milestone: EXEC-001
+## Current milestone: EXEC-002
 
-EXEC-001 establishes the deterministic Groww broker-adapter boundary after PLAN-001 and RISK-002. The adapter remains isolated from AI, strategy, and risk calculations and keeps provider submission disabled by default.
+EXEC-002 defines a deterministic readiness boundary for a controlled production runtime. It verifies caller-supplied evidence for the required static-IP and operational controls without performing network discovery, reading credentials, calling the broker, or enabling live submission.
 
 ### Files added
 
-- `brain/41_EXEC_GROWW_BROKER_ADAPTER_SPECIFICATION.md`
+- `brain/42_EXEC_PRODUCTION_RUNTIME_SPECIFICATION.md`
+- `src/execution_runtime.py`
+- `tests/test_execution_runtime.py`
 
 ### Safety
 
-The execution boundary requires an approved PLAN-001 trade intent and RISK-002 decision. Development and paper environments do not submit orders. Production execution remains locked until EXEC-002 verifies the required runtime/static-IP controls. No credentials or access tokens are stored in the repository.
+The runtime gate requires production environment selection, a registered static public IP matching the observed public IP, an execution lock, an independent kill switch, and a configured credential reference. It does not authorize orders or expose secrets.
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 
@@ -59,4 +61,4 @@ A feature is complete only after implementation, deterministic tests, documentat
 
 ## User Action Required
 
-No Groww secret, access token, broker credential, or model API key is required for EXEC-001 boundary development. Do not commit credentials.
+No Groww secret, access token, broker credential, or model API key is required for EXEC-002 deterministic development. Do not commit credentials.

@@ -6,9 +6,10 @@
 
 **Phase 0 — Foundation: COMPLETE**  
 **Phase 1 — Market Data Engine: 🟡 In Progress**  
+**Phase 2 — Instrument Master & Data Storage: 🟢 Complete through DATA-016**  
 **Phase 3 — Scanner & Signal Engine: 🟢 Complete**  
-**Phase 4 — AI Analysis Engine: 🟢 Complete**  
-**Phase 5 — Trade Planner & Risk Engine: 🟡 In Progress**
+**Phase 4 — AI Analysis Engine: 🟢 Complete through AI-007**  
+**Phase 5 — Trade Planner, Risk & Execution Controls: 🟡 In Progress**
 
 ### Foundation completed
 
@@ -107,7 +108,7 @@ RISK-002 Portfolio Risk Gate
 
 AI-007 performs deterministic internal-consistency checks only. Passing AI-007 does not approve a trade or calculate risk.
 
-## Phase 5 — Trade Planner & Risk Engine
+## Phase 5 — Trade Planner, Risk & Execution Controls
 
 ### RISK-001 — Risk Engine
 
@@ -187,7 +188,7 @@ EXEC-003 is the deterministic operational gate after EXEC-002. It verifies that 
 - [x] Rollback plan readiness
 - [x] Independent kill-switch readiness
 - [x] Execution lock remains enabled through controlled handoff
-- [ ] Automatic CI validation — pending for current change
+- [x] Automatic CI validation — green
 
 EXEC-003 does not call Groww, read credentials, enable live trading, or submit orders. A passing result only means the deployment evidence is complete.
 
@@ -242,12 +243,38 @@ Trade Journal / Analytics
 | 2 | Instrument Master & Data Storage | 🟢 Complete through DATA-016 |
 | 3 | Scanner & Signal Engine | 🟢 Complete |
 | 4 | AI Analysis Engine | 🟢 Complete through AI-007 |
-| 5 | Trade Planner & Risk Engine | 🟡 EXEC-003 in progress |
+| 5 | Trade Planner, Risk & Execution Controls | 🟡 EXEC-003 complete; next execution boundary pending |
 | 6 | Paper Execution | ⚪ Planned |
 | 7 | Backtesting | ⚪ Planned |
 | 8 | Broker Integration | 🟡 Groww selected; execution gated |
 | 9 | Dashboard & Operations | ⚪ Planned |
 | 10 | Controlled Live Deployment | ⚪ Planned |
+
+## Development Progress
+
+### Completed milestone chain
+
+```text
+DATA-003 → DATA-016 🟢
+        ↓
+SIG-001 🟢
+        ↓
+AI-001 → AI-007 🟢
+        ↓
+RISK-001 🟢
+        ↓
+PLAN-001 🟢
+        ↓
+RISK-002 🟢
+        ↓
+EXEC-001 🟢
+        ↓
+EXEC-002 🟢
+        ↓
+EXEC-003 🟢
+```
+
+The system is therefore past the deterministic AI, risk, planning, portfolio-risk, broker-adapter, runtime-readiness, and controlled-deployment boundaries. The next major boundary is **paper execution**, followed by further reconciliation, backtesting, and only then controlled live deployment work.
 
 ## CI / Change Discipline
 
@@ -274,4 +301,4 @@ If red → fix on main before adding more functionality
 
 ## Immediate Next Step
 
-**EXEC-003 — controlled deployment authorization.** Complete deterministic deployment-evidence tests and automatic CI before moving into paper execution.
+**Paper Execution / next execution boundary.** Begin with a broker-independent paper/simulation execution path and deterministic safeguards before considering any live order submission capability.

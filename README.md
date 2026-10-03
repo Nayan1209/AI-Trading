@@ -175,7 +175,21 @@ EXEC-002 defines the deterministic readiness gate for a controlled production ru
 - [x] Execution lock remains enabled during readiness evaluation
 - [x] Independent kill-switch readiness
 - [x] Credential reference presence without storing credentials
+- [x] Automatic CI validation — green
+
+### EXEC-003 — Controlled Deployment Authorization
+
+EXEC-003 is the deterministic operational gate after EXEC-002. It verifies that runtime readiness, paper verification, explicit operator approval, rollback readiness, kill-switch readiness, and the execution lock are all present before a controlled deployment handoff.
+
+- [x] EXEC-002 runtime readiness evidence
+- [x] Paper/simulation verification evidence
+- [x] Explicit operator approval
+- [x] Rollback plan readiness
+- [x] Independent kill-switch readiness
+- [x] Execution lock remains enabled through controlled handoff
 - [ ] Automatic CI validation — pending for current change
+
+EXEC-003 does not call Groww, read credentials, enable live trading, or submit orders. A passing result only means the deployment evidence is complete.
 
 ## Safety Boundary
 
@@ -228,7 +242,7 @@ Trade Journal / Analytics
 | 2 | Instrument Master & Data Storage | 🟢 Complete through DATA-016 |
 | 3 | Scanner & Signal Engine | 🟢 Complete |
 | 4 | AI Analysis Engine | 🟢 Complete through AI-007 |
-| 5 | Trade Planner & Risk Engine | 🟡 EXEC-002 in progress |
+| 5 | Trade Planner & Risk Engine | 🟡 EXEC-003 in progress |
 | 6 | Paper Execution | ⚪ Planned |
 | 7 | Backtesting | ⚪ Planned |
 | 8 | Broker Integration | 🟡 Groww selected; execution gated |
@@ -260,4 +274,4 @@ If red → fix on main before adding more functionality
 
 ## Immediate Next Step
 
-**EXEC-002 — static-IP production runtime readiness gate.** Complete deterministic runtime tests and automatic CI before considering any later controlled-deployment work.
+**EXEC-003 — controlled deployment authorization.** Complete deterministic deployment-evidence tests and automatic CI before moving into paper execution.

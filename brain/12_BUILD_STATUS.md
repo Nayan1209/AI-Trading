@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 3.4
+**Version:** 3.5
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -35,23 +35,24 @@
 | PLAN-001 | Trade Planner | 🟢 | 🟢 | 🟢 | Complete; deterministic broker-independent trade plan, CI green |
 | RISK-002 | Portfolio Risk Gate | 🟢 | 🟢 | 🟢 | Complete; deterministic exposure, concentration, and open-position gate, CI green |
 | EXEC-001 | Groww Broker Adapter | 🟢 | 🟢 | 🟢 | Complete; safe provider boundary with submission disabled by default, CI green |
-| EXEC-002 | Static-IP Production Runtime | 🟢 | 🟡 | 🟡 | In progress; deterministic production-runtime readiness gate |
+| EXEC-002 | Static-IP Production Runtime | 🟢 | 🟢 | 🟢 | Complete; deterministic production-runtime readiness gate, CI green |
+| EXEC-003 | Controlled Deployment Authorization | 🟢 | 🟡 | 🟡 | In progress; deterministic deployment-evidence gate |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 | TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
-## Current milestone: EXEC-002
+## Current milestone: EXEC-003
 
-EXEC-002 defines a deterministic readiness boundary for a controlled production runtime. It verifies caller-supplied evidence for the required static-IP and operational controls without performing network discovery, reading credentials, calling the broker, or enabling live submission.
+EXEC-003 defines a deterministic controlled-deployment authorization boundary. It consumes verified EXEC-002 readiness plus paper verification, explicit operator approval, rollback readiness, kill-switch readiness, and the still-enabled execution lock. It does not call Groww, read credentials, enable live trading, or submit orders.
 
 ### Files added
 
-- `brain/42_EXEC_PRODUCTION_RUNTIME_SPECIFICATION.md`
-- `src/execution_runtime.py`
-- `tests/test_execution_runtime.py`
+- `brain/43_EXEC_CONTROLLED_DEPLOYMENT_SPECIFICATION.md`
+- `src/controlled_deployment.py`
+- `tests/test_controlled_deployment.py`
 
 ### Safety
 
-The runtime gate requires production environment selection, a registered static public IP matching the observed public IP, an execution lock, an independent kill switch, and a configured credential reference. It does not authorize orders or expose secrets.
+A passing EXEC-003 result means deployment evidence is complete; it is not an order authorization. All upstream controls remain mandatory, and no credentials or access tokens are stored in the repository.
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 
@@ -61,4 +62,4 @@ A feature is complete only after implementation, deterministic tests, documentat
 
 ## User Action Required
 
-No Groww secret, access token, broker credential, or model API key is required for EXEC-002 deterministic development. Do not commit credentials.
+No Groww secret, access token, broker credential, or model API key is required for EXEC-003 deterministic development. Do not commit credentials.

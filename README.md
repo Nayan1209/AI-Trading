@@ -98,12 +98,16 @@ AI-001 validated AIAnalysis
     ↓
 AI-007 Analysis Integrity Gate
     ↓
-Trade Planner / RISK-001
+Trade Planner
+    ↓
+RISK-001 Risk Engine
 ```
 
 AI-007 performs deterministic internal-consistency checks only. Passing AI-007 does not approve a trade or calculate risk.
 
-## RISK-001 — Risk Engine
+## Phase 5 — Trade Planner & Risk Engine
+
+### RISK-001 — Risk Engine
 
 RISK-001 is the mandatory deterministic safety gate after AI analysis.
 
@@ -113,9 +117,23 @@ RISK-001 is the mandatory deterministic safety gate after AI analysis.
 - [x] Lot-size aligned quantity rounding
 - [x] Zero-quantity rejection
 - [x] BUY/SELL-only planning gate
-- [ ] Automatic CI validation — pending for current change
+- [x] Automatic CI validation — green
 
 RISK-001 never places an order and never lets AI confidence override deterministic limits.
+
+### PLAN-001 — Deterministic Trade Planner
+
+PLAN-001 creates an immutable, broker-independent trade plan after the AI integrity and RISK-001 gates.
+
+- [x] Preserve validated BUY/SELL entry, stop-loss, and target
+- [x] Consume bounded quantity from RISK-001
+- [x] Preserve deterministic risk budget and notional values
+- [x] Reject WATCH/NO_TRADE through the risk gate
+- [x] Immutable planning result
+- [x] No broker, network, credential, or model dependency
+- [ ] Automatic CI validation — pending for current change
+
+PLAN-001 creates order intent only. It does not authorize or execute a live order.
 
 ## Safety Boundary
 
@@ -166,7 +184,7 @@ Trade Journal / Analytics
 | 2 | Instrument Master & Data Storage | 🟢 Complete through DATA-016 |
 | 3 | Scanner & Signal Engine | 🟢 Complete |
 | 4 | AI Analysis Engine | 🟢 Complete through AI-007 |
-| 5 | Trade Planner & Risk Engine | 🟡 RISK-001 in progress |
+| 5 | Trade Planner & Risk Engine | 🟡 PLAN-001 in progress |
 | 6 | Paper Execution | ⚪ Planned |
 | 7 | Backtesting | ⚪ Planned |
 | 8 | Broker Integration | 🟡 Groww selected; implementation gated |
@@ -198,4 +216,4 @@ If red → fix on main before adding more functionality
 
 ## Immediate Next Step
 
-**RISK-001 — deterministic risk engine.** Run automatic CI for the complete change set. If green, proceed to the deterministic trade-planning boundary.
+**PLAN-001 — deterministic trade-planning boundary.** Run automatic CI for the complete change set. If green, proceed to the next Phase 5 boundary.

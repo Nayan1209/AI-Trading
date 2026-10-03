@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 3.1
+**Version:** 3.2
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -31,33 +31,34 @@
 | AI-005 | AI Model Adapter | 🟢 | 🟢 | 🟢 | Complete; provider-independent adapter boundary, CI green |
 | AI-006 | AI Response Parsing | 🟢 | 🟢 | 🟢 | Complete; deterministic response parsing boundary, CI green |
 | AI-007 | AI Analysis Integrity Gate | 🟢 | 🟢 | 🟢 | Complete; deterministic internal-consistency gate, CI green |
-| RISK-001 | Risk Engine | 🟢 | 🟢 | 🟡 | In progress; deterministic risk budget and quantity gate |
+| RISK-001 | Risk Engine | 🟢 | 🟢 | 🟢 | Complete; deterministic risk budget and quantity gate, CI green |
+| PLAN-001 | Trade Planner | 🟢 | 🟢 | 🟡 | In progress; deterministic broker-independent trade plan |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 | TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
-## Current milestone: RISK-001
+## Current milestone: PLAN-001
 
-RISK-001 introduces the mandatory deterministic safety gate after AI-007. It bounds BUY/SELL quantity using explicit account equity, risk percentage, maximum notional exposure, stop-loss distance, and lot size. It does not execute orders.
+PLAN-001 introduces the deterministic trade-planning boundary after AI-007 and RISK-001. It preserves the validated trade prices and consumes only the bounded quantity and risk values produced by RISK-001.
 
 ### Files added
 
-- `brain/38_RISK_ENGINE_SPECIFICATION.md`
-- `src/risk_engine.py`
-- `tests/test_risk_engine.py`
+- `brain/39_TRADE_PLANNER_SPECIFICATION.md`
+- `src/trade_planner.py`
+- `tests/test_trade_planner.py`
 
 ### Safety
 
-RISK-001 is the mandatory risk gate. AI confidence cannot override it. No leverage, hidden account state, broker calls, order placement, or credential access is used.
+PLAN-001 creates an immutable broker-independent order intent only. It does not authorize live execution, call a broker, access credentials, call a model provider, or bypass RISK-001.
 
 ## Immediate Next Step
 
-Run the automatic GitHub Actions CI for the complete RISK-001 change set. If green, mark RISK-001 complete and proceed to the deterministic trade-planning boundary.
+Run the automatic GitHub Actions CI for the complete PLAN-001 change set. If green, mark PLAN-001 complete and proceed to the next Phase 5 boundary.
 
 ## User Action Required
 
-No Groww secret, access token, broker credential, or model API key is required for RISK-001. Do not commit credentials.
+No Groww secret, access token, broker credential, or model API key is required for PLAN-001. Do not commit credentials.
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 

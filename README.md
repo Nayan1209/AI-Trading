@@ -75,9 +75,10 @@ The AI layer is being built as deterministic boundaries first. The project does 
 - [x] AI-003 deterministic analysis orchestration from signal → context → analyst
 - [x] AI-004 deterministic prompt construction boundary
 - [x] AI-005 provider-independent model adapter boundary
-- [ ] AI-006 deterministic response parsing boundary — implementation in progress
+- [x] AI-006 deterministic response parsing boundary
+- [ ] AI-007 deterministic analysis integrity gate — implementation in progress
 
-### AI-006 target flow
+### AI-007 target flow
 
 ```text
 SignalCandidate
@@ -93,9 +94,13 @@ AI-005 Model Adapter
 AI-006 Response Parser
     ↓
 AI-001 validated AIAnalysis
+    ↓
+AI-007 Analysis Integrity Gate
+    ↓
+Trade Planner / RISK-001
 ```
 
-AI-006 treats model output as untrusted text until it passes deterministic JSON parsing and the AI-001 validation contract. It rejects malformed JSON, non-object payloads, unsupported fields, and missing fields, while preserving financial numeric values as exact `Decimal` values. It does **not** make network calls, access brokers, execute orders, fetch market data, or bypass deterministic risk controls.
+AI-007 performs deterministic internal-consistency checks only. BUY/SELL analyses must have coherent entry, stop-loss, and target ordering; WATCH/NO_TRADE analyses cannot carry execution prices. Passing AI-007 does **not** approve a trade, calculate risk, or authorize execution.
 
 ## Safety Boundary
 
@@ -149,7 +154,7 @@ Groww is the first broker/market-data integration for the India-first phase. The
 | 1 | Market Data Engine | 🟡 In Progress |
 | 2 | Instrument Master & Data Storage | 🟢 Complete through DATA-016 |
 | 3 | Scanner & Signal Engine | 🟢 Complete |
-| 4 | AI Analysis Engine | 🟡 AI-001 → AI-006 in progress |
+| 4 | AI Analysis Engine | 🟡 AI-001 → AI-007 in progress |
 | 5 | Trade Planner & Risk Engine | ⚪ Planned |
 | 6 | Paper Execution | ⚪ Planned |
 | 7 | Backtesting | ⚪ Planned |
@@ -182,4 +187,4 @@ If red → fix on main before adding more functionality
 
 ## Immediate Next Step
 
-**AI-006 — deterministic response parsing boundary.** Complete the response parser and deterministic tests, then let the automatic CI verify the coherent change set. If CI is green, update the tracker and proceed to the next AI-analysis boundary.
+**AI-007 — deterministic analysis integrity gate.** Complete the integrity checks and deterministic tests, then let the automatic CI verify the coherent change set. If CI is green, mark AI-007 complete and define the next AI-analysis boundary.

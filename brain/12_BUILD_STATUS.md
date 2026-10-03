@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 3.5
+**Version:** 3.6
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -36,23 +36,38 @@
 | RISK-002 | Portfolio Risk Gate | 🟢 | 🟢 | 🟢 | Complete; deterministic exposure, concentration, and open-position gate, CI green |
 | EXEC-001 | Groww Broker Adapter | 🟢 | 🟢 | 🟢 | Complete; safe provider boundary with submission disabled by default, CI green |
 | EXEC-002 | Static-IP Production Runtime | 🟢 | 🟢 | 🟢 | Complete; deterministic production-runtime readiness gate, CI green |
-| EXEC-003 | Controlled Deployment Authorization | 🟢 | 🟡 | 🟡 | In progress; deterministic deployment-evidence gate |
+| EXEC-003 | Controlled Deployment Authorization | 🟢 | 🟢 | 🟢 | Complete; deterministic deployment-evidence gate, CI green |
+| PAPER-001 | Paper Execution Boundary | 🟢 | 🟡 | 🟡 | In progress; deterministic broker-independent simulation |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 | TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
-## Current milestone: EXEC-003
+## Phase Status
 
-EXEC-003 defines a deterministic controlled-deployment authorization boundary. It consumes verified EXEC-002 readiness plus paper verification, explicit operator approval, rollback readiness, kill-switch readiness, and the still-enabled execution lock. It does not call Groww, read credentials, enable live trading, or submit orders.
+- **Phase 0 — Foundation:** 🟢 Complete
+- **Phase 1 — Market Data Engine:** 🟢 Complete through DATA-016
+- **Phase 2 — Instrument Master & Data Storage:** 🟢 Complete through DATA-016
+- **Phase 3 — Scanner & Signal Engine:** 🟢 Complete
+- **Phase 4 — AI Analysis Engine:** 🟢 Complete through AI-007
+- **Phase 5 — Trade Planner, Risk & Execution Controls:** 🟢 Complete through EXEC-003
+- **Phase 6 — Paper Execution:** 🟡 PAPER-001 in progress
+
+## Current milestone: PAPER-001
+
+PAPER-001 introduces the first broker-independent paper/simulation execution boundary. It consumes an immutable PLAN-001 `TradePlan` and returns a deterministic simulated fill only when the explicit environment is `paper`.
 
 ### Files added
 
-- `brain/43_EXEC_CONTROLLED_DEPLOYMENT_SPECIFICATION.md`
-- `src/controlled_deployment.py`
-- `tests/test_controlled_deployment.py`
+- `brain/44_PAPER_EXECUTION_SPECIFICATION.md`
+- `src/paper_execution.py`
+- `tests/test_paper_execution.py`
 
 ### Safety
 
-A passing EXEC-003 result means deployment evidence is complete; it is not an order authorization. All upstream controls remain mandatory, and no credentials or access tokens are stored in the repository.
+PAPER-001 does not call Groww, access credentials, use network transport, enable live trading, or place real orders. Development and paper environments cannot place live orders.
+
+### Completion rule
+
+PAPER-001 becomes complete only after implementation, deterministic tests, documentation, and automatic CI validation are green.
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 
@@ -62,4 +77,4 @@ A feature is complete only after implementation, deterministic tests, documentat
 
 ## User Action Required
 
-No Groww secret, access token, broker credential, or model API key is required for EXEC-003 deterministic development. Do not commit credentials.
+No Groww secret, access token, broker credential, or model API key is required for PAPER-001. Do not commit credentials.

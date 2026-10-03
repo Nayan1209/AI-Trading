@@ -5,11 +5,12 @@
 ## Current Status
 
 **Phase 0 — Foundation: COMPLETE**  
-**Phase 1 — Market Data Engine: 🟡 In Progress**  
+**Phase 1 — Market Data Engine: 🟢 Complete through DATA-016**  
 **Phase 2 — Instrument Master & Data Storage: 🟢 Complete through DATA-016**  
 **Phase 3 — Scanner & Signal Engine: 🟢 Complete**  
 **Phase 4 — AI Analysis Engine: 🟢 Complete through AI-007**  
-**Phase 5 — Trade Planner, Risk & Execution Controls: 🟡 In Progress**
+**Phase 5 — Trade Planner, Risk & Execution Controls: 🟢 Complete through EXEC-003**  
+**Phase 6 — Paper Execution: 🟡 In Progress**
 
 ### Foundation completed
 
@@ -39,7 +40,7 @@
 - [x] Initial API and unit test
 - [x] Development PostgreSQL container definition
 
-### Phase 1 / scanner / signal progress
+### Phase 1 / market-data progress
 
 - [x] Initial Indian provider selected: **Groww Trading API**
 - [x] Groww API approval confirmed by project owner
@@ -60,7 +61,7 @@
 - [x] Instrument master specification (`brain/13_INSTRUMENT_MASTER_SPECIFICATION.md`)
 - [x] Groww quantity validation updated to accept provider-supplied zero values
 - [x] CASH and FNO instrument test fixtures aligned to the canonical CSV schema
-- [x] DATA-003 through DATA-016 completed with automatic CI green
+- [x] DATA-001 through DATA-016 completed with automatic CI green
 - [x] SIG-001 deterministic signal-engine foundation
 - [x] SIG-001 momentum strategy
 - [x] SIG-001 reversal strategy
@@ -112,8 +113,6 @@ AI-007 performs deterministic internal-consistency checks only. Passing AI-007 d
 
 ### RISK-001 — Risk Engine
 
-RISK-001 is the mandatory deterministic safety gate after AI analysis.
-
 - [x] Explicit equity and risk-budget inputs
 - [x] Stop-loss based per-unit risk calculation
 - [x] Maximum notional exposure cap
@@ -125,8 +124,6 @@ RISK-001 is the mandatory deterministic safety gate after AI analysis.
 RISK-001 never places an order and never lets AI confidence override deterministic limits.
 
 ### PLAN-001 — Deterministic Trade Planner
-
-PLAN-001 creates an immutable, broker-independent trade plan after the AI integrity and RISK-001 gates.
 
 - [x] Preserve validated BUY/SELL entry, stop-loss, and target
 - [x] Consume bounded quantity from RISK-001
@@ -140,8 +137,6 @@ PLAN-001 creates order intent only. It does not authorize or execute a live orde
 
 ### RISK-002 — Portfolio Exposure & Concentration Gate
 
-RISK-002 is the deterministic portfolio-level safety gate after trade planning.
-
 - [x] Explicit portfolio exposure limit
 - [x] Explicit single-symbol concentration limit
 - [x] Maximum open-position count
@@ -154,8 +149,6 @@ RISK-002 does not execute orders, access broker credentials, or infer hidden por
 
 ### EXEC-001 — Groww Broker Adapter Boundary
 
-EXEC-001 establishes the provider-facing adapter boundary while keeping provider submission disabled by default.
-
 - [x] Immutable provider-shaped order intent
 - [x] Explicit development/paper/staging/production environment boundary
 - [x] Mandatory RISK-002 approval before submission path
@@ -164,11 +157,7 @@ EXEC-001 establishes the provider-facing adapter boundary while keeping provider
 - [x] No credentials or access tokens in source control
 - [x] Automatic CI validation — green
 
-EXEC-001 does not bypass RISK-001 or RISK-002. EXEC-002 remains responsible for production runtime/static-IP controls before any real-money execution capability is considered.
-
 ### EXEC-002 — Static-IP Production Runtime
-
-EXEC-002 defines the deterministic readiness gate for a controlled production runtime. It does not discover the public IP, read secrets, call Groww, or authorize live orders.
 
 - [x] Production environment requirement
 - [x] Registered static-IP evidence
@@ -180,8 +169,6 @@ EXEC-002 defines the deterministic readiness gate for a controlled production ru
 
 ### EXEC-003 — Controlled Deployment Authorization
 
-EXEC-003 is the deterministic operational gate after EXEC-002. It verifies that runtime readiness, paper verification, explicit operator approval, rollback readiness, kill-switch readiness, and the execution lock are all present before a controlled deployment handoff.
-
 - [x] EXEC-002 runtime readiness evidence
 - [x] Paper/simulation verification evidence
 - [x] Explicit operator approval
@@ -190,11 +177,28 @@ EXEC-003 is the deterministic operational gate after EXEC-002. It verifies that 
 - [x] Execution lock remains enabled through controlled handoff
 - [x] Automatic CI validation — green
 
-EXEC-003 does not call Groww, read credentials, enable live trading, or submit orders. A passing result only means the deployment evidence is complete.
+EXEC-003 does not call Groww, read credentials, enable live trading, or submit orders. A passing result means the controlled-deployment evidence boundary is complete.
+
+## Phase 6 — Paper Execution
+
+### PAPER-001 — Deterministic Paper Execution Boundary
+
+PAPER-001 is the first paper/simulation execution layer. It consumes an existing immutable `TradePlan` and produces a deterministic simulated fill without any broker/network access.
+
+- [x] Explicit `paper` environment requirement
+- [x] BUY/SELL-only execution boundary
+- [x] Positive quantity validation
+- [x] Positive simulated fill-price validation
+- [x] Deterministic simulated order ID
+- [x] Immutable simulated order/fill result
+- [x] No broker credentials or network transport
+- [ ] Automatic CI validation — pending for current milestone
+
+PAPER-001 deliberately does not implement live Groww orders, exchange matching, slippage, partial fills, portfolio persistence, or reconciliation.
 
 ## Safety Boundary
 
-This repository currently has **no enabled real-money broker execution path**. Provider-facing execution remains disabled until the required execution and production-runtime controls are separately verified.
+This repository currently has **no enabled real-money broker execution path**. Development and paper environments cannot place live orders. Provider-facing execution remains disabled until the required execution and production-runtime controls are separately verified.
 
 The AI is never allowed to bypass deterministic risk and execution controls.
 
@@ -227,11 +231,13 @@ Portfolio Risk Gate
     ↓
 Execution Boundary
     ↓
-Broker Adapter (Groww first)
+Paper Execution
     ↓
 Reconciliation / Monitoring
     ↓
 Trade Journal / Analytics
+    ↓
+Controlled Live Execution (future)
 ```
 
 ## Development Phases
@@ -239,12 +245,12 @@ Trade Journal / Analytics
 | Phase | Name | Status |
 |---|---|---|
 | 0 | Foundation & specifications | 🟢 Complete |
-| 1 | Market Data Engine | 🟡 In Progress |
+| 1 | Market Data Engine | 🟢 Complete through DATA-016 |
 | 2 | Instrument Master & Data Storage | 🟢 Complete through DATA-016 |
 | 3 | Scanner & Signal Engine | 🟢 Complete |
 | 4 | AI Analysis Engine | 🟢 Complete through AI-007 |
-| 5 | Trade Planner, Risk & Execution Controls | 🟡 EXEC-003 complete; next execution boundary pending |
-| 6 | Paper Execution | ⚪ Planned |
+| 5 | Trade Planner, Risk & Execution Controls | 🟢 Complete through EXEC-003 |
+| 6 | Paper Execution | 🟡 PAPER-001 in progress |
 | 7 | Backtesting | ⚪ Planned |
 | 8 | Broker Integration | 🟡 Groww selected; execution gated |
 | 9 | Dashboard & Operations | ⚪ Planned |
@@ -255,7 +261,7 @@ Trade Journal / Analytics
 ### Completed milestone chain
 
 ```text
-DATA-003 → DATA-016 🟢
+DATA-001 → DATA-016 🟢
         ↓
 SIG-001 🟢
         ↓
@@ -272,9 +278,11 @@ EXEC-001 🟢
 EXEC-002 🟢
         ↓
 EXEC-003 🟢
+        ↓
+PAPER-001 🟡
 ```
 
-The system is therefore past the deterministic AI, risk, planning, portfolio-risk, broker-adapter, runtime-readiness, and controlled-deployment boundaries. The next major boundary is **paper execution**, followed by further reconciliation, backtesting, and only then controlled live deployment work.
+The deterministic data, scanner, signal, AI, risk, planning, portfolio-risk, broker-adapter, runtime-readiness, and controlled-deployment boundaries are complete. The current milestone is the broker-independent paper-execution boundary.
 
 ## CI / Change Discipline
 
@@ -301,4 +309,4 @@ If red → fix on main before adding more functionality
 
 ## Immediate Next Step
 
-**Paper Execution / next execution boundary.** Begin with a broker-independent paper/simulation execution path and deterministic safeguards before considering any live order submission capability.
+**PAPER-001 — deterministic paper execution.** Complete its automatic CI validation, then proceed to the next paper-execution boundary such as simulated order lifecycle and reconciliation.

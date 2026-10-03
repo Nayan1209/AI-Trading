@@ -33,36 +33,37 @@
 | AI-007 | AI Analysis Integrity Gate | 🟢 | 🟢 | 🟢 | Complete; deterministic internal-consistency gate, CI green |
 | RISK-001 | Risk Engine | 🟢 | 🟢 | 🟢 | Complete; deterministic risk budget and quantity gate, CI green |
 | PLAN-001 | Trade Planner | 🟢 | 🟢 | 🟢 | Complete; deterministic broker-independent trade plan, CI green |
-| RISK-002 | Portfolio Risk Gate | 🟢 | 🟢 | 🟡 | In progress; deterministic exposure, concentration, and open-position gate |
+| RISK-002 | Portfolio Risk Gate | 🟢 | 🟢 | 🟢 | Complete; deterministic exposure, concentration, and open-position gate, CI green |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 | TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
-## Current milestone: RISK-002
+## Current milestone: EXEC-001
 
-RISK-002 introduces the deterministic portfolio-level safety gate after RISK-001 and PLAN-001. It evaluates projected gross notional exposure, single-symbol concentration, and maximum open-position count using explicit caller-supplied limits.
+RISK-002 is complete. The deterministic portfolio-level safety gate now sits after RISK-001 and PLAN-001 and evaluates projected gross notional exposure, single-symbol concentration, and maximum open-position count using explicit caller-supplied limits.
 
-### Files added
+### RISK-002 completion
 
 - `brain/40_RISK_PORTFOLIO_EXPOSURE_SPECIFICATION.md`
 - `src/portfolio_risk.py`
 - `tests/test_portfolio_risk.py`
+- Implementation, deterministic tests, documentation, and automatic CI are green.
 
-### Safety
+### Next milestone: EXEC-001
+
+EXEC-001 is the Groww broker adapter boundary. It should remain isolated from strategy, AI, and risk logic. It must not bypass RISK-001, PLAN-001, or RISK-002, and it must not place live orders until the required execution safety and production-runtime controls are satisfied.
+
+## Safety
 
 RISK-002 uses conservative gross exposure semantics and never assumes positions will net. Missing, malformed, duplicate, or unsafe inputs are rejected. It does not call a broker, access credentials, or execute orders.
-
-## Immediate Next Step
-
-Run the automatic GitHub Actions CI for the complete RISK-002 change set. If green, mark RISK-002 complete before adding another feature.
-
-## User Action Required
-
-No Groww secret, access token, broker credential, or model API key is required for RISK-002. Do not commit credentials.
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 
 ## Completion Rule
 
 A feature is complete only after implementation, deterministic tests, documentation, and operational checks. CI is the final verification gate and should receive only one coherent, preflight-reviewed commit for each milestone.
+
+## User Action Required
+
+No Groww secret, access token, broker credential, or model API key is required for the completed RISK-002 milestone. Do not commit credentials.

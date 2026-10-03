@@ -34,29 +34,22 @@
 | RISK-001 | Risk Engine | 🟢 | 🟢 | 🟢 | Complete; deterministic risk budget and quantity gate, CI green |
 | PLAN-001 | Trade Planner | 🟢 | 🟢 | 🟢 | Complete; deterministic broker-independent trade plan, CI green |
 | RISK-002 | Portfolio Risk Gate | 🟢 | 🟢 | 🟢 | Complete; deterministic exposure, concentration, and open-position gate, CI green |
-| EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
-| EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
+| EXEC-001 | Groww Broker Adapter | 🟢 | 🟡 | 🟡 | In progress; safe provider boundary with submission disabled by default |
+| EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before any real-money execution capability |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 | TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
 ## Current milestone: EXEC-001
 
-RISK-002 is complete. The deterministic portfolio-level safety gate now sits after RISK-001 and PLAN-001 and evaluates projected gross notional exposure, single-symbol concentration, and maximum open-position count using explicit caller-supplied limits.
+EXEC-001 establishes the deterministic Groww broker-adapter boundary after PLAN-001 and RISK-002. The adapter remains isolated from AI, strategy, and risk calculations and keeps provider submission disabled by default.
 
-### RISK-002 completion
+### Files added
 
-- `brain/40_RISK_PORTFOLIO_EXPOSURE_SPECIFICATION.md`
-- `src/portfolio_risk.py`
-- `tests/test_portfolio_risk.py`
-- Implementation, deterministic tests, documentation, and automatic CI are green.
+- `brain/41_EXEC_GROWW_BROKER_ADAPTER_SPECIFICATION.md`
 
-### Next milestone: EXEC-001
+### Safety
 
-EXEC-001 is the Groww broker adapter boundary. It should remain isolated from strategy, AI, and risk logic. It must not bypass RISK-001, PLAN-001, or RISK-002, and it must not place live orders until the required execution safety and production-runtime controls are satisfied.
-
-## Safety
-
-RISK-002 uses conservative gross exposure semantics and never assumes positions will net. Missing, malformed, duplicate, or unsafe inputs are rejected. It does not call a broker, access credentials, or execute orders.
+The execution boundary requires an approved PLAN-001 trade intent and RISK-002 decision. Development and paper environments do not submit orders. Production execution remains locked until EXEC-002 verifies the required runtime/static-IP controls. No credentials or access tokens are stored in the repository.
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 
@@ -66,4 +59,4 @@ A feature is complete only after implementation, deterministic tests, documentat
 
 ## User Action Required
 
-No Groww secret, access token, broker credential, or model API key is required for the completed RISK-002 milestone. Do not commit credentials.
+No Groww secret, access token, broker credential, or model API key is required for EXEC-001 boundary development. Do not commit credentials.

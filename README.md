@@ -147,13 +147,27 @@ RISK-002 is the deterministic portfolio-level safety gate after trade planning.
 - [x] Conservative gross exposure semantics
 - [x] Existing-symbol position-slot handling
 - [x] Duplicate/malformed position rejection
-- [ ] Automatic CI validation — pending for current change
+- [x] Automatic CI validation — green
 
 RISK-002 does not execute orders, access broker credentials, or infer hidden portfolio state.
 
+### EXEC-001 — Groww Broker Adapter Boundary
+
+EXEC-001 establishes the provider-facing adapter boundary while keeping provider submission disabled by default.
+
+- [x] Immutable provider-shaped order intent
+- [x] Explicit development/paper/staging/production environment boundary
+- [x] Mandatory RISK-002 approval before submission path
+- [x] Explicit execution-control lock
+- [x] Broker transport isolated behind a small protocol
+- [x] No credentials or access tokens in source control
+- [ ] Automatic CI validation — pending for current change
+
+EXEC-001 does not bypass RISK-001 or RISK-002. EXEC-002 remains responsible for production runtime/static-IP controls before any real-money execution capability is considered.
+
 ## Safety Boundary
 
-This repository currently has **no live broker connection, live order execution, withdrawal capability, or real-money trading functionality**.
+This repository currently has **no enabled real-money broker execution path**. Provider-facing execution remains disabled until the required execution and production-runtime controls are separately verified.
 
 The AI is never allowed to bypass deterministic risk and execution controls.
 
@@ -184,7 +198,7 @@ Risk Engine  ← mandatory safety gate
     ↓
 Portfolio Risk Gate
     ↓
-Execution Engine
+Execution Boundary
     ↓
 Broker Adapter (Groww first)
     ↓
@@ -202,10 +216,10 @@ Trade Journal / Analytics
 | 2 | Instrument Master & Data Storage | 🟢 Complete through DATA-016 |
 | 3 | Scanner & Signal Engine | 🟢 Complete |
 | 4 | AI Analysis Engine | 🟢 Complete through AI-007 |
-| 5 | Trade Planner & Risk Engine | 🟡 RISK-002 in progress |
+| 5 | Trade Planner & Risk Engine | 🟡 EXEC-001 in progress |
 | 6 | Paper Execution | ⚪ Planned |
 | 7 | Backtesting | ⚪ Planned |
-| 8 | Broker Integration | 🟡 Groww selected; implementation gated |
+| 8 | Broker Integration | 🟡 Groww selected; execution gated |
 | 9 | Dashboard & Operations | ⚪ Planned |
 | 10 | Controlled Live Deployment | ⚪ Planned |
 
@@ -234,4 +248,4 @@ If red → fix on main before adding more functionality
 
 ## Immediate Next Step
 
-**RISK-002 — deterministic portfolio exposure and concentration gate.** Run automatic CI for the complete change set. If green, mark RISK-002 complete before adding another feature.
+**EXEC-001 — Groww broker adapter boundary.** Keep provider submission disabled by default and complete deterministic boundary tests before moving to EXEC-002.

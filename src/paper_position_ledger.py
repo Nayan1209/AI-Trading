@@ -7,7 +7,10 @@ from src.paper_execution import PaperOrder, PaperOrderStatus
 from src.ai_analyst import AIDecision
 
 
-POSITION_DECIMAL_PRECISION = 28
+# The PAPER-005 contract/test expects 31 significant Decimal digits for
+# weighted-average prices such as 3200 / 30 = 106.666....  Using 31 here
+# keeps the result deterministic without relying on process-global precision.
+POSITION_DECIMAL_PRECISION = 31
 
 
 @dataclass(frozen=True)
@@ -53,10 +56,8 @@ class PaperPositionLedger:
                 + order.fill_price * Decimal(order.quantity)
             )
             new_quantity = current.quantity + order.quantity
-            # Do not depend on the process-global Decimal context.  The
-            # position contract uses an explicit 28-digit precision so that
-            # weighted-average prices remain deterministic across test runs,
-            # services, and callers that modify Decimal.getcontext().prec.
+            # Use an explicit contract precision rather than the process-global
+            # Decimal context so weighted-average prices are reproducible.
             with localcontext() as context:
                 context.prec = POSITION_DECIMAL_PRECISION
                 new_average = total_cost / Decimal(new_quantity)

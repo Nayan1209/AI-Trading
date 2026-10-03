@@ -101,6 +101,8 @@ AI-007 Analysis Integrity Gate
 Trade Planner
     ↓
 RISK-001 Risk Engine
+    ↓
+RISK-002 Portfolio Risk Gate
 ```
 
 AI-007 performs deterministic internal-consistency checks only. Passing AI-007 does not approve a trade or calculate risk.
@@ -131,9 +133,23 @@ PLAN-001 creates an immutable, broker-independent trade plan after the AI integr
 - [x] Reject WATCH/NO_TRADE through the risk gate
 - [x] Immutable planning result
 - [x] No broker, network, credential, or model dependency
-- [ ] Automatic CI validation — pending for current change
+- [x] Automatic CI validation — green
 
 PLAN-001 creates order intent only. It does not authorize or execute a live order.
+
+### RISK-002 — Portfolio Exposure & Concentration Gate
+
+RISK-002 is the deterministic portfolio-level safety gate after trade planning.
+
+- [x] Explicit portfolio exposure limit
+- [x] Explicit single-symbol concentration limit
+- [x] Maximum open-position count
+- [x] Conservative gross exposure semantics
+- [x] Existing-symbol position-slot handling
+- [x] Duplicate/malformed position rejection
+- [ ] Automatic CI validation — pending for current change
+
+RISK-002 does not execute orders, access broker credentials, or infer hidden portfolio state.
 
 ## Safety Boundary
 
@@ -166,6 +182,8 @@ Trade Planner
     ↓
 Risk Engine  ← mandatory safety gate
     ↓
+Portfolio Risk Gate
+    ↓
 Execution Engine
     ↓
 Broker Adapter (Groww first)
@@ -184,7 +202,7 @@ Trade Journal / Analytics
 | 2 | Instrument Master & Data Storage | 🟢 Complete through DATA-016 |
 | 3 | Scanner & Signal Engine | 🟢 Complete |
 | 4 | AI Analysis Engine | 🟢 Complete through AI-007 |
-| 5 | Trade Planner & Risk Engine | 🟡 PLAN-001 in progress |
+| 5 | Trade Planner & Risk Engine | 🟡 RISK-002 in progress |
 | 6 | Paper Execution | ⚪ Planned |
 | 7 | Backtesting | ⚪ Planned |
 | 8 | Broker Integration | 🟡 Groww selected; implementation gated |
@@ -216,4 +234,4 @@ If red → fix on main before adding more functionality
 
 ## Immediate Next Step
 
-**PLAN-001 — deterministic trade-planning boundary.** Run automatic CI for the complete change set. If green, proceed to the next Phase 5 boundary.
+**RISK-002 — deterministic portfolio exposure and concentration gate.** Run automatic CI for the complete change set. If green, mark RISK-002 complete before adding another feature.

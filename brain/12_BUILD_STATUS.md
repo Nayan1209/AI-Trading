@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 3.2
+**Version:** 3.3
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -32,33 +32,34 @@
 | AI-006 | AI Response Parsing | 🟢 | 🟢 | 🟢 | Complete; deterministic response parsing boundary, CI green |
 | AI-007 | AI Analysis Integrity Gate | 🟢 | 🟢 | 🟢 | Complete; deterministic internal-consistency gate, CI green |
 | RISK-001 | Risk Engine | 🟢 | 🟢 | 🟢 | Complete; deterministic risk budget and quantity gate, CI green |
-| PLAN-001 | Trade Planner | 🟢 | 🟢 | 🟡 | In progress; deterministic broker-independent trade plan |
+| PLAN-001 | Trade Planner | 🟢 | 🟢 | 🟢 | Complete; deterministic broker-independent trade plan, CI green |
+| RISK-002 | Portfolio Risk Gate | 🟢 | 🟢 | 🟡 | In progress; deterministic exposure, concentration, and open-position gate |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 | TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
-## Current milestone: PLAN-001
+## Current milestone: RISK-002
 
-PLAN-001 introduces the deterministic trade-planning boundary after AI-007 and RISK-001. It preserves the validated trade prices and consumes only the bounded quantity and risk values produced by RISK-001.
+RISK-002 introduces the deterministic portfolio-level safety gate after RISK-001 and PLAN-001. It evaluates projected gross notional exposure, single-symbol concentration, and maximum open-position count using explicit caller-supplied limits.
 
 ### Files added
 
-- `brain/39_TRADE_PLANNER_SPECIFICATION.md`
-- `src/trade_planner.py`
-- `tests/test_trade_planner.py`
+- `brain/40_RISK_PORTFOLIO_EXPOSURE_SPECIFICATION.md`
+- `src/portfolio_risk.py`
+- `tests/test_portfolio_risk.py`
 
 ### Safety
 
-PLAN-001 creates an immutable broker-independent order intent only. It does not authorize live execution, call a broker, access credentials, call a model provider, or bypass RISK-001.
+RISK-002 uses conservative gross exposure semantics and never assumes positions will net. Missing, malformed, duplicate, or unsafe inputs are rejected. It does not call a broker, access credentials, or execute orders.
 
 ## Immediate Next Step
 
-Run the automatic GitHub Actions CI for the complete PLAN-001 change set. If green, mark PLAN-001 complete and proceed to the next Phase 5 boundary.
+Run the automatic GitHub Actions CI for the complete RISK-002 change set. If green, mark RISK-002 complete before adding another feature.
 
 ## User Action Required
 
-No Groww secret, access token, broker credential, or model API key is required for PLAN-001. Do not commit credentials.
+No Groww secret, access token, broker credential, or model API key is required for RISK-002. Do not commit credentials.
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 

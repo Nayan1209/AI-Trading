@@ -28,34 +28,35 @@
 | AI-002 | AI Context Builder | 🟢 | 🟢 | 🟢 | Complete; deterministic signal-to-context adapter |
 | AI-003 | AI Analysis Orchestration | 🟢 | 🟢 | 🟢 | Complete; deterministic orchestration boundary, CI green |
 | AI-004 | AI Prompt Construction | 🟢 | 🟢 | 🟢 | Complete; deterministic prompt artifact + revalidation, CI green |
-| AI-005 | AI Model Adapter | 🟢 | 🟢 | 🟢 | In progress; provider-independent adapter boundary |
+| AI-005 | AI Model Adapter | 🟢 | 🟢 | 🟢 | Complete; provider-independent adapter boundary, CI green |
+| AI-006 | AI Response Parsing | 🟢 | 🟢 | 🟡 | In progress; deterministic response parsing boundary |
 | RISK-001 | Risk Engine | ⚪ | ⚪ | ⚪ | Not Started |
 | EXEC-001 | Groww Broker Adapter | 🟢 | ⚪ | ⚪ | Design complete; implementation later |
 | EXEC-002 | Static-IP Production Runtime | 🟡 | ⚪ | ⚪ | Required before live orders |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 | TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
-## Current milestone: AI-005
+## Current milestone: AI-006
 
-AI-005 introduces a provider-independent model-adapter boundary after deterministic prompt construction. The core contract accepts only the immutable `AIPrompt` artifact and returns opaque `AIModelResponse` text with explicit model and prompt versions. No provider SDK, network call, credentials, trading interpretation, risk override, broker access, or execution is introduced.
+AI-006 introduces a deterministic response-parsing boundary after the AI-005 model adapter. The parser accepts only an `AIModelResponse`, parses its untrusted content as strict JSON, rejects unsupported or missing fields, preserves numeric values as `Decimal`, injects trusted model/prompt metadata from AI-005, and validates the final structure through the AI-001 `AIAnalysis` contract.
 
 ### Files added
 
-- `brain/35_AI_MODEL_ADAPTER_SPECIFICATION.md`
-- `src/ai_model.py`
-- `tests/test_ai_model.py`
+- `brain/36_AI_RESPONSE_PARSING_SPECIFICATION.md`
+- `src/ai_response.py`
+- `tests/test_ai_response.py`
 
 ### Safety
 
-The model response is untrusted text. AI-005 does not interpret it as a trade decision and does not execute orders. Provider-specific network and credential handling remain outside the core contract.
+AI-006 does not decide whether a trade is safe or executable. It does not access brokers, execute orders, fetch market data, call external services, or override deterministic risk controls. Model output remains untrusted until it passes the parser and AI-001 validation boundary.
 
 ## Immediate Next Step
 
-Run the automatic GitHub Actions CI for the complete AI-005 change set. If green, mark AI-005 complete and define the next AI-analysis boundary before implementing further functionality.
+Run the automatic GitHub Actions CI for the complete AI-006 change set. If green, mark AI-006 complete and define the next AI-analysis boundary before implementing further functionality.
 
 ## User Action Required
 
-No Groww secret, access token, broker credential, or model API key is required for AI-005. Do not commit credentials.
+No Groww secret, access token, broker credential, or model API key is required for AI-006. Do not commit credentials.
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 

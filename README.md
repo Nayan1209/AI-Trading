@@ -73,9 +73,11 @@ The AI layer is being built as deterministic boundaries first. The project does 
 - [x] AI-001 provider-independent analyst contract and structured output validation
 - [x] AI-002 deterministic signal-to-analysis context builder
 - [x] AI-003 deterministic analysis orchestration from signal → context → analyst
-- [ ] AI-004 deterministic prompt construction boundary — implementation in progress
+- [x] AI-004 deterministic prompt construction boundary
+- [x] AI-005 provider-independent model adapter boundary
+- [ ] AI-006 deterministic response parsing boundary — implementation in progress
 
-### AI-004 target flow
+### AI-006 target flow
 
 ```text
 SignalCandidate
@@ -86,12 +88,14 @@ AI-003 Analysis Orchestration
     ↓
 AI-004 Prompt Builder
     ↓
-Future Model Adapter
+AI-005 Model Adapter
+    ↓
+AI-006 Response Parser
     ↓
 AI-001 validated AIAnalysis
 ```
 
-AI-004 only constructs a stable prompt artifact. It does **not** make model/network calls, fetch news, access brokers, bypass risk controls, or invent missing market data. Financial `Decimal` values remain exact strings during prompt serialization, and caller-supplied external context remains untrusted data.
+AI-006 treats model output as untrusted text until it passes deterministic JSON parsing and the AI-001 validation contract. It rejects malformed JSON, non-object payloads, unsupported fields, and missing fields, while preserving financial numeric values as exact `Decimal` values. It does **not** make network calls, access brokers, execute orders, fetch market data, or bypass deterministic risk controls.
 
 ## Safety Boundary
 
@@ -145,7 +149,7 @@ Groww is the first broker/market-data integration for the India-first phase. The
 | 1 | Market Data Engine | 🟡 In Progress |
 | 2 | Instrument Master & Data Storage | 🟢 Complete through DATA-016 |
 | 3 | Scanner & Signal Engine | 🟢 Complete |
-| 4 | AI Analysis Engine | 🟡 AI-001 → AI-004 in progress |
+| 4 | AI Analysis Engine | 🟡 AI-001 → AI-006 in progress |
 | 5 | Trade Planner & Risk Engine | ⚪ Planned |
 | 6 | Paper Execution | ⚪ Planned |
 | 7 | Backtesting | ⚪ Planned |
@@ -178,4 +182,4 @@ If red → fix on main before adding more functionality
 
 ## Immediate Next Step
 
-**AI-004 — deterministic prompt construction boundary.** Complete the prompt artifact implementation and its deterministic tests, then let the automatic CI verify the coherent change set. If CI is green, update the tracker and proceed to the next AI-analysis boundary.
+**AI-006 — deterministic response parsing boundary.** Complete the response parser and deterministic tests, then let the automatic CI verify the coherent change set. If CI is green, update the tracker and proceed to the next AI-analysis boundary.

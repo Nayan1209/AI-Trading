@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 3.9
+**Version:** 4.0
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -40,7 +40,8 @@
 | PAPER-001 | Paper Execution Boundary | 🟢 | 🟢 | 🟢 | Complete; deterministic broker-independent simulation, CI green |
 | PAPER-002 | Paper Order Ledger | 🟢 | 🟢 | 🟢 | Complete; deterministic in-process order history and duplicate protection, CI green |
 | PAPER-003 | Paper Order Reconciliation | 🟢 | 🟢 | 🟢 | Complete; deterministic read-only ledger reconciliation, CI green |
-| PAPER-004 | Paper Execution Session | 🟢 | 🟡 | 🟡 | In progress; deterministic execution → ledger → reconciliation orchestration |
+| PAPER-004 | Paper Execution Session | 🟢 | 🟢 | 🟢 | Complete; deterministic execution → ledger → reconciliation orchestration, CI green |
+| PAPER-005 | Paper Position Accounting | 🟢 | 🟡 | 🟡 | In progress; deterministic long-only position state and realized P&L |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 | TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
@@ -52,25 +53,25 @@
 - **Phase 3 — Scanner & Signal Engine:** 🟢 Complete
 - **Phase 4 — AI Analysis Engine:** 🟢 Complete through AI-007
 - **Phase 5 — Trade Planner, Risk & Execution Controls:** 🟢 Complete through EXEC-003
-- **Phase 6 — Paper Execution:** 🟡 PAPER-004 in progress
+- **Phase 6 — Paper Execution:** 🟡 PAPER-005 in progress
 
-## Current milestone: PAPER-004
+## Current milestone: PAPER-005
 
-PAPER-004 composes the existing paper-execution boundaries into one deterministic session. It executes an approved `TradePlan`, records the resulting immutable `PaperOrder` in the PAPER-002 ledger, and reconciles the complete expected session history through the read-only PAPER-003 boundary.
+PAPER-005 adds deterministic position accounting on top of completed paper fills. It maintains explicit long-only position state, weighted-average entry pricing, realized P&L, duplicate-order protection, and immutable deterministic snapshots.
 
 ### Files added
 
-- `brain/47_PAPER_EXECUTION_SESSION_SPECIFICATION.md`
-- `src/paper_execution_session.py`
-- `tests/test_paper_execution_session.py`
+- `brain/48_PAPER_POSITION_ACCOUNTING_SPECIFICATION.md`
+- `src/paper_position_ledger.py`
+- `tests/test_paper_position_ledger.py`
 
 ### Safety
 
-PAPER-004 does not call Groww, access credentials, use network transport, enable live trading, modify the production execution lock, introduce database persistence, or add exchange matching/slippage/partial-fill behavior.
+PAPER-005 does not call Groww, access credentials, use network transport, enable live trading, persist to a database, calculate unrealized P&L, support short positions, or apply fees/slippage/taxes.
 
 ### Completion rule
 
-PAPER-004 becomes complete only after implementation, deterministic tests, documentation, and automatic CI validation are green.
+PAPER-005 becomes complete only after implementation, deterministic tests, documentation, and automatic CI validation are green.
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 
@@ -80,4 +81,4 @@ A feature is complete only after implementation, deterministic tests, documentat
 
 ## User Action Required
 
-No Groww secret, access token, broker credential, or model API key is required for PAPER-004. Do not commit credentials.
+No Groww secret, access token, broker credential, or model API key is required for PAPER-005. Do not commit credentials.

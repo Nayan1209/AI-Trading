@@ -10,7 +10,7 @@
 **Phase 3 — Scanner & Signal Engine: 🟢 Complete**  
 **Phase 4 — AI Analysis Engine: 🟢 Complete through AI-007**  
 **Phase 5 — Trade Planner, Risk & Execution Controls: 🟢 Complete through EXEC-003**  
-**Phase 6 — Paper Execution: 🟡 In Progress — PAPER-002**
+**Phase 6 — Paper Execution: 🟡 In Progress — PAPER-003**
 
 ### Foundation completed
 
@@ -207,9 +207,27 @@ PAPER-002 adds an in-process ledger for completed PAPER-001 simulated orders. It
 - [x] Immutable tuple snapshots
 - [x] No broker/network access
 - [x] No credentials or secrets
+- [x] Automatic CI validation — green
+
+PAPER-002 does not implement database persistence, exchange matching, slippage, partial fills, portfolio/P&L accounting, reconciliation, or live broker submission.
+
+### PAPER-003 — Deterministic Paper Order Reconciliation
+
+PAPER-003 adds a read-only reconciliation boundary over the PAPER-002 ledger. It compares expected immutable `PaperOrder` records with the recorded ledger snapshot and produces a deterministic result.
+
+- [x] Accept only a `PaperOrderLedger` and immutable expected-order tuple
+- [x] Require unique expected order IDs
+- [x] Detect missing order IDs
+- [x] Detect unexpected recorded orders
+- [x] Detect mismatched recorded order values
+- [x] Preserve deterministic result ordering
+- [x] Return an immutable reconciliation result
+- [x] No ledger mutation during reconciliation
+- [x] No broker/network access
+- [x] No credentials or secrets
 - [ ] Automatic CI validation — pending for current milestone
 
-PAPER-002 does not implement database persistence, exchange matching, slippage, partial fills, portfolio/P&L accounting, reconciliation, or live broker submission. Those remain separate milestones.
+PAPER-003 does not implement exchange matching, slippage, partial fills, portfolio/P&L accounting, database persistence, or live broker submission.
 
 ## Safety Boundary
 
@@ -248,6 +266,8 @@ Paper Execution
     ↓
 Paper Order Ledger
     ↓
+Paper Order Reconciliation
+    ↓
 Reconciliation / Monitoring
     ↓
 Trade Journal / Analytics
@@ -265,7 +285,7 @@ Controlled Live Execution (future)
 | 3 | Scanner & Signal Engine | 🟢 Complete |
 | 4 | AI Analysis Engine | 🟢 Complete through AI-007 |
 | 5 | Trade Planner, Risk & Execution Controls | 🟢 Complete through EXEC-003 |
-| 6 | Paper Execution | 🟡 PAPER-002 in progress |
+| 6 | Paper Execution | 🟡 PAPER-003 in progress |
 | 7 | Backtesting | ⚪ Planned |
 | 8 | Broker Integration | 🟡 Groww selected; execution gated |
 | 9 | Dashboard & Operations | ⚪ Planned |
@@ -296,10 +316,12 @@ EXEC-003 🟢
         ↓
 PAPER-001 🟢
         ↓
-PAPER-002 🟡
+PAPER-002 🟢
+        ↓
+PAPER-003 🟡
 ```
 
-The deterministic data, scanner, signal, AI, risk, planning, portfolio-risk, broker-adapter, runtime-readiness, controlled-deployment, and first paper-execution boundaries are complete. The current milestone is the deterministic paper order ledger.
+The deterministic data, scanner, signal, AI, risk, planning, portfolio-risk, broker-adapter, runtime-readiness, controlled-deployment, paper-execution, and paper-order-ledger boundaries are complete. The current milestone is the deterministic paper-order reconciliation boundary.
 
 ## CI / Change Discipline
 
@@ -326,4 +348,4 @@ If red → fix on main before adding more functionality
 
 ## Immediate Next Step
 
-**PAPER-002 — deterministic paper order ledger.** Complete its automatic CI validation, then proceed to the next paper-execution boundary such as portfolio state/reconciliation.
+**PAPER-003 — deterministic paper-order reconciliation.** Wait for automatic CI to turn green, then proceed to the next paper-execution boundary.

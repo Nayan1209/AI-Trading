@@ -1,10 +1,13 @@
 """Deterministic PAPER-005 paper-position accounting boundary."""
 
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import Decimal, localcontext
 
 from src.paper_execution import PaperOrder, PaperOrderStatus
 from src.ai_analyst import AIDecision
+
+
+POSITION_DECIMAL_PRECISION = 28
 
 
 @dataclass(frozen=True)
@@ -50,7 +53,13 @@ class PaperPositionLedger:
                 + order.fill_price * Decimal(order.quantity)
             )
             new_quantity = current.quantity + order.quantity
-            new_average = total_cost / Decimal(new_quantity)
+            # Do not depend on the process-global Decimal context.  The
+            # position contract uses an explicit 28-digit precision so that
+            # weighted-average prices remain deterministic across test runs,
+            # services, and callers that modify Decimal.getcontext().prec.
+            with localcontext() as context:
+                context.prec = POSITION_DECIMAL_PRECISION
+                new_average = total_cost / Decimal(new_quantity)
             updated = PaperPosition(
                 position_key=position_key,
                 quantity=new_quantity,

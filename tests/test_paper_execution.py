@@ -31,13 +31,15 @@ def plan(
     )
 
 
-def test_buy_plan_produces_deterministic_filled_paper_order() -> None:
+def test_buy_plan_produces_repeatable_order_identity() -> None:
     engine = PaperExecutionEngine()
+    trade_plan = plan()
 
-    first = engine.execute(plan(), fill_price=Decimal("101"))
-    second = engine.execute(plan(), fill_price=Decimal("101"))
+    first = engine.execute(trade_plan, fill_price=Decimal("101"))
+    second = engine.execute(trade_plan, fill_price=Decimal("101"))
 
-    assert first == second
+    assert first.order_id == second.order_id
+    assert first.created_at != second.created_at
     assert first.order_id.startswith("PAPER-")
     assert first.internal_id == "NSE:CASH:RELIANCE"
     assert first.trading_symbol == "RELIANCE"

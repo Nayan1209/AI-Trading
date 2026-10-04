@@ -19,6 +19,8 @@ def plan(decision: AIDecision = AIDecision.BUY, quantity: int = 10) -> TradePlan
         estimated_risk=Decimal("50"),
         notional_value=Decimal("1000"),
         reason="test plan",
+        internal_id="NSE:CASH:RELIANCE",
+        trading_symbol="RELIANCE",
     )
 
 

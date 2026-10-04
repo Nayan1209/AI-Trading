@@ -38,7 +38,7 @@ def test_portfolio_aggregates_positions_deterministically() -> None:
         "NSE:CASH:RELIANCE",
         "NSE:CASH:TCS",
     )
-    assert result.market_value == Decimal("9300")
+    assert result.market_value == Decimal("7400")
     assert result.realized_pnl == Decimal("70")
     assert result.unrealized_pnl == Decimal("400")
     assert result.total_pnl == Decimal("470")

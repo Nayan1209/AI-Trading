@@ -1,5 +1,5 @@
 # Build Status / Development Tracker
-**Version:** 4.0
+**Version:** 5.0
 
 | ID | Workstream | Design | Build | Test | Status |
 |---|---|---:|---:|---:|---|
@@ -32,18 +32,19 @@
 | AI-006 | AI Response Parsing | 🟢 | 🟢 | 🟢 | Complete; deterministic response parsing boundary, CI green |
 | AI-007 | AI Analysis Integrity Gate | 🟢 | 🟢 | 🟢 | Complete; deterministic internal-consistency gate, CI green |
 | RISK-001 | Risk Engine | 🟢 | 🟢 | 🟢 | Complete; deterministic risk budget and quantity gate, CI green |
-| PLAN-001 | Trade Planner | 🟢 | 🟢 | 🟢 | Complete; deterministic broker-independent trade plan, CI green |
+| PLAN-001 | Trade Planner | 🟢 | 🟢 | 🟢 | Complete; deterministic broker-independent plan with explicit instrument and client-order identity, CI green |
 | RISK-002 | Portfolio Risk Gate | 🟢 | 🟢 | 🟢 | Complete; deterministic exposure, concentration, and open-position gate, CI green |
 | EXEC-001 | Groww Broker Adapter | 🟢 | 🟢 | 🟢 | Complete; safe provider boundary with submission disabled by default, CI green |
 | EXEC-002 | Static-IP Production Runtime | 🟢 | 🟢 | 🟢 | Complete; deterministic production-runtime readiness gate, CI green |
 | EXEC-003 | Controlled Deployment Authorization | 🟢 | 🟢 | 🟢 | Complete; deterministic deployment-evidence gate, CI green |
-| PAPER-001 | Paper Execution Boundary | 🟢 | 🟢 | 🟢 | Complete; deterministic broker-independent simulation, CI green |
+| PAPER-001 | Paper Execution Boundary | 🟢 | 🟢 | 🟢 | Complete; identity-bearing deterministic paper fills, CI green |
 | PAPER-002 | Paper Order Ledger | 🟢 | 🟢 | 🟢 | Complete; deterministic in-process order history and duplicate protection, CI green |
 | PAPER-003 | Paper Order Reconciliation | 🟢 | 🟢 | 🟢 | Complete; deterministic read-only ledger reconciliation, CI green |
 | PAPER-004 | Paper Execution Session | 🟢 | 🟢 | 🟢 | Complete; deterministic execution → ledger → reconciliation orchestration, CI green |
-| PAPER-005 | Paper Position Accounting | 🟢 | 🟢 | 🟢 | Complete; deterministic long-only position state, weighted-average pricing, and realized P&L |
-| PAPER-006 | Paper Position Valuation | 🟢 | 🟢 | 🟢 | Complete; deterministic mark-to-market value, unrealized P&L, and total P&L |
-| PAPER-007 | Paper Portfolio Valuation | 🟢 | 🟢 | 🟡 | In progress; deterministic aggregate valuation across immutable paper positions |
+| PAPER-005 | Paper Position Accounting | 🟢 | 🟢 | 🟢 | Complete; deterministic long-only position state, weighted-average pricing, realized P&L, and green CI |
+| PAPER-006 | Paper Position Valuation | 🟢 | 🟢 | 🟢 | Complete; deterministic mark-to-market value, unrealized P&L, total P&L, and green CI |
+| PAPER-007 | Paper Portfolio Valuation | 🟢 | 🟢 | 🟢 | Complete; aggregate immutable-position valuation; CI green on `main` commit `c4f9367` |
+| PAPER-008 | Persistent Paper Order Journal | 🟢 | ⚪ | ⚪ | Planned; append-only PostgreSQL storage for completed paper fills |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 | TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
@@ -55,25 +56,27 @@
 - **Phase 3 — Scanner & Signal Engine:** 🟢 Complete
 - **Phase 4 — AI Analysis Engine:** 🟢 Complete through AI-007
 - **Phase 5 — Trade Planner, Risk & Execution Controls:** 🟢 Complete through EXEC-003
-- **Phase 6 — Paper Execution:** 🟡 PAPER-007 in progress
+- **Phase 6 — Paper Execution:** 🟢 PAPER-001 through PAPER-007 complete; 🟡 PAPER-008 planned
 
-## Current milestone: PAPER-007
+## Next milestone: PAPER-008 — Persistent Paper Order Journal
 
-PAPER-007 adds deterministic portfolio-level valuation on top of PAPER-005 position accounting and PAPER-006 position valuation. It aggregates market value, realized P&L, unrealized P&L, and total P&L for an explicit set of immutable positions and explicit current market prices.
+PAPER-008 adds durable, append-only PostgreSQL storage for completed immutable paper fills. The identity fields carried by `TradePlan` and `PaperOrder` provide stable lookup and duplicate-detection keys for this journal.
 
-### Files added
+### Specification
 
-- `brain/50_PAPER_PORTFOLIO_VALUATION_SPECIFICATION.md`
-- `src/paper_portfolio_valuation.py`
-- `tests/test_paper_portfolio_valuation.py`
+- [`brain/51_PAPER_ORDER_PERSISTENCE_SPECIFICATION.md`](51_PAPER_ORDER_PERSISTENCE_SPECIFICATION.md)
 
 ### Safety
 
-PAPER-007 does not call Groww, access credentials, use network transport, mutate the position ledger, persist to a database, execute orders, or make trading decisions.
+PAPER-008 does not call Groww, access credentials, submit orders, or enable live execution. It persists paper fills only; position snapshots and portfolio valuations remain in memory.
 
 ### Completion rule
 
-PAPER-007 becomes complete only after implementation, deterministic tests, documentation, and automatic CI validation are green.
+PAPER-008 becomes complete only after implementation, deterministic repository and migration tests, documentation, and automatic CI validation are green.
+
+### Current CI evidence
+
+The latest workflow run for `main` commit `c4f9367` passed: [GitHub Actions run](https://github.com/Nayan1209/AI-Trading/actions/runs/37219860214).
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 
@@ -83,4 +86,4 @@ A feature is complete only after implementation, deterministic tests, documentat
 
 ## User Action Required
 
-No Groww secret, access token, broker credential, or model API key is required for PAPER-007. Do not commit credentials.
+No Groww secret, access token, broker credential, or model API key is required for PAPER-008. Do not commit credentials.

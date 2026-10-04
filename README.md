@@ -10,7 +10,7 @@
 **Phase 3 — Scanner & Signal Engine: 🟢 Complete**  
 **Phase 4 — AI Analysis Engine: 🟢 Complete through AI-007**  
 **Phase 5 — Trade Planner, Risk & Execution Controls: 🟢 Complete through EXEC-003**  
-**Phase 6 — Paper Execution: 🟡 In Progress — PAPER-005**
+**Phase 6 — Paper Execution: 🟢 PAPER-001 through PAPER-007 complete; 🟡 PAPER-008 planned**
 
 ### Foundation completed
 
@@ -127,6 +127,8 @@ RISK-001 never places an order and never lets AI confidence override determinist
 
 - [x] Preserve validated BUY/SELL entry, stop-loss, and target
 - [x] Consume bounded quantity from RISK-001
+- [x] Require explicit instrument identity (`internal_id` and `trading_symbol`)
+- [x] Carry a caller-supplied or generated `client_order_id`
 - [x] Preserve deterministic risk budget and notional values
 - [x] Reject WATCH/NO_TRADE through the risk gate
 - [x] Immutable planning result
@@ -187,14 +189,15 @@ PAPER-001 is the first paper/simulation execution layer. It consumes an existing
 
 - [x] Explicit `paper` environment requirement
 - [x] BUY/SELL-only execution boundary
+- [x] Preserve `internal_id`, `trading_symbol`, and `client_order_id` in simulated orders
 - [x] Positive quantity validation
 - [x] Positive simulated fill-price validation
-- [x] Deterministic simulated order ID
+- [x] SHA-256 order ID derived from canonical plan identity and fill inputs
 - [x] Immutable simulated order/fill result
 - [x] No broker credentials or network transport
 - [x] Automatic CI validation — green
 
-PAPER-001 deliberately does not implement live Groww orders, exchange matching, slippage, partial fills, portfolio persistence, or reconciliation.
+PAPER-001 deliberately does not implement live Groww orders, exchange matching, slippage, partial fills, database persistence, or reconciliation.
 
 ### PAPER-002 — Deterministic Paper Order Ledger
 
@@ -259,9 +262,38 @@ PAPER-005 adds deterministic in-process position accounting on top of completed 
 - [x] Immutable deterministic position snapshots
 - [x] No broker/network access
 - [x] No credentials or secrets
-- [ ] Automatic CI validation — pending for current milestone
+- [x] Automatic CI validation — green
 
 PAPER-005 does not implement exchange matching, slippage, fees/taxes, partial fills, short selling, mark-to-market valuation, unrealized P&L, database persistence, or live broker submission.
+
+### PAPER-006 — Deterministic Paper Position Valuation
+
+PAPER-006 values an immutable long-only position snapshot at a caller-supplied positive market price.
+
+- [x] Calculate market value and unrealized P&L from quantity and current price
+- [x] Preserve realized P&L and calculate total P&L
+- [x] Use explicit deterministic decimal precision
+- [x] Return immutable results without mutating the position ledger
+- [x] Automatic CI validation — green
+
+PAPER-006 does not fetch market prices, persist data, execute orders, or access a broker.
+
+### PAPER-007 — Deterministic Paper Portfolio Valuation
+
+PAPER-007 aggregates PAPER-006 valuations for an explicit set of immutable positions and current prices.
+
+- [x] Require exactly one positive price per position
+- [x] Reject duplicate positions and missing or unexpected price keys
+- [x] Return deterministically sorted immutable position valuations
+- [x] Aggregate market value and realized, unrealized, and total P&L
+- [x] Support an empty portfolio with zero totals
+- [x] Automatic CI validation — green on `main` commit `c4f9367` ([run](https://github.com/Nayan1209/AI-Trading/actions/runs/37219860214))
+
+PAPER-007 does not fetch prices, persist data, execute orders, or make trading decisions.
+
+### PAPER-008 — Persistent Paper Order Journal (planned)
+
+PAPER-008 will add an append-only PostgreSQL journal for immutable simulated fills. Its specification is in [`brain/51_PAPER_ORDER_PERSISTENCE_SPECIFICATION.md`](brain/51_PAPER_ORDER_PERSISTENCE_SPECIFICATION.md).
 
 ## Safety Boundary
 
@@ -306,6 +338,12 @@ Paper Execution Session
     ↓
 Paper Position Accounting
     ↓
+Paper Position Valuation
+    ↓
+Paper Portfolio Valuation
+    ↓
+Persistent Paper Order Journal (planned)
+    ↓
 Reconciliation / Monitoring
     ↓
 Trade Journal / Analytics
@@ -323,7 +361,7 @@ Controlled Live Execution (future)
 | 3 | Scanner & Signal Engine | 🟢 Complete |
 | 4 | AI Analysis Engine | 🟢 Complete through AI-007 |
 | 5 | Trade Planner, Risk & Execution Controls | 🟢 Complete through EXEC-003 |
-| 6 | Paper Execution | 🟡 PAPER-005 in progress |
+| 6 | Paper Execution | 🟢 PAPER-001 through PAPER-007 complete; 🟡 PAPER-008 planned |
 | 7 | Backtesting | ⚪ Planned |
 | 8 | Broker Integration | 🟡 Groww selected; execution gated |
 | 9 | Dashboard & Operations | ⚪ Planned |
@@ -360,14 +398,20 @@ PAPER-003 🟢
         ↓
 PAPER-004 🟢
         ↓
-PAPER-005 🟡
+PAPER-005 🟢
+        ↓
+PAPER-006 🟢
+        ↓
+PAPER-007 🟢
+        ↓
+PAPER-008 ⚪ planned
 ```
 
-The deterministic data, scanner, signal, AI, risk, planning, portfolio-risk, broker-adapter, runtime-readiness, controlled-deployment, paper-execution, paper-order-ledger, paper-order-reconciliation, and paper-execution-session boundaries are complete. The current milestone is the deterministic paper-position accounting boundary.
+The deterministic data, scanner, signal, AI, risk, planning, portfolio-risk, broker-adapter, runtime-readiness, controlled-deployment, paper-execution, order-ledger, reconciliation, session, position-accounting, position-valuation, and portfolio-valuation boundaries are complete. PAPER-008 is the next planned paper-execution milestone.
 
 ## CI / Change Discipline
 
-CI runs **automatically on every push to `main`** and can also be started with `workflow_dispatch`. There is no pull-request requirement for this project.
+CI runs automatically on pushes to `main`, pull requests targeting `main`, and `workflow_dispatch`. The latest run for `main` commit `c4f9367` passed ([run](https://github.com/Nayan1209/AI-Trading/actions/runs/37219860214)).
 
 Development work is performed directly on `main`; pull requests and development branches are not part of the normal workflow.
 
@@ -390,4 +434,4 @@ If red → fix on main before adding more functionality
 
 ## Immediate Next Step
 
-**PAPER-005 — deterministic paper-position accounting.** Wait for automatic CI to turn green, then proceed to the next paper-execution boundary.
+**PAPER-008 — persistent paper order journal.** The design is recorded in [`brain/51_PAPER_ORDER_PERSISTENCE_SPECIFICATION.md`](brain/51_PAPER_ORDER_PERSISTENCE_SPECIFICATION.md); implementation has not started.

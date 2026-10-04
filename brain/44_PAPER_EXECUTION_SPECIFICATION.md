@@ -33,8 +33,11 @@ For a valid BUY or SELL plan:
 - side is derived from the plan decision;
 - fill price is the supplied simulation price;
 - status is `FILLED`;
-- a deterministic order identifier is derived from the immutable order inputs;
+- `internal_id`, `trading_symbol`, and `client_order_id` are preserved from the plan;
+- the deterministic order identifier is a SHA-256 prefix derived from canonical plan identity, plan values, and the supplied fill price;
 - no external state is read or written.
+
+Executing the same immutable `TradePlan` with the same fill price produces the same order identifier.
 
 ## Rejections
 
@@ -44,7 +47,7 @@ The executor must reject:
 - non-BUY/SELL decisions;
 - zero or negative quantity;
 - zero or negative simulated fill price;
-- malformed plans.
+- malformed plans or plans missing canonical instrument or client order identity.
 
 ## Non-Goals
 

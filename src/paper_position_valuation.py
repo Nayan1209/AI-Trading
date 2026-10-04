@@ -7,6 +7,7 @@ from src.paper_position_ledger import PaperPosition
 
 
 POSITION_VALUATION_DECIMAL_PRECISION = 31
+P&L_DECIMAL_QUANTUM = Decimal("0.01")
 
 
 @dataclass(frozen=True)
@@ -41,9 +42,12 @@ class PaperPositionValuationEngine:
             context.prec = POSITION_VALUATION_DECIMAL_PRECISION
             market_value = market_price * Decimal(position.quantity)
             unrealized_pnl = (
-                market_price - position.average_entry_price
-            ) * Decimal(position.quantity)
-            total_pnl = position.realized_pnl + unrealized_pnl
+                (market_price - position.average_entry_price)
+                * Decimal(position.quantity)
+            ).quantize(P&L_DECIMAL_QUANTUM)
+            total_pnl = (position.realized_pnl + unrealized_pnl).quantize(
+                P&L_DECIMAL_QUANTUM
+            )
 
         return PaperPositionValuation(
             position_key=position.position_key,

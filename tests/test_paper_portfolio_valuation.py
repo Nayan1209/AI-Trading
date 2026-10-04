@@ -62,7 +62,13 @@ def test_market_prices_must_match_position_keys() -> None:
         engine.evaluate(positions, {})
 
     with pytest.raises(ValueError, match="unexpected position key"):
-        engine.evaluate(positions, {"NSE:CASH:TCS": Decimal("100")})
+        engine.evaluate(
+            positions,
+            {
+                "NSE:CASH:RELIANCE": Decimal("100"),
+                "NSE:CASH:TCS": Decimal("100"),
+            },
+        )
 
 
 def test_duplicate_position_keys_are_rejected() -> None:

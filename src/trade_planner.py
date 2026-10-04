@@ -1,6 +1,6 @@
 """Deterministic PLAN-001 trade-planning boundary."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from decimal import Decimal
 from uuid import uuid4
@@ -22,10 +22,10 @@ class TradePlan:
     estimated_risk: Decimal
     notional_value: Decimal
     reason: str
-    internal_id: str
-    trading_symbol: str
-    created_at: datetime
-    client_order_id: str
+    internal_id: str = ""
+    trading_symbol: str = ""
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    client_order_id: str = field(default_factory=lambda: f"CLIENT-{uuid4().hex}")
 
 
 class TradePlanner:

@@ -7,7 +7,14 @@ from src.paper_execution import PaperExecutionEngine, PaperOrderStatus
 from src.trade_planner import TradePlan
 
 
-def plan(decision: AIDecision = AIDecision.BUY, quantity: int = 10) -> TradePlan:
+def plan(
+    decision: AIDecision = AIDecision.BUY,
+    quantity: int = 10,
+    *,
+    internal_id: str = "NSE:CASH:RELIANCE",
+    trading_symbol: str = "RELIANCE",
+    client_order_id: str = "CLIENT-TEST-001",
+) -> TradePlan:
     return TradePlan(
         decision=decision,
         entry=Decimal("100"),
@@ -18,6 +25,9 @@ def plan(decision: AIDecision = AIDecision.BUY, quantity: int = 10) -> TradePlan
         estimated_risk=Decimal("50"),
         notional_value=Decimal("1000"),
         reason="test plan",
+        internal_id=internal_id,
+        trading_symbol=trading_symbol,
+        client_order_id=client_order_id,
     )
 
 
@@ -29,10 +39,35 @@ def test_buy_plan_produces_deterministic_filled_paper_order() -> None:
 
     assert first == second
     assert first.order_id.startswith("PAPER-")
+    assert first.internal_id == "NSE:CASH:RELIANCE"
+    assert first.trading_symbol == "RELIANCE"
+    assert first.client_order_id == "CLIENT-TEST-001"
     assert first.decision is AIDecision.BUY
     assert first.quantity == 10
     assert first.fill_price == Decimal("101")
     assert first.status is PaperOrderStatus.FILLED
+
+
+def test_identical_trade_values_for_different_symbols_produce_different_order_ids() -> None:
+    engine = PaperExecutionEngine()
+
+    reliance = engine.execute(plan(), fill_price=Decimal("101"))
+    tcs = engine.execute(
+        plan(internal_id="NSE:CASH:TCS", trading_symbol="TCS"),
+        fill_price=Decimal("101"),
+    )
+
+    assert reliance.order_id != tcs.order_id
+
+
+def test_new_client_order_id_allows_intentional_repeat_trade() -> None:
+    engine = PaperExecutionEngine()
+
+    first = engine.execute(plan(client_order_id="CLIENT-001"), fill_price=Decimal("101"))
+    second = engine.execute(plan(client_order_id="CLIENT-002"), fill_price=Decimal("101"))
+
+    assert first.order_id != second.order_id
+    assert first.client_order_id != second.client_order_id
 
 
 def test_sell_plan_preserves_side_and_quantity() -> None:
@@ -69,3 +104,11 @@ def test_non_trade_decision_is_rejected() -> None:
 def test_invalid_plan_type_is_rejected() -> None:
     with pytest.raises(TypeError, match="TradePlan"):
         PaperExecutionEngine().execute(object(), fill_price=Decimal("100"))
+
+
+def test_missing_instrument_identity_is_rejected() -> None:
+    with pytest.raises(ValueError, match="internal_id"):
+        PaperExecutionEngine().execute(
+            plan(internal_id=""),
+            fill_price=Decimal("100"),
+        )

@@ -1,6 +1,6 @@
 """Deterministic PAPER-001 simulation execution boundary."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from decimal import Decimal
 from enum import StrEnum
@@ -21,14 +21,14 @@ class PaperOrder:
     """Immutable simulated order/fill result with explicit identity."""
 
     order_id: str
-    internal_id: str
-    trading_symbol: str
-    client_order_id: str
-    created_at: datetime
     decision: AIDecision
     quantity: int
     fill_price: Decimal
     status: PaperOrderStatus
+    internal_id: str = ""
+    trading_symbol: str = ""
+    client_order_id: str = ""
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class PaperExecutionEngine:

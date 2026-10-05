@@ -1,11 +1,26 @@
 # UI/UX Specification
-**Version:** 0.1 | **Status:** Draft
+**Version:** 0.2 | **Status:** Initial read-only development command center implemented; operational screens remain draft
 
 ## Screens
 Login/MFA; Command Center; Scanner; Signals; AI Analysis; Trade Plans; Orders; Positions; Portfolio; Trade Journal; Risk Center; System Health; Audit Log; Settings; Emergency Controls.
 
 ## Command Center
 Show system state, portfolio, P&L, drawdown, exposure, positions, AI decisions, orders, risk state, and data/broker health.
+
+### Initial UI-001 Delivery
+
+The first dashboard slice is served at `/` by the FastAPI application and consumes the existing health and latest-market-data endpoints.
+
+- Shows whether the application health endpoint responds and the reported environment.
+- Lets the user request a latest candle by symbol, exchange, and timeframe.
+- Identifies the current data as synthetic mock output and states that live execution is disabled.
+- Marks portfolio/positions, signals/AI, and orders/risk panels as not connected when their read APIs are absent. It must not invent balances, P&L, decisions, orders, or risk state.
+- Provides no order entry, cancellation, trading-halt, credential, or other write controls.
+- Uses native HTML/CSS/JavaScript with no external script, font, image, or chart dependency.
+
+This initial view is development-only. It does not implement login/MFA. Do not expose it as a production dashboard until authentication and authorization are in place.
+
+The remaining command-center data (portfolio, positions, AI decisions, orders, risk, and broker health) depends on read APIs and runtime connections that are not currently wired into `src/main.py`.
 
 ## Principles
 Trading state must be unambiguous. Risk is prominent. Dangerous actions require confirmation. Emergency stop is easy to locate. AI analysis uses structured reason codes/evidence. Color is never the only indicator.

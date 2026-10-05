@@ -1,11 +1,14 @@
+from pathlib import Path
+
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from .market_data.providers import MockMarketDataProvider
 from .market_data.service import MarketDataService
 
 app = FastAPI(title="AI Trading System", version="0.1.0")
 market_data = MarketDataService(MockMarketDataProvider())
+DASHBOARD_FILE = Path(__file__).parent / "static" / "dashboard.html"
 
 
 @app.exception_handler(KeyError)
@@ -23,6 +26,16 @@ async def value_error_handler(request: Request, exc: ValueError) -> JSONResponse
 @app.exception_handler(RuntimeError)
 async def runtime_error_handler(request: Request, exc: RuntimeError) -> JSONResponse:
     return JSONResponse(status_code=503, content={"detail": "market-data service unavailable"})
+
+
+@app.get("/", include_in_schema=False)
+def dashboard() -> FileResponse:
+    """Serve the read-only development command center."""
+    return FileResponse(
+        DASHBOARD_FILE,
+        media_type="text/html",
+        headers={"Cache-Control": "no-store"},
+    )
 
 
 @app.get("/api/v1/health")

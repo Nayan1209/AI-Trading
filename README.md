@@ -11,7 +11,10 @@
 **Phase 4 — AI Analysis Engine: 🟢 Complete through AI-007**  
 **Phase 5 — Trade Planner, Risk & Execution Controls: 🟢 Complete through EXEC-003**  
 **Phase 6 — Paper Execution: 🟢 PAPER-001 through PAPER-008 complete**<br />
-**Phase 7 — Backtesting: 🟢 TEST-001 historical signal replay complete**
+**Phase 7 — Backtesting: 🟢 TEST-001 historical signal replay complete**<br />
+**Phase 9 — Dashboard: 🟡 Initial read-only development command center implemented**
+
+Run `uvicorn src.main:app --reload` and open `http://127.0.0.1:8000/` to view the dashboard. The current app uses synthetic mock candles and does not connect portfolio, order, AI, risk, broker, or authentication services.
 
 ### Foundation completed
 
@@ -375,7 +378,7 @@ Controlled Live Execution (future)
 | 6 | Paper Execution | 🟢 PAPER-001 through PAPER-008 complete |
 | 7 | Backtesting | 🟢 TEST-001 historical signal replay complete |
 | 8 | Broker Integration | 🟡 Groww selected; execution gated |
-| 9 | Dashboard & Operations | ⚪ Planned |
+| 9 | Dashboard & Operations | 🟡 Initial development view; connected operational data and authentication remain |
 | 10 | Controlled Live Deployment | ⚪ Planned |
 
 ## Development Progress
@@ -447,4 +450,4 @@ If red → fix on main before adding more functionality
 
 ## Immediate Next Step
 
-**UI-001 — Dashboard** is the next unstarted milestone. Position persistence and broader portfolio analytics remain future work.
+**Continue UI-001** by wiring real read-only portfolio, position, signal, order, and risk summaries to the dashboard. The app currently exposes only health and latest market data; the other sources and authentication are not connected.

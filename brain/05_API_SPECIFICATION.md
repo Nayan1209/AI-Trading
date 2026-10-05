@@ -17,6 +17,10 @@ GET /api/v1/positions
 GET /api/v1/system/status
 POST /api/v1/system/trading-halt
 
+## Dashboard
+
+`GET /` serves the read-only development dashboard as HTML. It uses the health and latest-market-data routes; it does not create or expose trading actions.
+
 ## Broker Adapter Contract
 The internal execution layer must not expose Groww-specific request objects to strategy or AI services.
 
@@ -74,6 +78,8 @@ Fields unavailable from a specific provider are nullable rather than fabricated.
 `src/market_data/groww_provider.py` is **read-only**. It converts Groww `get_quote` output into the project's `Candle` model for the initial connectivity milestone. It does not import or expose order-placement methods.
 
 The current normalized `Candle` uses `timeframe="1d_snapshot"` for this Groww quote path. This label is deliberate: it must not be interpreted as an interval candle.
+
+The application entry point currently implements health and latest-market-data APIs only; portfolio, order, AI, risk, and broker status APIs are not wired in.
 
 ## Example Risk Request
 ```json

@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1016">
+  <title>Command Center · AI Trading System</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page: #0b1016;
+      --sidebar: #0e151e;
+      --panel: #121b26;
+      --panel-raised: #172230;
+      --border: #253342;
+      --text: #edf3f9;
+      --muted: #93a3b5;
+      --soft: #718195;
+      --mint: #7fe0bf;
+      --blue: #8eb8ff;
+      --amber: #f2c879;
+      --red: #f08c8c;
+      --radius: 14px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-synthesis: none;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; background: var(--page); color: var(--text); }
+    a { color: inherit; }
+    button, input, select { font: inherit; }
+    button, a, input, select { outline-offset: 3px; }
+    :focus-visible { outline: 2px solid var(--blue); }
+    .skip-link { position: absolute; left: 12px; top: -50px; z-index: 5; padding: 10px 14px; border-radius: 8px; background: var(--text); color: var(--page); }
+    .skip-link:focus { top: 12px; }
+
+    .shell { min-height: 100vh; }
+    .sidebar {
+      position: fixed; inset: 0 auto 0 0; z-index: 2; display: flex; width: 242px;
+      flex-direction: column; padding: 26px 16px 18px; border-right: 1px solid var(--border);
+      background: var(--sidebar);
+    }
+    .brand { display: flex; align-items: center; gap: 11px; margin: 0 8px 38px; text-decoration: none; }
+    .brand-mark { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 11px; background: #19362f; color: var(--mint); font-size: 15px; font-weight: 750; }
+    .brand-name { font-size: 13px; font-weight: 700; letter-spacing: .01em; }
+    .brand-caption { margin-top: 3px; color: var(--muted); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+    .nav-heading { margin: 0 10px 10px; color: var(--soft); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .nav-list { display: grid; gap: 5px; }
+    .nav-link { display: flex; min-height: 42px; align-items: center; gap: 12px; padding: 0 12px; border: 1px solid transparent; border-radius: 9px; color: var(--muted); font-size: 12px; text-decoration: none; transition: color .15s ease, background .15s ease; }
+    .nav-link:hover { background: #151f2b; color: var(--text); }
+    .nav-link.active { border-color: #25453d; background: #172b27; color: var(--mint); }
+    .nav-glyph { display: inline-grid; width: 17px; place-items: center; font-size: 15px; }
+    .sidebar-spacer { flex: 1; }
+    .sidebar-note { padding: 13px; border: 1px solid var(--border); border-radius: 11px; background: #111a24; }
+    .sidebar-note-title { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 650; }
+    .dot { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: var(--amber); box-shadow: 0 0 0 3px #f2c8791c; }
+    .sidebar-note p { margin: 8px 0 0; color: var(--muted); font-size: 10px; line-height: 1.55; }
+
+    .main { min-height: 100vh; margin-left: 242px; }
+    .topbar { display: flex; height: 68px; align-items: center; justify-content: space-between; padding: 0 42px; border-bottom: 1px solid var(--border); }
+    .crumb { color: var(--muted); font-size: 11px; }
+    .crumb strong { color: var(--text); font-weight: 600; }
+    .top-actions { display: flex; align-items: center; gap: 12px; }
+    .environment-badge { display: inline-flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid #51452d; border-radius: 999px; background: #30291e; color: #f2d38f; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    .environment-badge .dot { background: var(--amber); }
+    .refresh-button { display: inline-flex; min-height: 34px; align-items: center; gap: 8px; padding: 0 11px; border: 1px solid var(--border); border-radius: 8px; background: var(--panel); color: var(--text); cursor: pointer; font-size: 11px; }
+    .refresh-button:hover { border-color: #405367; background: var(--panel-raised); }
+    .refresh-button:disabled { cursor: wait; opacity: .65; }
+    .refresh-icon { color: var(--blue); font-size: 14px; }
+
+    .content { width: min(1280px, 100%); margin: 0 auto; padding: 34px 42px 54px; }
+    .eyebrow { margin: 0 0 9px; color: var(--mint); font-size: 10px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(25px, 3vw, 32px); font-weight: 650; letter-spacing: -.035em; }
+    .page-intro { margin: 9px 0 23px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .notice { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 22px; padding: 14px 16px; border: 1px solid #51452d; border-radius: 11px; background: #211f1a; }
+    .notice-icon { display: grid; width: 20px; height: 20px; flex: 0 0 auto; place-items: center; border: 1px solid #78643d; border-radius: 50%; color: var(--amber); font-size: 11px; font-weight: 700; }
+    .notice strong { display: block; margin-bottom: 4px; color: #f1d69d; font-size: 11px; }
+    .notice p { margin: 0; color: #b7aa8d; font-size: 10px; line-height: 1.55; }
+
+    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 14px; margin: 29px 0 13px; }
+    h2 { margin: 0; font-size: 14px; font-weight: 650; letter-spacing: -.01em; }
+    .section-caption { margin: 5px 0 0; color: var(--muted); font-size: 10px; }
+    .subtle-label { color: var(--soft); font-size: 10px; }
+    .status-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
+    .status-card, .panel { border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
+    .status-card { min-height: 112px; padding: 16px 17px; }
+    .status-card-top { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 10px; }
+    .status-icon { display: grid; width: 27px; height: 27px; place-items: center; border: 1px solid var(--border); border-radius: 8px; background: var(--panel-raised); color: var(--blue); font-size: 12px; }
+    .status-value { margin: 12px 0 4px; font-size: 17px; font-weight: 650; letter-spacing: -.025em; }
+    .status-detail { color: var(--muted); font-size: 10px; }
+    .state-text { display: inline-flex; align-items: center; gap: 7px; }
+    .state-text .dot { background: var(--mint); box-shadow: 0 0 0 3px #7fe0bf1c; }
+    .state-text.unavailable .dot { background: var(--red); box-shadow: 0 0 0 3px #f08c8c1c; }
+
+    .market-panel { margin-top: 25px; overflow: hidden; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 17px 19px; border-bottom: 1px solid var(--border); }
+    .panel-title { display: flex; align-items: center; gap: 10px; }
+    .panel-title-icon { display: grid; width: 29px; height: 29px; place-items: center; border-radius: 8px; background: #182b3d; color: var(--blue); font-size: 14px; }
+    .panel-head h2 { font-size: 13px; }
+    .data-badge { display: inline-flex; align-items: center; gap: 7px; padding: 6px 9px; border: 1px solid #51452d; border-radius: 999px; color: #ecd193; font-size: 9px; font-weight: 650; text-transform: uppercase; }
+    .data-badge .dot { width: 6px; height: 6px; }
+    .market-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; padding: 16px 19px; border-bottom: 1px solid var(--border); background: #101822; }
+    .field { display: grid; min-width: 130px; gap: 6px; }
+    .field.symbol-field { flex: 1 1 210px; }
+    .field label { color: var(--muted); font-size: 9px; font-weight: 650; letter-spacing: .05em; text-transform: uppercase; }
+    .field input, .field select { width: 100%; height: 36px; padding: 0 10px; border: 1px solid var(--border); border-radius: 7px; background: #0d141d; color: var(--text); font-size: 11px; }
+    .field input::placeholder { color: var(--soft); }
+    .field input:focus, .field select:focus { border-color: #6684aa; outline: 2px solid #8eb8ff33; }
+    .search-button { height: 36px; padding: 0 15px; border: 1px solid #4a836f; border-radius: 7px; background: #1b4438; color: #b6f2db; cursor: pointer; font-size: 10px; font-weight: 700; }
+    .search-button:hover { background: #225544; }
+    .market-error { display: none; margin: 14px 19px 0; padding: 10px 12px; border: 1px solid #673d42; border-radius: 8px; background: #2b1b20; color: #f2b4b4; font-size: 10px; }
+    .market-error.visible { display: block; }
+    .quote-overview { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 20px 17px; }
+    .instrument-name { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 10px; }
+    .exchange-tag { padding: 4px 6px; border: 1px solid var(--border); border-radius: 5px; color: #c4d0dd; font-size: 8px; font-weight: 700; }
+    .quote-price { margin-top: 8px; font-variant-numeric: tabular-nums; font-size: 29px; font-weight: 650; letter-spacing: -.04em; }
+    .quote-subtitle { margin-top: 4px; color: var(--muted); font-size: 9px; }
+    .timestamp-box { text-align: right; }
+    .timestamp-box span { display: block; color: var(--soft); font-size: 9px; }
+    .timestamp-box strong { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; font-weight: 550; }
+    .quote-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 0 20px 19px; border: 1px solid var(--border); border-radius: 9px; background: #0f1720; }
+    .quote-stat { padding: 12px 13px; }
+    .quote-stat + .quote-stat { border-left: 1px solid var(--border); }
+    .quote-stat span { display: block; color: var(--soft); font-size: 9px; }
+    .quote-stat strong { display: block; margin-top: 7px; font-variant-numeric: tabular-nums; font-size: 11px; font-weight: 600; }
+
+    .unavailable-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
+    .unavailable-card { min-height: 132px; padding: 16px; }
+    .unavailable-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .unavailable-card h3 { margin: 0; font-size: 11px; font-weight: 650; }
+    .not-connected { padding: 5px 7px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); font-size: 8px; text-transform: uppercase; }
+    .unavailable-card p { margin: 13px 0 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .footer-note { margin-top: 24px; padding-top: 13px; border-top: 1px solid var(--border); color: var(--soft); font-size: 9px; line-height: 1.6; }
+
+    @media (max-width: 1000px) {
+      .sidebar { width: 210px; }
+      .main { margin-left: 210px; }
+      .topbar { padding: 0 26px; }
+      .content { padding: 30px 26px 44px; }
+      .status-grid, .unavailable-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .status-card:last-child { grid-column: 1 / -1; }
+    }
+    @media (max-width: 700px) {
+      .sidebar { position: static; width: 100%; height: auto; padding: 13px 16px; border-right: 0; border-bottom: 1px solid var(--border); }
+      .brand { margin: 0; }
+      .nav-heading, .sidebar-spacer, .sidebar-note { display: none; }
+      .nav-list { display: flex; gap: 7px; margin-top: 12px; }
+      .nav-link { min-height: 34px; flex: 1; justify-content: center; padding: 0 8px; font-size: 10px; }
+      .nav-glyph { display: none; }
+      .main { margin: 0; }
+      .topbar { height: 56px; padding: 0 17px; }
+      .crumb { font-size: 10px; }
+      .environment-badge { padding: 6px 8px; font-size: 8px; }
+      .refresh-button { min-height: 31px; padding: 0 9px; font-size: 10px; }
+      .content { padding: 24px 17px 36px; }
+      .page-intro { max-width: 480px; }
+      .status-grid, .unavailable-grid { grid-template-columns: 1fr; }
+      .status-card:last-child { grid-column: auto; }
+      .status-card { min-height: 96px; }
+      .section-heading { align-items: start; }
+      .quote-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .quote-stat:nth-child(odd) { border-left: 0; }
+      .quote-stat:nth-child(n+3) { border-top: 1px solid var(--border); }
+      .quote-stat:last-child { grid-column: 1 / -1; }
+      .quote-overview { align-items: start; }
+      .quote-price { font-size: 25px; }
+      .timestamp-box { max-width: 130px; }
+      .panel-head { align-items: start; }
+    }
+    @media (max-width: 430px) {
+      .topbar { padding: 0 12px; }
+      .content { padding-right: 12px; padding-left: 12px; }
+      .crumb span { display: none; }
+      .environment-badge { gap: 5px; }
+      .data-badge { font-size: 8px; }
+      .market-controls { align-items: stretch; }
+      .field { flex: 1 1 calc(50% - 8px); }
+      .field.symbol-field { flex-basis: 100%; }
+      .search-button { flex: 1 1 100%; }
+      .quote-overview { flex-direction: column; gap: 14px; }
+      .timestamp-box { max-width: none; text-align: left; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <div class="shell">
+    <aside class="sidebar" aria-label="Main navigation">
+      <a class="brand" href="#overview" aria-label="AI Trading System command center">
+        <span class="brand-mark" aria-hidden="true">A</span>
+        <span>
+          <span class="brand-name">AI Trading System</span>
+          <span class="brand-caption">Operations workspace</span>
+        </span>
+      </a>
+      <p class="nav-heading">Workspace</p>
+      <nav class="nav-list" aria-label="Workspace">
+        <a class="nav-link active" href="#overview" aria-current="page"><span class="nav-glyph" aria-hidden="true">⌂</span>Command center</a>
+        <a class="nav-link" href="#market-data"><span class="nav-glyph" aria-hidden="true">⌁</span>Market data</a>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-note">
+        <div class="sidebar-note-title"><span class="dot" aria-hidden="true"></span>Development instance</div>
+        <p>Read-only workspace. Broker order controls are not available here.</p>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="crumb"><span>Workspace&nbsp; / &nbsp;</span><strong>Command center</strong></div>
+        <div class="top-actions">
+          <span class="environment-badge"><span class="dot" aria-hidden="true"></span><span id="environment-label">Development</span></span>
+          <button class="refresh-button" id="refresh-button" type="button"><span class="refresh-icon" aria-hidden="true">↻</span>Refresh</button>
+        </div>
+      </header>
+
+      <main class="content" id="main-content">
+        <section id="overview" aria-labelledby="page-title">
+          <p class="eyebrow">System overview</p>
+          <h1 id="page-title">Command center</h1>
+          <p class="page-intro">A read-only view of the services and market-data endpoints currently connected to this app.</p>
+
+          <div class="notice" role="note">
+            <span class="notice-icon" aria-hidden="true">!</span>
+            <div>
+              <strong>Development mode · simulated market data</strong>
+              <p>This app currently uses a local mock market-data provider. No live broker, portfolio, order, AI, or risk state is connected to this dashboard. Trading actions are unavailable.</p>
+            </div>
+          </div>
+
+          <div class="section-heading">
+            <div><h2>Service status</h2><p class="section-caption">Read from the application health endpoint.</p></div>
+            <span class="subtle-label" id="health-updated">Checking…</span>
+          </div>
+          <div class="status-grid" aria-live="polite">
+            <article class="status-card">
+              <div class="status-card-top"><span>Application</span><span class="status-icon" aria-hidden="true">◉</span></div>
+              <div class="status-value state-text" id="application-status"><span class="dot" aria-hidden="true"></span>Checking</div>
+              <div class="status-detail" id="application-detail">Connecting to the local API</div>
+            </article>
+            <article class="status-card">
+              <div class="status-card-top"><span>Market data</span><span class="status-icon" aria-hidden="true">⌁</span></div>
+              <div class="status-value" id="market-source">Mock provider</div>
+              <div class="status-detail">Synthetic development snapshots</div>
+            </article>
+            <article class="status-card">
+              <div class="status-card-top"><span>Live execution</span><span class="status-icon" aria-hidden="true">⊘</span></div>
+              <div class="status-value">Disabled</div>
+              <div class="status-detail">No order controls are exposed by this app</div>
+            </article>
+          </div>
+        </section>
+
+        <section id="market-data" aria-labelledby="market-title">
+          <div class="section-heading">
+            <div><h2>Market snapshot</h2><p class="section-caption">Request the latest candle from the configured development provider.</p></div>
+            <span class="subtle-label" id="market-updated">No request yet</span>
+          </div>
+
+          <article class="panel market-panel">
+            <div class="panel-head">
+              <div class="panel-title">
+                <span class="panel-title-icon" aria-hidden="true">⌁</span>
+                <div><h2 id="market-title">Latest candle</h2><p class="section-caption">Values are returned by the market-data API.</p></div>
+              </div>
+              <span class="data-badge"><span class="dot" aria-hidden="true"></span>Mock data</span>
+            </div>
+            <form class="market-controls" id="market-form">
+              <div class="field symbol-field">
+                <label for="symbol">Trading symbol</label>
+                <input id="symbol" name="symbol" type="text" value="RELIANCE" maxlength="32" autocomplete="off" required>
+              </div>
+              <div class="field">
+                <label for="exchange">Exchange</label>
+                <select id="exchange" name="exchange"><option value="NSE">NSE</option><option value="BSE">BSE</option></select>
+              </div>
+              <div class="field">
+                <label for="timeframe">Timeframe</label>
+                <select id="timeframe" name="timeframe"><option value="15m">15 minutes</option><option value="1d_snapshot">Daily snapshot</option></select>
+              </div>
+              <button class="search-button" type="submit">Load snapshot</button>
+            </form>
+            <div class="market-error" id="market-error" role="alert"></div>
+            <div class="quote-overview">
+              <div>
+                <div class="instrument-name"><span id="quote-symbol">RELIANCE</span><span class="exchange-tag" id="quote-exchange">NSE</span></div>
+                <div class="quote-price" id="quote-close" aria-live="polite">—</div>
+                <div class="quote-subtitle">Candle close · INR</div>
+              </div>
+              <div class="timestamp-box"><span>Candle timestamp</span><strong id="quote-timestamp">Waiting for response</strong></div>
+            </div>
+            <div class="quote-grid" aria-label="Candle details">
+              <div class="quote-stat"><span>Open</span><strong id="quote-open">—</strong></div>
+              <div class="quote-stat"><span>High</span><strong id="quote-high">—</strong></div>
+              <div class="quote-stat"><span>Low</span><strong id="quote-low">—</strong></div>
+              <div class="quote-stat"><span>Close</span><strong id="quote-close-small">—</strong></div>
+              <div class="quote-stat"><span>Volume</span><strong id="quote-volume">—</strong></div>
+            </div>
+          </article>
+        </section>
+
+        <section aria-labelledby="unavailable-title">
+          <div class="section-heading">
+            <div><h2 id="unavailable-title">Other command-center data</h2><p class="section-caption">These panels will populate when the app exposes their read APIs.</p></div>
+          </div>
+          <div class="unavailable-grid">
+            <article class="panel unavailable-card">
+              <div class="unavailable-card-head"><h3>Portfolio &amp; positions</h3><span class="not-connected">Not connected</span></div>
+              <p>No portfolio or position endpoint is currently wired to this app. No balance or P&amp;L is being estimated.</p>
+            </article>
+            <article class="panel unavailable-card">
+              <div class="unavailable-card-head"><h3>Signals &amp; AI analysis</h3><span class="not-connected">Not connected</span></div>
+              <p>Signal and analysis services exist in the codebase, but this app does not provide current results to display.</p>
+            </article>
+            <article class="panel unavailable-card">
+              <div class="unavailable-card-head"><h3>Orders &amp; risk</h3><span class="not-connected">Not connected</span></div>
+              <p>Order, risk, and broker-health summaries are unavailable here. This dashboard has no trade controls.</p>
+            </article>
+          </div>
+        </section>
+
+        <p class="footer-note">Dashboard data refreshes only when requested. The current development provider returns synthetic sample values and is not a live market feed.</p>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const byId = (id) => document.getElementById(id);
+    const inr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 });
+    const integer = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
+
+    function setText(id, value) {
+      byId(id).textContent = value;
+    }
+
+    function showMarketError(message) {
+      const error = byId("market-error");
+      error.textContent = message;
+      error.classList.toggle("visible", Boolean(message));
+    }
+
+    async function readJson(url) {
+      const response = await fetch(url, { cache: "no-store", headers: { Accept: "application/json" } });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.detail || "The request could not be completed.");
+      return payload;
+    }
+
+    async function refreshHealth() {
+      try {
+        const health = await readJson("/api/v1/health");
+        const healthy = health.status === "ok";
+        const status = byId("application-status");
+        status.classList.toggle("unavailable", !healthy);
+        status.replaceChildren(Object.assign(document.createElement("span"), { className: "dot", ariaHidden: "true" }));
+        status.append(document.createTextNode(healthy ? "Responding" : "Unavailable"));
+        setText("application-detail", healthy ? "Health check succeeded" : "Health check returned an issue");
+        setText("environment-label", (health.environment || "unknown").toUpperCase());
+        setText("health-updated", `Checked ${new Date().toLocaleTimeString("en-IN")}`);
+      } catch {
+        const status = byId("application-status");
+        status.classList.add("unavailable");
+        status.replaceChildren(Object.assign(document.createElement("span"), { className: "dot", ariaHidden: "true" }));
+        status.append(document.createTextNode("Unavailable"));
+        setText("application-detail", "The local health endpoint did not respond");
+        setText("health-updated", "Health check failed");
+      }
+    }
+
+    async function loadMarket(event) {
+      if (event) event.preventDefault();
+      const button = document.querySelector(".search-button");
+      const symbol = byId("symbol").value.trim();
+      if (!symbol) {
+        showMarketError("Enter a trading symbol to request a snapshot.");
+        byId("symbol").focus();
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Loading…";
+      showMarketError("");
+      const params = new URLSearchParams({
+        symbol,
+        exchange: byId("exchange").value,
+        timeframe: byId("timeframe").value,
+      });
+
+      try {
+        const candle = await readJson(`/api/v1/market-data/latest?${params.toString()}`);
+        setText("quote-symbol", candle.symbol);
+        setText("quote-exchange", candle.exchange);
+        setText("quote-close", inr.format(Number(candle.close)));
+        setText("quote-open", inr.format(Number(candle.open)));
+        setText("quote-high", inr.format(Number(candle.high)));
+        setText("quote-low", inr.format(Number(candle.low)));
+        setText("quote-close-small", inr.format(Number(candle.close)));
+        setText("quote-volume", integer.format(Number(candle.volume)));
+        setText("quote-timestamp", new Date(candle.timestamp).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }));
+        setText("market-updated", `Updated ${new Date().toLocaleTimeString("en-IN")}`);
+      } catch (error) {
+        showMarketError(error instanceof Error ? error.message : "Market data could not be loaded.");
+        setText("market-updated", "Request failed");
+      } finally {
+        button.disabled = false;
+        button.textContent = "Load snapshot";
+      }
+    }
+
+    byId("market-form").addEventListener("submit", loadMarket);
+    byId("refresh-button").addEventListener("click", async () => {
+      const button = byId("refresh-button");
+      button.disabled = true;
+      await Promise.all([refreshHealth(), loadMarket()]);
+      button.disabled = false;
+    });
+    refreshHealth();
+    loadMarket();
+  </script>
+</body>
+</html>

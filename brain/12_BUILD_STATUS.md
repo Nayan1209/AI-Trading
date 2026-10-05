@@ -46,7 +46,7 @@
 | PAPER-007 | Paper Portfolio Valuation | 🟢 | 🟢 | 🟢 | Complete; aggregate immutable-position valuation; CI green on `main` commit `c4f9367` |
 | PAPER-008 | Persistent Paper Order Journal | 🟢 | 🟢 | 🟢 | Complete; append-only PostgreSQL journal, idempotent replay, and deterministic history; CI green on `main` commit `2a66f4a` |
 | TEST-001 | Historical Signal Backtesting | 🟢 | 🟢 | 🟢 | Complete; deterministic one-instrument candle replay for existing SIG-001 strategies; CI green on `main` commit `472d5a0` ([run](https://github.com/Nayan1209/AI-Trading/actions/runs/37269308234)) |
-| UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
+| UI-001 | Dashboard | 🟢 | 🟡 | ⚪ | Initial read-only development command center implemented; remaining panels need connected read APIs and authentication |
 
 ## Phase Status
 
@@ -109,3 +109,9 @@ A feature is complete only after implementation, deterministic tests, documentat
 ## User Action Required
 
 No Groww secret, access token, broker credential, model API key, or PostgreSQL service is required for TEST-001. Do not commit credentials.
+
+## UI-001 — Dashboard Initial Delivery
+
+The first read-only dashboard is served at `/`. It shows application health, current development mode, the latest mock candle, and clear disconnected states for portfolio/positions, signals/AI, and orders/risk. It exposes no trading actions and is not production-ready because login/MFA and role authorization are not implemented.
+
+UI-001 remains in progress. Connecting actual portfolio, order, signal, and risk information requires selecting and wiring their runtime data sources into the application API.

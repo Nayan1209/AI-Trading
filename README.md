@@ -16,6 +16,8 @@
 
 Run `uvicorn src.main:app --reload` and open `http://127.0.0.1:8000/` to view the dashboard. The current app uses synthetic mock candles and does not connect portfolio, order, AI, risk, broker, or authentication services.
 
+The repository CI suite passed after this initial delivery ([run](https://github.com/Nayan1209/AI-Trading/actions/runs/37273027633)); focused browser and accessibility verification remains.
+
 ### Foundation completed
 
 - [x] GitHub repository initialized

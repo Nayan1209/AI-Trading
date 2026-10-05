@@ -46,7 +46,7 @@
 | PAPER-007 | Paper Portfolio Valuation | 🟢 | 🟢 | 🟢 | Complete; aggregate immutable-position valuation; CI green on `main` commit `c4f9367` |
 | PAPER-008 | Persistent Paper Order Journal | 🟢 | 🟢 | 🟢 | Complete; append-only PostgreSQL journal, idempotent replay, and deterministic history; CI green on `main` commit `2a66f4a` |
 | TEST-001 | Historical Signal Backtesting | 🟢 | 🟢 | 🟢 | Complete; deterministic one-instrument candle replay for existing SIG-001 strategies; CI green on `main` commit `472d5a0` ([run](https://github.com/Nayan1209/AI-Trading/actions/runs/37269308234)) |
-| UI-001 | Dashboard | 🟢 | 🟡 | ⚪ | Initial read-only development command center implemented; CI green on `main` commit `32ed4c4`; remaining panels need connected read APIs and authentication |
+| UI-001 | Dashboard | 🟢 | 🟡 | 🟡 | Read-only development command center implemented; source-level accessibility checks pass; remaining panels need connected read APIs and authentication |
 
 ## Phase Status
 
@@ -118,4 +118,4 @@ UI-001 remains in progress. Connecting actual portfolio, order, signal, and risk
 
 ### CI evidence
 
-The GitHub Actions suite passed after the initial dashboard delivery: [workflow run](https://github.com/Nayan1209/AI-Trading/actions/runs/37273027633). The run covers the repository's current test suite; the browser dashboard itself still needs focused interaction and accessibility verification.
+The GitHub Actions suite passed after the initial dashboard delivery: [workflow run](https://github.com/Nayan1209/AI-Trading/actions/runs/37273027633). Focused source-level accessibility checks now cover landmarks, labeled controls, announced errors, keyboard focus, reduced motion, and muted-text contrast. All five checks pass, and the full local suite passes with 275 tests. The user confirmed the local dashboard loads and supplied a narrow-viewport screenshot showing the responding health status. Automated browser interaction could not be completed because the in-app browser URL policy blocked programmatic inspection of localhost.

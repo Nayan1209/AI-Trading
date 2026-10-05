@@ -15,7 +15,7 @@
       --border: #253342;
       --text: #edf3f9;
       --muted: #93a3b5;
-      --soft: #718195;
+      --soft: #7b8ba0;
       --mint: #7fe0bf;
       --blue: #8eb8ff;
       --amber: #f2c879;
@@ -42,6 +42,7 @@
     }
     .brand { display: flex; align-items: center; gap: 11px; margin: 0 8px 38px; text-decoration: none; }
     .brand-mark { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 11px; background: #19362f; color: var(--mint); font-size: 15px; font-weight: 750; }
+    .brand-name, .brand-caption { display: block; }
     .brand-name { font-size: 13px; font-weight: 700; letter-spacing: .01em; }
     .brand-caption { margin-top: 3px; color: var(--muted); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
     .nav-heading { margin: 0 10px 10px; color: var(--soft); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
@@ -105,7 +106,7 @@
     .field label { color: var(--muted); font-size: 9px; font-weight: 650; letter-spacing: .05em; text-transform: uppercase; }
     .field input, .field select { width: 100%; height: 36px; padding: 0 10px; border: 1px solid var(--border); border-radius: 7px; background: #0d141d; color: var(--text); font-size: 11px; }
     .field input::placeholder { color: var(--soft); }
-    .field input:focus, .field select:focus { border-color: #6684aa; outline: 2px solid #8eb8ff33; }
+    .field input:focus-visible, .field select:focus-visible { border-color: #6684aa; }
     .search-button { height: 36px; padding: 0 15px; border: 1px solid #4a836f; border-radius: 7px; background: #1b4438; color: #b6f2db; cursor: pointer; font-size: 10px; font-weight: 700; }
     .search-button:hover { background: #225544; }
     .market-error { display: none; margin: 14px 19px 0; padding: 10px 12px; border: 1px solid #673d42; border-radius: 8px; background: #2b1b20; color: #f2b4b4; font-size: 10px; }

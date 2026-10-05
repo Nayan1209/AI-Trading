@@ -131,6 +131,30 @@
     .unavailable-card h3 { margin: 0; font-size: 11px; font-weight: 650; }
     .not-connected { padding: 5px 7px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); font-size: 8px; text-transform: uppercase; }
     .unavailable-card p { margin: 13px 0 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .source-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+    .source-card { min-width: 0; padding: 16px; }
+    .source-card.groww-source { grid-column: 1 / -1; }
+    .source-card h3 { margin: 0; font-size: 12px; font-weight: 650; }
+    .source-card h4 { margin: 16px 0 0; font-size: 10px; font-weight: 650; }
+    .source-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .source-status { flex: 0 0 auto; padding: 5px 7px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); font-size: 8px; font-weight: 700; text-transform: uppercase; }
+    .source-status[data-status="available"] { border-color: #25453d; color: var(--mint); }
+    .source-status[data-status="unconfigured"] { border-color: #51452d; color: var(--amber); }
+    .source-status[data-status="unavailable"] { border-color: #673d42; color: #f2b4b4; }
+    .source-detail { min-height: 30px; margin: 9px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .source-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 13px; }
+    .source-stat { min-width: 0; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: #0f1720; }
+    .source-stat span { display: block; color: var(--soft); font-size: 9px; }
+    .source-stat strong { display: block; overflow-wrap: anywhere; margin-top: 6px; font-size: 12px; font-variant-numeric: tabular-nums; }
+    .source-table-wrap { overflow-x: auto; margin-top: 8px; border: 1px solid var(--border); border-radius: 8px; }
+    .source-table { width: 100%; min-width: 390px; border-collapse: collapse; font-size: 9px; }
+    .source-table th, .source-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+    .source-table th { color: var(--muted); font-weight: 650; }
+    .source-table td { color: var(--text); }
+    .source-table tr:last-child td { border-bottom: 0; }
+    .source-table .empty-row { color: var(--soft); text-align: center; }
+    .groww-data-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+    .groww-data-grid h4 { margin-top: 0; }
     .footer-note { margin-top: 24px; padding-top: 13px; border-top: 1px solid var(--border); color: var(--soft); font-size: 9px; line-height: 1.6; }
 
     @media (max-width: 1000px) {
@@ -139,6 +163,9 @@
       .topbar { padding: 0 26px; }
       .content { padding: 30px 26px 44px; }
       .status-grid, .unavailable-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .source-grid { grid-template-columns: 1fr; }
+      .source-card.groww-source { grid-column: auto; }
+      .groww-data-grid { grid-template-columns: 1fr; }
       .status-card:last-child { grid-column: 1 / -1; }
     }
     @media (max-width: 700px) {
@@ -227,8 +254,8 @@
           <div class="notice" role="note">
             <span class="notice-icon" aria-hidden="true">!</span>
             <div>
-              <strong>Development mode · simulated market data</strong>
-              <p>This app currently uses a local mock market-data provider. No live broker, portfolio, order, AI, or risk state is connected to this dashboard. Trading actions are unavailable.</p>
+              <strong>Development mode · mock market data</strong>
+              <p>The quote panel uses synthetic candles. Read-only paper history and Groww account snapshots appear below when configured. This dashboard has no broker trade controls; signal, AI, and risk summaries remain disconnected.</p>
             </div>
           </div>
 
@@ -293,7 +320,7 @@
               </div>
               <div class="timestamp-box"><span>Candle timestamp</span><strong id="quote-timestamp">Waiting for response</strong></div>
             </div>
-            <div class="quote-grid" aria-label="Candle details">
+            <div class="quote-grid" role="group" aria-label="Candle details">
               <div class="quote-stat"><span>Open</span><strong id="quote-open">—</strong></div>
               <div class="quote-stat"><span>High</span><strong id="quote-high">—</strong></div>
               <div class="quote-stat"><span>Low</span><strong id="quote-low">—</strong></div>
@@ -303,22 +330,66 @@
           </article>
         </section>
 
+        <section aria-labelledby="paper-sources-title">
+          <div class="section-heading">
+            <div><h2 id="paper-sources-title">Paper account data</h2><p class="section-caption">Read-only state from this process and the optional PostgreSQL paper journal.</p></div>
+          </div>
+          <div class="source-grid">
+            <article class="panel source-card" aria-labelledby="memory-title">
+              <div class="source-head"><h3 id="memory-title">In-memory paper session</h3><span class="source-status" id="memory-status" data-status="loading" role="status">Loading</span></div>
+              <p class="source-detail" id="memory-detail">Reading the current app session.</p>
+              <div class="source-summary" role="group" aria-label="In-memory paper summary">
+                <div class="source-stat"><span>Filled orders</span><strong id="memory-order-count">—</strong></div>
+                <div class="source-stat"><span>Open positions</span><strong id="memory-position-count">—</strong></div>
+                <div class="source-stat"><span>Realized P&amp;L · pre-fee</span><strong id="memory-realized-pnl">—</strong></div>
+              </div>
+              <h4>Open positions</h4>
+              <div class="source-table-wrap"><table class="source-table" aria-label="In-memory paper positions"><thead><tr><th scope="col">Symbol</th><th scope="col">Quantity</th><th scope="col">Avg. entry</th><th scope="col">Realized P&amp;L</th></tr></thead><tbody id="memory-positions"><tr><td class="empty-row" colspan="4">Loading…</td></tr></tbody></table></div>
+              <h4>Recent fills</h4>
+              <div class="source-table-wrap"><table class="source-table" aria-label="Recent in-memory paper fills"><thead><tr><th scope="col">Symbol</th><th scope="col">Side</th><th scope="col">Quantity</th><th scope="col">Fill price</th><th scope="col">Status</th></tr></thead><tbody id="memory-orders"><tr><td class="empty-row" colspan="5">Loading…</td></tr></tbody></table></div>
+            </article>
+            <article class="panel source-card" aria-labelledby="persistent-title">
+              <div class="source-head"><h3 id="persistent-title">PostgreSQL paper history</h3><span class="source-status" id="persistent-status" data-status="loading" role="status">Loading</span></div>
+              <p class="source-detail" id="persistent-detail">Checking the optional local database.</p>
+              <div class="source-summary" role="group" aria-label="Persistent paper summary">
+                <div class="source-stat"><span>Filled orders</span><strong id="persistent-order-count">—</strong></div>
+                <div class="source-stat"><span>Open positions</span><strong id="persistent-position-count">—</strong></div>
+                <div class="source-stat"><span>Realized P&amp;L · pre-fee</span><strong id="persistent-realized-pnl">—</strong></div>
+              </div>
+              <h4>Open positions reconstructed from fills</h4>
+              <div class="source-table-wrap"><table class="source-table" aria-label="PostgreSQL paper positions"><thead><tr><th scope="col">Symbol</th><th scope="col">Quantity</th><th scope="col">Avg. entry</th><th scope="col">Realized P&amp;L</th></tr></thead><tbody id="persistent-positions"><tr><td class="empty-row" colspan="4">Loading…</td></tr></tbody></table></div>
+              <h4>Recent persisted fills</h4>
+              <div class="source-table-wrap"><table class="source-table" aria-label="Recent PostgreSQL paper fills"><thead><tr><th scope="col">Symbol</th><th scope="col">Side</th><th scope="col">Quantity</th><th scope="col">Fill price</th><th scope="col">Status</th></tr></thead><tbody id="persistent-orders"><tr><td class="empty-row" colspan="5">Loading…</td></tr></tbody></table></div>
+            </article>
+            <article class="panel source-card groww-source" aria-labelledby="groww-title">
+              <div class="source-head"><h3 id="groww-title">Groww account snapshot</h3><span class="source-status" id="groww-status" data-status="loading" role="status">Loading</span></div>
+              <p class="source-detail" id="groww-detail">Read-only holdings, positions, and current-day orders. No broker actions are available.</p>
+              <div class="source-summary" role="group" aria-label="Groww account summary">
+                <div class="source-stat"><span>Holdings</span><strong id="groww-holding-count">—</strong></div>
+                <div class="source-stat"><span>Positions</span><strong id="groww-position-count">—</strong></div>
+                <div class="source-stat"><span>Today's orders</span><strong id="groww-order-count">—</strong></div>
+              </div>
+              <div class="groww-data-grid">
+                <div><h4>Holdings</h4><div class="source-table-wrap"><table class="source-table" aria-label="Groww holdings"><thead><tr><th scope="col">Symbol</th><th scope="col">Quantity</th><th scope="col">Avg. price</th></tr></thead><tbody id="groww-holdings"><tr><td class="empty-row" colspan="3">Loading…</td></tr></tbody></table></div></div>
+                <div><h4>Positions</h4><div class="source-table-wrap"><table class="source-table" aria-label="Groww positions"><thead><tr><th scope="col">Symbol</th><th scope="col">Qty.</th><th scope="col">Realized P&amp;L</th></tr></thead><tbody id="groww-positions"><tr><td class="empty-row" colspan="3">Loading…</td></tr></tbody></table></div></div>
+                <div><h4>Today's orders</h4><div class="source-table-wrap"><table class="source-table" aria-label="Groww current-day orders"><thead><tr><th scope="col">Symbol</th><th scope="col">Side / status</th><th scope="col">Filled</th></tr></thead><tbody id="groww-orders"><tr><td class="empty-row" colspan="3">Loading…</td></tr></tbody></table></div></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
         <section aria-labelledby="unavailable-title">
           <div class="section-heading">
-            <div><h2 id="unavailable-title">Other command-center data</h2><p class="section-caption">These panels will populate when the app exposes their read APIs.</p></div>
+            <div><h2 id="unavailable-title">Other command-center data</h2><p class="section-caption">These read APIs are not yet connected to the dashboard.</p></div>
           </div>
           <div class="unavailable-grid">
-            <article class="panel unavailable-card">
-              <div class="unavailable-card-head"><h3>Portfolio &amp; positions</h3><span class="not-connected">Not connected</span></div>
-              <p>No portfolio or position endpoint is currently wired to this app. No balance or P&amp;L is being estimated.</p>
-            </article>
             <article class="panel unavailable-card">
               <div class="unavailable-card-head"><h3>Signals &amp; AI analysis</h3><span class="not-connected">Not connected</span></div>
               <p>Signal and analysis services exist in the codebase, but this app does not provide current results to display.</p>
             </article>
             <article class="panel unavailable-card">
-              <div class="unavailable-card-head"><h3>Orders &amp; risk</h3><span class="not-connected">Not connected</span></div>
-              <p>Order, risk, and broker-health summaries are unavailable here. This dashboard has no trade controls.</p>
+              <div class="unavailable-card-head"><h3>Risk &amp; broker health</h3><span class="not-connected">Not connected</span></div>
+              <p>Risk and broker-health summaries are not connected here. The dashboard has no broker order controls.</p>
             </article>
           </div>
         </section>
@@ -411,15 +482,172 @@
       }
     }
 
+    function formatMoney(value) {
+      const amount = Number(value);
+      return value === null || value === undefined || value === "" || !Number.isFinite(amount)
+        ? "—"
+        : inr.format(amount);
+    }
+
+    function formatCount(value) {
+      const amount = Number(value);
+      return Number.isFinite(amount) ? integer.format(amount) : "—";
+    }
+
+    function updateSourceStatus(id, status) {
+      const element = byId(id);
+      element.dataset.status = status;
+      element.textContent = status === "available"
+        ? "Available"
+        : status === "unconfigured"
+          ? "Not configured"
+          : "Unavailable";
+    }
+
+    function renderRows(id, rows, columns, emptyMessage) {
+      const body = byId(id);
+      body.replaceChildren();
+      if (!rows || rows.length === 0) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.className = "empty-row";
+        cell.colSpan = columns.length;
+        cell.textContent = emptyMessage;
+        row.append(cell);
+        body.append(row);
+        return;
+      }
+
+      for (const item of rows) {
+        const row = document.createElement("tr");
+        for (const column of columns) {
+          const cell = document.createElement("td");
+          const value = column.value(item);
+          cell.textContent = value === null || value === undefined || value === "" ? "—" : String(value);
+          row.append(cell);
+        }
+        body.append(row);
+      }
+    }
+
+    function renderPaperSource(prefix, data) {
+      updateSourceStatus(prefix + "-status", data.status);
+      setText(prefix + "-detail", data.detail || "Paper history is unavailable.");
+      if (data.status !== "available") {
+        for (const metric of ["order-count", "position-count", "realized-pnl"]) {
+          setText(prefix + "-" + metric, "—");
+        }
+        renderRows(prefix + "-positions", [], Array.from({ length: 4 }), data.detail || "Paper data is unavailable.");
+        renderRows(prefix + "-orders", [], Array.from({ length: 5 }), data.detail || "Paper data is unavailable.");
+        return;
+      }
+
+      setText(prefix + "-order-count", formatCount(data.order_count));
+      setText(prefix + "-position-count", formatCount(data.position_count));
+      setText(prefix + "-realized-pnl", formatMoney(data.realized_pnl));
+      renderRows(
+        prefix + "-positions",
+        data.positions,
+        [
+          { value: (item) => item.symbol },
+          { value: (item) => formatCount(item.quantity) },
+          { value: (item) => formatMoney(item.average_entry_price) },
+          { value: (item) => formatMoney(item.realized_pnl) },
+        ],
+        "No open paper positions.",
+      );
+      renderRows(
+        prefix + "-orders",
+        data.orders,
+        [
+          { value: (item) => item.symbol },
+          { value: (item) => item.side },
+          { value: (item) => formatCount(item.quantity) },
+          { value: (item) => formatMoney(item.fill_price) },
+          { value: (item) => item.status },
+        ],
+        "No paper fills in this source.",
+      );
+    }
+
+    function renderGrowwSource(data) {
+      updateSourceStatus("groww-status", data.status);
+      setText("groww-detail", data.detail || "Groww account data is unavailable.");
+      if (data.status !== "available") {
+        for (const metric of ["holding-count", "position-count", "order-count"]) {
+          setText("groww-" + metric, "—");
+        }
+        for (const [id, columns] of [["groww-holdings", 3], ["groww-positions", 3], ["groww-orders", 3]]) {
+          renderRows(id, [], Array.from({ length: columns }), data.detail || "Groww data is unavailable.");
+        }
+        return;
+      }
+
+      setText("groww-holding-count", formatCount(data.holding_count));
+      setText("groww-position-count", formatCount(data.position_count));
+      setText("groww-order-count", formatCount(data.order_count));
+      renderRows(
+        "groww-holdings",
+        data.holdings,
+        [
+          { value: (item) => item.trading_symbol },
+          { value: (item) => formatCount(item.quantity) },
+          { value: (item) => formatMoney(item.average_price) },
+        ],
+        "No Groww holdings returned.",
+      );
+      renderRows(
+        "groww-positions",
+        data.positions,
+        [
+          { value: (item) => item.trading_symbol },
+          { value: (item) => formatCount(item.quantity) },
+          { value: (item) => formatMoney(item.realised_pnl) },
+        ],
+        "No Groww positions returned.",
+      );
+      renderRows(
+        "groww-orders",
+        data.orders,
+        [
+          { value: (item) => item.trading_symbol },
+          { value: (item) => (item.transaction_type || "—") + " / " + (item.order_status || "—") },
+          { value: (item) => formatCount(item.filled_quantity) + " / " + formatCount(item.quantity) },
+        ],
+        "No orders returned for today.",
+      );
+    }
+
+    async function loadAccountSource(url, renderer, statusId, detailId) {
+      try {
+        renderer(await readJson(url));
+      } catch {
+        updateSourceStatus(statusId, "unavailable");
+        setText(detailId, "The local read-only account endpoint could not be reached.");
+      }
+    }
+
+    async function loadAccountSources() {
+      await Promise.all([
+        loadAccountSource("/api/v1/paper/in-memory", (data) => renderPaperSource("memory", data), "memory-status", "memory-detail"),
+        loadAccountSource("/api/v1/paper/persistent", (data) => renderPaperSource("persistent", data), "persistent-status", "persistent-detail"),
+        loadAccountSource("/api/v1/groww/account", renderGrowwSource, "groww-status", "groww-detail"),
+      ]);
+    }
+
     byId("market-form").addEventListener("submit", loadMarket);
     byId("refresh-button").addEventListener("click", async () => {
       const button = byId("refresh-button");
       button.disabled = true;
-      await Promise.all([refreshHealth(), loadMarket()]);
-      button.disabled = false;
+      try {
+        await Promise.all([refreshHealth(), loadMarket(), loadAccountSources()]);
+      } finally {
+        button.disabled = false;
+      }
     });
     refreshHealth();
     loadMarket();
+    loadAccountSources();
   </script>
 </body>
 </html>

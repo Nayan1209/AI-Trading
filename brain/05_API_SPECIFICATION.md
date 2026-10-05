@@ -5,6 +5,9 @@
 REST/JSON control APIs use `/api/v1`. Real-time internal updates may use WebSockets/events. Use UUIDs and correlation IDs.
 
 GET /api/v1/health
+GET /api/v1/paper/in-memory
+GET /api/v1/paper/persistent
+GET /api/v1/groww/account
 GET /api/v1/instruments
 GET /api/v1/signals
 POST /api/v1/analysis
@@ -19,7 +22,13 @@ POST /api/v1/system/trading-halt
 
 ## Dashboard
 
-`GET /` serves the read-only development dashboard as HTML. It uses the health and latest-market-data routes; it does not create or expose trading actions.
+`GET /` serves the read-only development dashboard as HTML. It uses health, latest market data, and read-only paper/account snapshot routes; it does not create or expose trading actions.
+
+The paper and Groww account snapshot routes are development-only, accept loopback clients only, and return `Cache-Control: no-store`. `GET /api/v1/paper/in-memory` projects the current process's immutable paper fills into positions and pre-fee realized P&L. `GET /api/v1/paper/persistent` reads the optional PostgreSQL `paper_orders` journal and reconstructs positions from its fills. Unrealized P&L remains unavailable until current price marks are attached.
+
+`GET /api/v1/groww/account` calls only Groww's read methods for holdings, positions, and the current-day order page. It returns an allow-listed subset of account fields and never returns the access token. Configure `GROWW_ACCESS_TOKEN` locally. No order placement, modification, or cancellation method is exposed.
+
+The method names and returned fields follow Groww's official [Python SDK portfolio guide](https://groww.in/trade-api/docs/python-sdk/portfolio) and [orders guide](https://groww.in/trade-api/docs/python-sdk/orders).
 
 ## Broker Adapter Contract
 The internal execution layer must not expose Groww-specific request objects to strategy or AI services.

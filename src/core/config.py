@@ -1,7 +1,17 @@
-from pydantic import BaseModel
+from pydantic import SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-class Settings(BaseModel):
-    app_env: str = 'development'
-    log_level: str = 'INFO'
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+    app_env: str = "development"
+    log_level: str = "INFO"
+    database_url: SecretStr | None = None
+    groww_access_token: SecretStr | None = None
 
 settings = Settings()

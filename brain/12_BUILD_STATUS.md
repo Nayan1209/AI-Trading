@@ -46,7 +46,7 @@
 | PAPER-007 | Paper Portfolio Valuation | 🟢 | 🟢 | 🟢 | Complete; aggregate immutable-position valuation; CI green on `main` commit `c4f9367` |
 | PAPER-008 | Persistent Paper Order Journal | 🟢 | 🟢 | 🟢 | Complete; append-only PostgreSQL journal, idempotent replay, and deterministic history; CI green on `main` commit `2a66f4a` |
 | TEST-001 | Historical Signal Backtesting | 🟢 | 🟢 | 🟢 | Complete; deterministic one-instrument candle replay for existing SIG-001 strategies; CI green on `main` commit `472d5a0` ([run](https://github.com/Nayan1209/AI-Trading/actions/runs/37269308234)) |
-| UI-001 | Dashboard | 🟢 | 🟡 | 🟡 | Read-only development command center implemented; source-level accessibility checks pass; remaining panels need connected read APIs and authentication |
+| UI-001 | Dashboard | 🟢 | 🟡 | 🟡 | Local read-only command center reads in-memory paper state plus optional PostgreSQL history and Groww account snapshots; signals, AI, risk, and authentication remain |
 
 ## Phase Status
 
@@ -108,14 +108,14 @@ A feature is complete only after implementation, deterministic tests, documentat
 
 ## User Action Required
 
-No Groww secret, access token, broker credential, model API key, or PostgreSQL service is required for TEST-001. Do not commit credentials.
+No Groww secret, access token, broker credential, model API key, or PostgreSQL service is required for TEST-001. Do not commit credentials. For UI-001, the ignored local `.env` file must receive a valid `DATABASE_URL` and `GROWW_ACCESS_TOKEN` before those optional account sources return live data.
 
 ## UI-001 — Dashboard Initial Delivery
 
-The first read-only dashboard is served at `/`. It shows application health, current development mode, the latest mock candle, and clear disconnected states for portfolio/positions, signals/AI, and orders/risk. It exposes no trading actions and is not production-ready because login/MFA and role authorization are not implemented.
+The read-only dashboard is served at `/`. It shows application health, the latest mock candle, local in-memory paper state, optional PostgreSQL paper history, and optional Groww holdings/positions/current-day orders. The account snapshot APIs are limited to development mode and loopback clients. It exposes no trading actions and is not production-ready because login/MFA and role authorization are not implemented.
 
-UI-001 remains in progress. Connecting actual portfolio, order, signal, and risk information requires selecting and wiring their runtime data sources into the application API.
+UI-001 remains in progress. Signal, AI, and risk read APIs are not connected. PostgreSQL and Groww remain inactive until `DATABASE_URL` with migration 003 and `GROWW_ACCESS_TOKEN` are configured locally. Unrealized paper P&L is not calculated without current price marks.
 
 ### CI evidence
 
-The GitHub Actions suite passed after the initial dashboard delivery: [workflow run](https://github.com/Nayan1209/AI-Trading/actions/runs/37273027633). Focused source-level accessibility checks now cover landmarks, labeled controls, announced errors, keyboard focus, reduced motion, and muted-text contrast. All five checks pass, and the full local suite passes with 275 tests. The user confirmed the local dashboard loads and supplied a narrow-viewport screenshot showing the responding health status. Automated browser interaction could not be completed because the in-app browser URL policy blocked programmatic inspection of localhost.
+The initial dashboard delivery passed GitHub Actions: [workflow run](https://github.com/Nayan1209/AI-Trading/actions/runs/37273027633). The current source integration passes 17 focused API, paper projection, Groww adapter, and accessibility checks locally; the embedded dashboard JavaScript also passes a syntax check. The full suite and CI for this update remain pending. The user supplied a screenshot confirming the initial dashboard loaded; automated inspection of localhost remains blocked by the in-app browser URL policy.

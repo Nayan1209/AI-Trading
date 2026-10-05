@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 from fastapi.testclient import TestClient
 
 from src import main
@@ -46,3 +48,54 @@ def test_expected_missing_resource_maps_to_404(monkeypatch) -> None:
     response = client.get("/api/v1/market-data/latest", params={"symbol": "RELIANCE"})
     assert response.status_code == 404
     assert response.json()["detail"] == "market-data resource not found"
+
+
+def test_in_memory_paper_snapshot_is_read_only_and_starts_empty() -> None:
+    response = client.get("/api/v1/paper/in-memory")
+
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+    assert response.json()["status"] == "available"
+    assert response.json()["orders"] == []
+    assert response.json()["positions"] == []
+
+
+def test_persistent_paper_snapshot_reports_unconfigured_without_a_database(monkeypatch) -> None:
+    monkeypatch.setattr(
+        main,
+        "settings",
+        SimpleNamespace(app_env="development", database_url=None, groww_access_token=None),
+    )
+
+    response = client.get("/api/v1/paper/persistent")
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "unconfigured"
+    assert response.json()["orders"] == []
+
+
+def test_groww_snapshot_reports_unconfigured_without_a_token(monkeypatch) -> None:
+    monkeypatch.setattr(
+        main,
+        "settings",
+        SimpleNamespace(app_env="development", database_url=None, groww_access_token=None),
+    )
+
+    response = client.get("/api/v1/groww/account")
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "unconfigured"
+    assert response.json()["orders"] == []
+
+
+def test_account_snapshot_routes_are_hidden_outside_development(monkeypatch) -> None:
+    monkeypatch.setattr(
+        main,
+        "settings",
+        SimpleNamespace(app_env="production", database_url=None, groww_access_token=None),
+    )
+
+    response = client.get("/api/v1/groww/account")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "not found"}

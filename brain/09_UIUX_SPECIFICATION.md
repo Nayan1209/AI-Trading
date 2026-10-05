@@ -9,18 +9,20 @@ Show system state, portfolio, P&L, drawdown, exposure, positions, AI decisions, 
 
 ### Initial UI-001 Delivery
 
-The first dashboard slice is served at `/` by the FastAPI application and consumes the existing health and latest-market-data endpoints.
+The first dashboard slice is served at `/` by the FastAPI application and consumes the health and latest-market-data endpoints plus optional read-only paper and Groww account snapshots.
 
 - Shows whether the application health endpoint responds and the reported environment.
 - Lets the user request a latest candle by symbol, exchange, and timeframe.
 - Identifies the current data as synthetic mock output and states that live execution is disabled.
-- Marks portfolio/positions, signals/AI, and orders/risk panels as not connected when their read APIs are absent. It must not invent balances, P&L, decisions, orders, or risk state.
+- Shows current-process paper orders and positions and, when configured, the PostgreSQL paper-order journal and Groww holdings, positions, and current-day orders.
+- Shows explicit unconfigured/unavailable states when `DATABASE_URL`, migration 003, or `GROWW_ACCESS_TOKEN` is unavailable. It must not invent balances, P&L, decisions, orders, or risk state.
 - Provides no order entry, cancellation, trading-halt, credential, or other write controls.
+- Keeps unauthenticated paper and account snapshot APIs on development mode and loopback clients only.
 - Uses native HTML/CSS/JavaScript with no external script, font, image, or chart dependency.
 
 This initial view is development-only. It does not implement login/MFA. Do not expose it as a production dashboard until authentication and authorization are in place.
 
-The remaining command-center data (portfolio, positions, AI decisions, orders, risk, and broker health) depends on read APIs and runtime connections that are not currently wired into `src/main.py`.
+Signals, AI decisions, risk, and live-execution health remain disconnected. The PostgreSQL journal stores paper fills only; the dashboard reconstructs paper positions and realized P&L from those fills and does not estimate unrealized P&L without price marks.
 
 ## Principles
 Trading state must be unambiguous. Risk is prominent. Dangerous actions require confirmation. Emergency stop is easy to locate. AI analysis uses structured reason codes/evidence. Color is never the only indicator.

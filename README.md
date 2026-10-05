@@ -12,11 +12,17 @@
 **Phase 5 — Trade Planner, Risk & Execution Controls: 🟢 Complete through EXEC-003**  
 **Phase 6 — Paper Execution: 🟢 PAPER-001 through PAPER-008 complete**<br />
 **Phase 7 — Backtesting: 🟢 TEST-001 historical signal replay complete**<br />
-**Phase 9 — Dashboard: 🟡 Initial read-only development command center implemented**
+**Phase 9 — Dashboard: 🟡 Read-only command center with paper and Groww account source adapters**
 
-Run `uvicorn src.main:app --reload` and open `http://127.0.0.1:8000/` to view the dashboard. The current app uses synthetic mock candles and does not connect portfolio, order, AI, risk, broker, or authentication services.
+Run `uvicorn src.main:app --reload` and open `http://127.0.0.1:8000/` to view the dashboard. The quote panel uses synthetic mock candles. The dashboard also reads this process's paper ledger, optional PostgreSQL paper-order history, and optional Groww holdings, positions, and current-day orders. It remains read-only; signals, AI, risk, and authentication are not connected.
 
-The repository CI suite passed after this initial delivery ([run](https://github.com/Nayan1209/AI-Trading/actions/runs/37273027633)); focused browser and accessibility verification remains.
+The account snapshot APIs return data only in development mode and for loopback clients. They are not production-ready until authentication and authorization are implemented.
+
+#### Optional local account sources
+
+The local git-ignored `.env` file is ready. Set `DATABASE_URL` to a PostgreSQL database with migration 003 applied to enable persisted paper history. Set `GROWW_ACCESS_TOKEN` to a short-lived token in this file to enable read-only Groww holdings, positions, and order snapshots. Do not paste or commit the token. Restart the server after changing either value. Leaving either value blank keeps that source clearly marked as unconfigured.
+
+The dashboard and account-source changes are kept on `main`; CI runs automatically on each push.
 
 ### Foundation completed
 
@@ -452,4 +458,4 @@ If red → fix on main before adding more functionality
 
 ## Immediate Next Step
 
-**Continue UI-001** by wiring real read-only portfolio, position, signal, order, and risk summaries to the dashboard. The app currently exposes only health and latest market data; the other sources and authentication are not connected.
+**Continue UI-001** by wiring read-only signal, AI, and risk summaries, then add authentication and authorization before making any account data available outside a local development session. PostgreSQL and Groww account snapshots remain disabled until their local settings are configured.

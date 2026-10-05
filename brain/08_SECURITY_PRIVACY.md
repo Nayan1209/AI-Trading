@@ -22,6 +22,8 @@ The application must:
 ## Access
 Roles: Owner/Admin, Operator, Read-only/Analyst, Service Account. Trading execution permissions are separate from administration.
 
+The current dashboard account snapshot routes have no login or role authorization. They therefore return data only in development mode to loopback clients and set `Cache-Control: no-store`. Groww responses are reduced to an allow-list of display fields; access tokens and account profile identifiers are never returned. The dashboard adapter calls holdings, positions, and order-list reads only. Do not expose these routes through a public host or reverse proxy until authentication and authorization are implemented.
+
 ## AI Security
 Treat news/web text as untrusted. Defend against prompt injection. Tool access is allow-listed. AI has no withdrawal/bank-change capability and does not receive raw broker credentials.
 

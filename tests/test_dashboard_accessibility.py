@@ -86,6 +86,6 @@ def test_muted_text_meets_wcag_aa_on_dashboard_surfaces() -> None:
 def test_dashboard_remains_read_only_and_uses_safe_dom_text_updates() -> None:
     source = DASHBOARD.read_text(encoding="utf-8")
     assert "No order controls are exposed" in source
-    assert "Trading actions are unavailable" in source
+    assert "This dashboard has no broker trade controls" in source
     assert "textContent" in source
     assert "innerHTML" not in source

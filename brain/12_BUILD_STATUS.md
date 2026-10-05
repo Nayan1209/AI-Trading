@@ -45,7 +45,7 @@
 | PAPER-006 | Paper Position Valuation | 🟢 | 🟢 | 🟢 | Complete; deterministic mark-to-market value, unrealized P&L, total P&L, and green CI |
 | PAPER-007 | Paper Portfolio Valuation | 🟢 | 🟢 | 🟢 | Complete; aggregate immutable-position valuation; CI green on `main` commit `c4f9367` |
 | PAPER-008 | Persistent Paper Order Journal | 🟢 | 🟢 | 🟢 | Complete; append-only PostgreSQL journal, idempotent replay, and deterministic history; CI green on `main` commit `2a66f4a` |
-| TEST-001 | Historical Signal Backtesting | 🟢 | 🟢 | 🟢 | Complete; deterministic one-instrument candle replay for existing SIG-001 strategies with explicit timing and transaction-cost assumptions |
+| TEST-001 | Historical Signal Backtesting | 🟢 | 🟢 | 🟢 | Complete; deterministic one-instrument candle replay for existing SIG-001 strategies; CI green on `main` commit `472d5a0` ([run](https://github.com/Nayan1209/AI-Trading/actions/runs/37269308234)) |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 
 ## Phase Status
@@ -100,7 +100,7 @@ TEST-001 is complete after deterministic tests, the specification, the `main` pu
 
 ### CI evidence
 
-Update this evidence with the GitHub Actions run for the completed `main` commit after push.
+The GitHub Actions run for `main` commit `472d5a0` passed: [workflow run](https://github.com/Nayan1209/AI-Trading/actions/runs/37269308234).
 
 ## Completion Rule
 

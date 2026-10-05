@@ -304,6 +304,8 @@ TEST-001 replays one existing SIG-001 strategy over one validated historical can
 
 The backtester does not estimate position size, a portfolio equity curve, or drawdown, and it does not pass signals through AI/risk/execution or contact a broker. Its results are research output, not approval to trade.
 
+CI passed for `main` commit `472d5a0` ([run](https://github.com/Nayan1209/AI-Trading/actions/runs/37269308234)).
+
 ## Safety Boundary
 
 This repository currently has **no enabled real-money broker execution path**. Development and paper environments cannot place live orders. Provider-facing execution remains disabled until the required execution and production-runtime controls are separately verified.

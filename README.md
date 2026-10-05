@@ -20,7 +20,7 @@ The account snapshot APIs return data only in development mode and for loopback 
 
 #### Optional local account sources
 
-The local git-ignored `.env` file is ready. Set `DATABASE_URL` to a PostgreSQL database with migration 003 applied to enable persisted paper history. Set `GROWW_ACCESS_TOKEN` to a short-lived token in this file to enable read-only Groww holdings, positions, and order snapshots. Do not paste or commit the token. Restart the server after changing either value. Leaving either value blank keeps that source clearly marked as unconfigured.
+The local git-ignored `.env` file is ready. Set `DATABASE_URL` to a PostgreSQL database with migration 003 applied to enable persisted paper history. For Groww, set either `GROWW_ACCESS_TOKEN` or both `GROWW_API_KEY` and `GROWW_API_SECRET` in this file; the key-and-secret flow obtains an access token when the account snapshot is requested and may require daily approval in Groww. The dashboard uses Groww read methods only. Do not paste or commit credentials. Restart the server after changing these values. Leaving them blank keeps the source marked as unconfigured.
 
 Dashboard source integration is on `main` commit `b1315d8`; [GitHub Actions run #131 passed](https://github.com/Nayan1209/AI-Trading/actions/runs/37277642840).
 

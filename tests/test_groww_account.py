@@ -1,3 +1,6 @@
+import sys
+from types import ModuleType
+
 from src.groww_account import GrowwAccountProvider
 
 
@@ -74,3 +77,25 @@ def test_groww_snapshot_uses_read_methods_and_allow_lists_account_fields() -> No
     ]
     assert "account_number" not in str(snapshot)
     assert "not-a-real-token" not in str(snapshot)
+
+
+def test_groww_account_provider_exchanges_api_key_and_secret_for_access_token(monkeypatch) -> None:
+    calls = []
+
+    class FakeGrowwAPI:
+        @staticmethod
+        def get_access_token(*, api_key, secret):
+            calls.append((api_key, secret))
+            return "generated-access-token"
+
+        def __init__(self, access_token):
+            self.access_token = access_token
+
+    fake_module = ModuleType("growwapi")
+    fake_module.GrowwAPI = FakeGrowwAPI
+    monkeypatch.setitem(sys.modules, "growwapi", fake_module)
+
+    provider = GrowwAccountProvider(api_key="test-api-key", api_secret="test-api-secret")
+
+    assert calls == [("test-api-key", "test-api-secret")]
+    assert provider._client.access_token == "generated-access-token"

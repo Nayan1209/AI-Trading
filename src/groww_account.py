@@ -9,10 +9,18 @@ from typing import Any
 class GrowwAccountProvider:
     """Read holdings, positions, and the current-day order page from Groww."""
 
-    def __init__(self, access_token: str, client: Any | None = None) -> None:
-        if not access_token:
-            raise ValueError("Groww access token is required")
-
+    def __init__(
+        self,
+        access_token: str | None = None,
+        client: Any | None = None,
+        *,
+        api_key: str | None = None,
+        api_secret: str | None = None,
+    ) -> None:
+        if access_token is not None and not access_token.strip():
+            access_token = None
+        if access_token is None and not (api_key and api_secret):
+            raise ValueError("Groww access token or API key and secret are required")
         if client is not None:
             self._client = client
             return
@@ -21,6 +29,13 @@ class GrowwAccountProvider:
             from growwapi import GrowwAPI
         except ImportError as exc:  # pragma: no cover - dependency/environment guard
             raise RuntimeError("growwapi is not installed") from exc
+
+        if access_token is None:
+            access_token = GrowwAPI.get_access_token(api_key=api_key, secret=api_secret)
+            if isinstance(access_token, Mapping):
+                access_token = access_token.get("token")
+            if not isinstance(access_token, str) or not access_token.strip():
+                raise RuntimeError("Groww did not return an access token")
 
         self._client = GrowwAPI(access_token)
 

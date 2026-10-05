@@ -146,11 +146,21 @@ def groww_account_state(request: Request) -> dict[str, object]:
         if settings.groww_access_token is not None
         else ""
     )
-    if not token:
+    api_key = (
+        settings.groww_api_key.get_secret_value().strip()
+        if settings.groww_api_key is not None
+        else ""
+    )
+    api_secret = (
+        settings.groww_api_secret.get_secret_value().strip()
+        if settings.groww_api_secret is not None
+        else ""
+    )
+    if not token and not (api_key and api_secret):
         return {
             "status": "unconfigured",
             "source": "Groww read-only API",
-            "detail": "Set GROWW_ACCESS_TOKEN in the local environment; the token is never returned by this API.",
+            "detail": "Set GROWW_ACCESS_TOKEN or both GROWW_API_KEY and GROWW_API_SECRET locally; credentials are never returned by this API.",
             "holding_count": 0,
             "position_count": 0,
             "order_count": 0,
@@ -160,12 +170,16 @@ def groww_account_state(request: Request) -> dict[str, object]:
         }
 
     try:
-        return GrowwAccountProvider(token).snapshot()
+        return GrowwAccountProvider(
+            token or None,
+            api_key=api_key or None,
+            api_secret=api_secret or None,
+        ).snapshot()
     except Exception:
         return {
             "status": "unavailable",
             "source": "Groww read-only API",
-            "detail": "Groww data could not be read; check the local token, network, and account API access.",
+            "detail": "Groww data could not be read; check local credentials, daily API-key approval, network, and account API access.",
             "holding_count": 0,
             "position_count": 0,
             "order_count": 0,

@@ -13,5 +13,7 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     database_url: SecretStr | None = None
     groww_access_token: SecretStr | None = None
+    groww_api_key: SecretStr | None = None
+    groww_api_secret: SecretStr | None = None
 
 settings = Settings()

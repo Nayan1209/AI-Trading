@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 
 from fastapi.testclient import TestClient
+from pydantic import SecretStr
 
 from src import main
 
@@ -64,7 +65,13 @@ def test_persistent_paper_snapshot_reports_unconfigured_without_a_database(monke
     monkeypatch.setattr(
         main,
         "settings",
-        SimpleNamespace(app_env="development", database_url=None, groww_access_token=None),
+        SimpleNamespace(
+            app_env="development",
+            database_url=None,
+            groww_access_token=None,
+            groww_api_key=None,
+            groww_api_secret=None,
+        ),
     )
 
     response = client.get("/api/v1/paper/persistent")
@@ -78,7 +85,13 @@ def test_groww_snapshot_reports_unconfigured_without_a_token(monkeypatch) -> Non
     monkeypatch.setattr(
         main,
         "settings",
-        SimpleNamespace(app_env="development", database_url=None, groww_access_token=None),
+        SimpleNamespace(
+            app_env="development",
+            database_url=None,
+            groww_access_token=None,
+            groww_api_key=None,
+            groww_api_secret=None,
+        ),
     )
 
     response = client.get("/api/v1/groww/account")
@@ -88,11 +101,49 @@ def test_groww_snapshot_reports_unconfigured_without_a_token(monkeypatch) -> Non
     assert response.json()["orders"] == []
 
 
+def test_groww_snapshot_uses_api_key_and_secret_without_returning_them(monkeypatch) -> None:
+    calls = []
+
+    class StubProvider:
+        def __init__(self, access_token, *, api_key, api_secret):
+            calls.append((access_token, api_key, api_secret))
+
+        def snapshot(self):
+            return {"status": "available", "orders": []}
+
+    monkeypatch.setattr(
+        main,
+        "settings",
+        SimpleNamespace(
+            app_env="development",
+            database_url=None,
+            groww_access_token=None,
+            groww_api_key=SecretStr("test-api-key"),
+            groww_api_secret=SecretStr("test-api-secret"),
+        ),
+    )
+    monkeypatch.setattr(main, "GrowwAccountProvider", StubProvider)
+
+    response = client.get("/api/v1/groww/account")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "available", "orders": []}
+    assert calls == [(None, "test-api-key", "test-api-secret")]
+    assert "test-api-key" not in response.text
+    assert "test-api-secret" not in response.text
+
+
 def test_account_snapshot_routes_are_hidden_outside_development(monkeypatch) -> None:
     monkeypatch.setattr(
         main,
         "settings",
-        SimpleNamespace(app_env="production", database_url=None, groww_access_token=None),
+        SimpleNamespace(
+            app_env="production",
+            database_url=None,
+            groww_access_token=None,
+            groww_api_key=None,
+            groww_api_secret=None,
+        ),
     )
 
     response = client.get("/api/v1/groww/account")

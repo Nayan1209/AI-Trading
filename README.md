@@ -10,7 +10,7 @@
 **Phase 3 — Scanner & Signal Engine: 🟢 Complete**  
 **Phase 4 — AI Analysis Engine: 🟢 Complete through AI-007**  
 **Phase 5 — Trade Planner, Risk & Execution Controls: 🟢 Complete through EXEC-003**  
-**Phase 6 — Paper Execution: 🟢 PAPER-001 through PAPER-007 complete; 🟡 PAPER-008 planned**
+**Phase 6 — Paper Execution: 🟢 PAPER-001 through PAPER-007 complete; 🟡 PAPER-008 in progress**
 
 ### Foundation completed
 
@@ -291,9 +291,9 @@ PAPER-007 aggregates PAPER-006 valuations for an explicit set of immutable posit
 
 PAPER-007 does not fetch prices, persist data, execute orders, or make trading decisions.
 
-### PAPER-008 — Persistent Paper Order Journal (planned)
+### PAPER-008 — Persistent Paper Order Journal
 
-PAPER-008 will add an append-only PostgreSQL journal for immutable simulated fills. Its specification is in [`brain/51_PAPER_ORDER_PERSISTENCE_SPECIFICATION.md`](brain/51_PAPER_ORDER_PERSISTENCE_SPECIFICATION.md).
+PAPER-008 adds an append-only PostgreSQL journal for immutable simulated fills. The repository, migration, and deterministic repository tests are implemented; automatic CI is the remaining completion gate. The specification is in [`brain/51_PAPER_ORDER_PERSISTENCE_SPECIFICATION.md`](brain/51_PAPER_ORDER_PERSISTENCE_SPECIFICATION.md).
 
 ## Safety Boundary
 
@@ -361,7 +361,7 @@ Controlled Live Execution (future)
 | 3 | Scanner & Signal Engine | 🟢 Complete |
 | 4 | AI Analysis Engine | 🟢 Complete through AI-007 |
 | 5 | Trade Planner, Risk & Execution Controls | 🟢 Complete through EXEC-003 |
-| 6 | Paper Execution | 🟢 PAPER-001 through PAPER-007 complete; 🟡 PAPER-008 planned |
+| 6 | Paper Execution | 🟢 PAPER-001 through PAPER-007 complete; 🟡 PAPER-008 in progress |
 | 7 | Backtesting | ⚪ Planned |
 | 8 | Broker Integration | 🟡 Groww selected; execution gated |
 | 9 | Dashboard & Operations | ⚪ Planned |
@@ -404,10 +404,10 @@ PAPER-006 🟢
         ↓
 PAPER-007 🟢
         ↓
-PAPER-008 ⚪ planned
+PAPER-008 🟡 in progress
 ```
 
-The deterministic data, scanner, signal, AI, risk, planning, portfolio-risk, broker-adapter, runtime-readiness, controlled-deployment, paper-execution, order-ledger, reconciliation, session, position-accounting, position-valuation, and portfolio-valuation boundaries are complete. PAPER-008 is the next planned paper-execution milestone.
+The deterministic data, scanner, signal, AI, risk, planning, portfolio-risk, broker-adapter, runtime-readiness, controlled-deployment, paper-execution, order-ledger, reconciliation, session, position-accounting, position-valuation, and portfolio-valuation boundaries are complete. PAPER-008, the persistent paper order journal, is in progress.
 
 ## CI / Change Discipline
 
@@ -434,4 +434,4 @@ If red → fix on main before adding more functionality
 
 ## Immediate Next Step
 
-**PAPER-008 — persistent paper order journal.** The design is recorded in [`brain/51_PAPER_ORDER_PERSISTENCE_SPECIFICATION.md`](brain/51_PAPER_ORDER_PERSISTENCE_SPECIFICATION.md); implementation has not started.
+**PAPER-008 — persistent paper order journal.** The implementation and tests are on `main`; wait for automatic CI to pass before marking the milestone complete.

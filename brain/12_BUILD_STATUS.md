@@ -44,7 +44,7 @@
 | PAPER-005 | Paper Position Accounting | 🟢 | 🟢 | 🟢 | Complete; deterministic long-only position state, weighted-average pricing, realized P&L, and green CI |
 | PAPER-006 | Paper Position Valuation | 🟢 | 🟢 | 🟢 | Complete; deterministic mark-to-market value, unrealized P&L, total P&L, and green CI |
 | PAPER-007 | Paper Portfolio Valuation | 🟢 | 🟢 | 🟢 | Complete; aggregate immutable-position valuation; CI green on `main` commit `c4f9367` |
-| PAPER-008 | Persistent Paper Order Journal | 🟢 | ⚪ | ⚪ | Planned; append-only PostgreSQL storage for completed paper fills |
+| PAPER-008 | Persistent Paper Order Journal | 🟢 | 🟢 | 🟡 | Implementation and tests added; automatic CI pending |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 | TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
@@ -56,15 +56,18 @@
 - **Phase 3 — Scanner & Signal Engine:** 🟢 Complete
 - **Phase 4 — AI Analysis Engine:** 🟢 Complete through AI-007
 - **Phase 5 — Trade Planner, Risk & Execution Controls:** 🟢 Complete through EXEC-003
-- **Phase 6 — Paper Execution:** 🟢 PAPER-001 through PAPER-007 complete; 🟡 PAPER-008 planned
+- **Phase 6 — Paper Execution:** 🟢 PAPER-001 through PAPER-007 complete; 🟡 PAPER-008 in progress
 
-## Next milestone: PAPER-008 — Persistent Paper Order Journal
+## Current milestone: PAPER-008 — Persistent Paper Order Journal
 
 PAPER-008 adds durable, append-only PostgreSQL storage for completed immutable paper fills. The identity fields carried by `TradePlan` and `PaperOrder` provide stable lookup and duplicate-detection keys for this journal.
 
-### Specification
+### Files added
 
 - [`brain/51_PAPER_ORDER_PERSISTENCE_SPECIFICATION.md`](51_PAPER_ORDER_PERSISTENCE_SPECIFICATION.md)
+- `src/storage/postgres_paper_orders.py`
+- `database/migrations/003_paper_orders.sql`
+- `tests/test_postgres_paper_order_journal.py`
 
 ### Safety
 
@@ -72,11 +75,7 @@ PAPER-008 does not call Groww, access credentials, submit orders, or enable live
 
 ### Completion rule
 
-PAPER-008 becomes complete only after implementation, deterministic repository and migration tests, documentation, and automatic CI validation are green.
-
-### Current CI evidence
-
-The latest workflow run for `main` commit `c4f9367` passed: [GitHub Actions run](https://github.com/Nayan1209/AI-Trading/actions/runs/37219860214).
+PAPER-008 becomes complete only after implementation, deterministic repository and migration tests, documentation, and automatic CI validation are green. The current main push is awaiting that CI result.
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 
@@ -86,4 +85,4 @@ A feature is complete only after implementation, deterministic tests, documentat
 
 ## User Action Required
 
-No Groww secret, access token, broker credential, or model API key is required for PAPER-008. Do not commit credentials.
+No Groww secret, access token, broker credential, or model API key is required for PAPER-008. A PostgreSQL connection is needed when running the journal against a database. Do not commit credentials.

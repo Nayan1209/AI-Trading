@@ -1,6 +1,6 @@
 # PAPER-008 — Persistent Paper Order Journal
 
-**Status:** Planned · **Parent:** Phase 6 — Paper Execution
+**Status:** Implementation added; automatic CI pending · **Parent:** Phase 6 — Paper Execution
 **Depends on:** PLAN-001, PAPER-001, PAPER-002, PAPER-004, DATA-006
 
 ## Objective

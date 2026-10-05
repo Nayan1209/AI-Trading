@@ -45,8 +45,8 @@
 | PAPER-006 | Paper Position Valuation | 🟢 | 🟢 | 🟢 | Complete; deterministic mark-to-market value, unrealized P&L, total P&L, and green CI |
 | PAPER-007 | Paper Portfolio Valuation | 🟢 | 🟢 | 🟢 | Complete; aggregate immutable-position valuation; CI green on `main` commit `c4f9367` |
 | PAPER-008 | Persistent Paper Order Journal | 🟢 | 🟢 | 🟢 | Complete; append-only PostgreSQL journal, idempotent replay, and deterministic history; CI green on `main` commit `2a66f4a` |
+| TEST-001 | Historical Signal Backtesting | 🟢 | 🟢 | 🟢 | Complete; deterministic one-instrument candle replay for existing SIG-001 strategies with explicit timing and transaction-cost assumptions |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
-| TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
 ## Phase Status
 
@@ -57,8 +57,9 @@
 - **Phase 4 — AI Analysis Engine:** 🟢 Complete through AI-007
 - **Phase 5 — Trade Planner, Risk & Execution Controls:** 🟢 Complete through EXEC-003
 - **Phase 6 — Paper Execution:** 🟢 PAPER-001 through PAPER-008 complete
+- **Phase 7 — Backtesting:** 🟢 TEST-001 deterministic signal replay complete
 
-## Latest completed milestone: PAPER-008 — Persistent Paper Order Journal
+## Previous milestone: PAPER-008 — Persistent Paper Order Journal
 
 PAPER-008 adds durable, append-only PostgreSQL storage for completed immutable paper fills. The identity fields carried by `TradePlan` and `PaperOrder` provide stable lookup and duplicate-detection keys for this journal.
 
@@ -83,10 +84,28 @@ The GitHub Actions run for `main` commit `2a66f4a` passed: [workflow run](https:
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 
+## Latest completed milestone: TEST-001 — Historical Signal Backtesting
+
+TEST-001 replays one existing SIG-001 strategy over a validated, chronological OHLCV series. It uses only the trailing candle window to form each signal, enters at the next candle open, exits at the configured holding-bar close, and subtracts explicit per-side transaction costs. Tests use in-memory candle fixtures only.
+
+The result reports individual gross/net trade returns and equal-notional summary statistics. It does not size positions, calculate a portfolio equity curve/drawdown, authorize risk, or execute trades. See [`52_BACKTESTING_SPECIFICATION.md`](52_BACKTESTING_SPECIFICATION.md).
+
+### Safety
+
+Backtesting does not call AI, a database, Groww, paper execution, or any network service. Simulated signals and returns are research outputs, not execution or risk approval.
+
+### Completion rule
+
+TEST-001 is complete after deterministic tests, the specification, the `main` push, and successful automatic CI.
+
+### CI evidence
+
+Update this evidence with the GitHub Actions run for the completed `main` commit after push.
+
 ## Completion Rule
 
 A feature is complete only after implementation, deterministic tests, documentation, and operational checks. CI is the final verification gate.
 
 ## User Action Required
 
-No Groww secret, access token, broker credential, or model API key is required for PAPER-008. A PostgreSQL connection is needed when running the journal against a database. Do not commit credentials.
+No Groww secret, access token, broker credential, model API key, or PostgreSQL service is required for TEST-001. Do not commit credentials.

@@ -10,7 +10,8 @@
 **Phase 3 — Scanner & Signal Engine: 🟢 Complete**  
 **Phase 4 — AI Analysis Engine: 🟢 Complete through AI-007**  
 **Phase 5 — Trade Planner, Risk & Execution Controls: 🟢 Complete through EXEC-003**  
-**Phase 6 — Paper Execution: 🟢 PAPER-001 through PAPER-008 complete**
+**Phase 6 — Paper Execution: 🟢 PAPER-001 through PAPER-008 complete**<br />
+**Phase 7 — Backtesting: 🟢 TEST-001 historical signal replay complete**
 
 ### Foundation completed
 
@@ -295,6 +296,14 @@ PAPER-007 does not fetch prices, persist data, execute orders, or make trading d
 
 PAPER-008 adds an append-only PostgreSQL journal for immutable simulated fills. The repository, migration, and deterministic repository tests are complete; CI passed on `main` commit `2a66f4a` ([run](https://github.com/Nayan1209/AI-Trading/actions/runs/37266152195)). The specification is in [`brain/51_PAPER_ORDER_PERSISTENCE_SPECIFICATION.md`](brain/51_PAPER_ORDER_PERSISTENCE_SPECIFICATION.md).
 
+## Phase 7 — Backtesting
+
+### TEST-001 — Historical Signal Backtesting
+
+TEST-001 replays one existing SIG-001 strategy over one validated historical candle series. Signals use only their trailing lookback window; simulated entries use the next candle open, exits use the configured holding-bar close, and per-side transaction costs are explicit inputs. Results include immutable trade records and equal-notional return summaries. See [`brain/52_BACKTESTING_SPECIFICATION.md`](brain/52_BACKTESTING_SPECIFICATION.md).
+
+The backtester does not estimate position size, a portfolio equity curve, or drawdown, and it does not pass signals through AI/risk/execution or contact a broker. Its results are research output, not approval to trade.
+
 ## Safety Boundary
 
 This repository currently has **no enabled real-money broker execution path**. Development and paper environments cannot place live orders. Provider-facing execution remains disabled until the required execution and production-runtime controls are separately verified.
@@ -342,7 +351,7 @@ Paper Position Valuation
     ↓
 Paper Portfolio Valuation
     ↓
-Persistent Paper Order Journal (planned)
+Persistent Paper Order Journal
     ↓
 Reconciliation / Monitoring
     ↓
@@ -362,7 +371,7 @@ Controlled Live Execution (future)
 | 4 | AI Analysis Engine | 🟢 Complete through AI-007 |
 | 5 | Trade Planner, Risk & Execution Controls | 🟢 Complete through EXEC-003 |
 | 6 | Paper Execution | 🟢 PAPER-001 through PAPER-008 complete |
-| 7 | Backtesting | ⚪ Planned |
+| 7 | Backtesting | 🟢 TEST-001 historical signal replay complete |
 | 8 | Broker Integration | 🟡 Groww selected; execution gated |
 | 9 | Dashboard & Operations | ⚪ Planned |
 | 10 | Controlled Live Deployment | ⚪ Planned |
@@ -405,6 +414,8 @@ PAPER-006 🟢
 PAPER-007 🟢
         ↓
 PAPER-008 🟢
+        ↓
+TEST-001 🟢
 ```
 
 The deterministic data, scanner, signal, AI, risk, planning, portfolio-risk, broker-adapter, runtime-readiness, controlled-deployment, paper-execution, order-ledger, reconciliation, session, position-accounting, position-valuation, portfolio-valuation, and persistent paper-order journal boundaries are complete.
@@ -434,4 +445,4 @@ If red → fix on main before adding more functionality
 
 ## Immediate Next Step
 
-**Choose the next milestone.** The dashboard (`UI-001`) and backtesting (`TEST-001`) remain unstarted; position persistence and analytics are future work.
+**UI-001 — Dashboard** is the next unstarted milestone. Position persistence and broader portfolio analytics remain future work.

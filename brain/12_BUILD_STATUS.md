@@ -44,7 +44,7 @@
 | PAPER-005 | Paper Position Accounting | 🟢 | 🟢 | 🟢 | Complete; deterministic long-only position state, weighted-average pricing, realized P&L, and green CI |
 | PAPER-006 | Paper Position Valuation | 🟢 | 🟢 | 🟢 | Complete; deterministic mark-to-market value, unrealized P&L, total P&L, and green CI |
 | PAPER-007 | Paper Portfolio Valuation | 🟢 | 🟢 | 🟢 | Complete; aggregate immutable-position valuation; CI green on `main` commit `c4f9367` |
-| PAPER-008 | Persistent Paper Order Journal | 🟢 | 🟢 | 🟡 | Implementation and tests added; automatic CI pending |
+| PAPER-008 | Persistent Paper Order Journal | 🟢 | 🟢 | 🟢 | Complete; append-only PostgreSQL journal, idempotent replay, and deterministic history; CI green on `main` commit `2a66f4a` |
 | UI-001 | Dashboard | ⚪ | ⚪ | ⚪ | Not Started |
 | TEST-001 | Backtesting | ⚪ | ⚪ | ⚪ | Not Started |
 
@@ -56,9 +56,9 @@
 - **Phase 3 — Scanner & Signal Engine:** 🟢 Complete
 - **Phase 4 — AI Analysis Engine:** 🟢 Complete through AI-007
 - **Phase 5 — Trade Planner, Risk & Execution Controls:** 🟢 Complete through EXEC-003
-- **Phase 6 — Paper Execution:** 🟢 PAPER-001 through PAPER-007 complete; 🟡 PAPER-008 in progress
+- **Phase 6 — Paper Execution:** 🟢 PAPER-001 through PAPER-008 complete
 
-## Current milestone: PAPER-008 — Persistent Paper Order Journal
+## Latest completed milestone: PAPER-008 — Persistent Paper Order Journal
 
 PAPER-008 adds durable, append-only PostgreSQL storage for completed immutable paper fills. The identity fields carried by `TradePlan` and `PaperOrder` provide stable lookup and duplicate-detection keys for this journal.
 
@@ -75,7 +75,11 @@ PAPER-008 does not call Groww, access credentials, submit orders, or enable live
 
 ### Completion rule
 
-PAPER-008 becomes complete only after implementation, deterministic repository and migration tests, documentation, and automatic CI validation are green. The current main push is awaiting that CI result.
+PAPER-008 is complete: implementation, deterministic repository and migration tests, documentation, and automatic CI validation are green.
+
+### CI evidence
+
+The GitHub Actions run for `main` commit `2a66f4a` passed: [workflow run](https://github.com/Nayan1209/AI-Trading/actions/runs/37266152195).
 
 All project development is performed directly on `main`. No pull request or separate development branch is required.
 

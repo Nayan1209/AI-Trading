@@ -256,9 +256,14 @@ def test_database_failure_rolls_back_insert():
 def test_lookups_and_snapshot_restore_utc_order_history():
     connection = FakeConnection()
     first = paper_order()
-    second = replace(first, order_id="PAPER-second", client_order_id="CLIENT-002")
+    second = replace(
+        first,
+        order_id="PAPER-second",
+        client_order_id="CLIENT-002",
+        created_at=first.created_at + timedelta(minutes=1),
+    )
     first_row = order_row(first)
-    second_row = order_row(second, created_at=first.created_at + timedelta(minutes=1))
+    second_row = order_row(second)
     connection.cursor_instance.fetchone_results = [first_row, second_row, None]
     connection.cursor_instance.fetchall_results = [[first_row, second_row]]
     repository = PostgresPaperOrderJournal(connection)

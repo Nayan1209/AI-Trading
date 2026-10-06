@@ -12,15 +12,15 @@
 **Phase 5 — Trade Planner, Risk & Execution Controls: 🟢 Complete through EXEC-003**  
 **Phase 6 — Paper Execution: 🟢 PAPER-001 through PAPER-008 complete**<br />
 **Phase 7 — Backtesting: 🟢 TEST-001 historical signal replay complete**<br />
-**Phase 9 — Dashboard: 🟡 Read-only command center with paper and Groww account source adapters**
+**Phase 9 — Dashboard: 🟢 Read-only command center with live Groww quotes and account snapshots**
 
-Run `uvicorn src.main:app --reload` and open `http://127.0.0.1:8000/` to view the dashboard. The quote panel uses synthetic mock candles. The dashboard also reads this process's paper ledger, optional PostgreSQL paper-order history, and optional Groww holdings, positions, and current-day orders. It remains read-only; signals, AI, risk, and authentication are not connected.
+Run `uvicorn src.main:app --reload` and open `http://127.0.0.1:8000/` to view the dashboard. Enter a Groww trading symbol to request a live quote or latest 15-minute candle. The dashboard also reads this process's paper ledger, optional PostgreSQL paper-order history, and Groww holdings, positions, and current-day orders. Market and account data come from configured sources; missing or failed sources show as unavailable with no synthetic fallback. The dashboard is read-only; signals, AI, risk, and authentication are not connected.
 
 The account snapshot APIs return data only in development mode and for loopback clients. They are not production-ready until authentication and authorization are implemented.
 
 #### Optional local account sources
 
-The local git-ignored `.env` file is ready. Set `DATABASE_URL` to a PostgreSQL database with migration 003 applied to enable persisted paper history. For Groww, set either `GROWW_ACCESS_TOKEN` or both `GROWW_API_KEY` and `GROWW_API_SECRET` in this file; the key-and-secret flow obtains an access token when the account snapshot is requested and may require daily approval in Groww. The dashboard uses Groww read methods only. Do not paste or commit credentials. Restart the server after changing these values. Leaving them blank keeps the source marked as unconfigured.
+Set `DATABASE_URL` in the ignored local `.env` to a PostgreSQL database with migration 003 applied to enable persisted paper history. For Groww, set either `GROWW_ACCESS_TOKEN` or both `GROWW_API_KEY` and `GROWW_API_SECRET`; the API-key flow obtains an access token. The dashboard uses Groww read methods only. Do not commit credentials. Restart the server after changing these values. With no credentials, the dashboard reports Groww as unconfigured.
 
 Dashboard source integration is on `main` commit `b1315d8`; [GitHub Actions run #131 passed](https://github.com/Nayan1209/AI-Trading/actions/runs/37277642840).
 
@@ -48,7 +48,7 @@ Dashboard source integration is on `main` commit `b1315d8`; [GitHub Actions run 
 - [x] Document control
 - [x] Initial application skeleton
 - [x] Market-data domain model
-- [x] Mock market-data provider
+- [x] Read-only Groww market-data provider with no runtime mock fallback
 - [x] Initial API and unit test
 - [x] Development PostgreSQL container definition
 

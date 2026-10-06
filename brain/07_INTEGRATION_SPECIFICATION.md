@@ -52,7 +52,7 @@ Groww's current trading-API guidance states that API order placement must origin
 The static-IP requirement is an **execution deployment prerequisite**, not a reason to expose the database or application publicly.
 
 ## Environment Separation
-- `development`: mock provider / fixtures; no broker orders.
+- `development`: live provider reads only when valid local credentials are configured; no broker orders.
 - `paper`: real market data may be consumed, but no live broker order is allowed.
 - `staging`: provider connectivity tests with execution disabled unless explicitly approved.
 - `production`: live execution only after all deterministic safety gates and operational checks pass.
@@ -76,3 +76,5 @@ The AI may propose analysis or a trade plan. It does not receive direct credenti
 
 ## Current State
 Groww account/API key approval has been confirmed by the project owner. No secret values are stored in the repository. No live order has been placed by this project.
+
+The read-only dashboard quote path uses the Groww Trading API for live quotes and historical candles. It reports missing credentials and provider failures as unavailable rather than substituting generated prices or volumes.

@@ -13,7 +13,7 @@ class MarketDataService:
         self,
         symbol: str,
         exchange: str = "NSE",
-        timeframe: str = "15m",
+        timeframe: str = "live",
         max_age: timedelta = timedelta(minutes=5),
         reference_time: datetime | None = None,
     ) -> Candle:

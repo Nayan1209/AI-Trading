@@ -5,12 +5,13 @@ class FakeGrowwClient:
     EXCHANGE_NSE = "NSE"
     SEGMENT_CASH = "CASH"
 
-    def get_quote(self, *, exchange, segment, trading_symbol):
+    def get_quote(self, *, exchange, segment, trading_symbol, timeout=None):
         assert exchange == "NSE"
         assert segment == "CASH"
         assert trading_symbol == "RELIANCE"
         return {
             "last_trade_time": 1760000000000,
+            "last_price": 1419.0,
             "volume": 123456,
             "ohlc": {
                 "open": 1400.0,
@@ -28,10 +29,11 @@ def test_groww_provider_normalizes_quote_without_network_access():
 
     assert candle.symbol == "RELIANCE"
     assert candle.exchange == "NSE"
-    assert candle.timeframe == "1d_snapshot"
+    assert candle.timeframe == "live"
     assert candle.open == 1400
     assert candle.high == 1425.5
     assert candle.low == 1395
     assert candle.close == 1418.25
     assert candle.volume == 123456
+    assert candle.last_price == 1419.0
     assert candle.timestamp.tzinfo is not None

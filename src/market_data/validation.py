@@ -23,6 +23,8 @@ def validate_candle(candle: Candle) -> None:
         raise ValueError("high must be greater than or equal to low")
     if candle.volume < 0:
         raise ValueError("volume must be non-negative")
+    if candle.last_price is not None and candle.last_price <= 0:
+        raise ValueError("last traded price must be greater than zero")
 
 
 def is_stale(candle: Candle, reference_time: datetime, max_age: timedelta) -> bool:

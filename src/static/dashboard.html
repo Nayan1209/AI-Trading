@@ -254,8 +254,8 @@
           <div class="notice" role="note">
             <span class="notice-icon" aria-hidden="true">!</span>
             <div>
-              <strong>Development mode · mock market data</strong>
-              <p>The quote panel uses synthetic candles. Read-only paper history and Groww account snapshots appear below when configured. This dashboard has no broker trade controls; signal, AI, and risk summaries remain disconnected.</p>
+              <strong>Read-only Groww market data</strong>
+              <p>Market quotes come from the configured Groww Trading API. Missing credentials or unavailable data are shown as unavailable; the dashboard does not substitute sample values. This dashboard has no broker trade controls, and signal, AI, and risk summaries remain disconnected.</p>
             </div>
           </div>
 
@@ -271,8 +271,8 @@
             </article>
             <article class="status-card">
               <div class="status-card-top"><span>Market data</span><span class="status-icon" aria-hidden="true">⌁</span></div>
-              <div class="status-value" id="market-source">Mock provider</div>
-              <div class="status-detail">Synthetic development snapshots</div>
+              <div class="status-value" id="market-source">Checking</div>
+              <div class="status-detail" id="market-source-detail">Checking Groww configuration</div>
             </article>
             <article class="status-card">
               <div class="status-card-top"><span>Live execution</span><span class="status-icon" aria-hidden="true">⊘</span></div>
@@ -284,7 +284,7 @@
 
         <section id="market-data" aria-labelledby="market-title">
           <div class="section-heading">
-            <div><h2>Market snapshot</h2><p class="section-caption">Request the latest candle from the configured development provider.</p></div>
+            <div><h2>Market data</h2><p class="section-caption">Request a live Groww quote or the latest 15-minute candle.</p></div>
             <span class="subtle-label" id="market-updated">No request yet</span>
           </div>
 
@@ -292,14 +292,14 @@
             <div class="panel-head">
               <div class="panel-title">
                 <span class="panel-title-icon" aria-hidden="true">⌁</span>
-                <div><h2 id="market-title">Latest candle</h2><p class="section-caption">Values are returned by the market-data API.</p></div>
+                <div><h2 id="market-title">Market quote</h2><p class="section-caption">Values are returned by the Groww Trading API.</p></div>
               </div>
-              <span class="data-badge"><span class="dot" aria-hidden="true"></span>Mock data</span>
+              <span class="data-badge" id="market-badge"><span class="dot" aria-hidden="true"></span>Live quote</span>
             </div>
             <form class="market-controls" id="market-form">
               <div class="field symbol-field">
                 <label for="symbol">Trading symbol</label>
-                <input id="symbol" name="symbol" type="text" value="RELIANCE" maxlength="32" autocomplete="off" required>
+                <input id="symbol" name="symbol" type="text" placeholder="Enter a Groww trading symbol" maxlength="32" autocomplete="off" required>
               </div>
               <div class="field">
                 <label for="exchange">Exchange</label>
@@ -307,18 +307,18 @@
               </div>
               <div class="field">
                 <label for="timeframe">Timeframe</label>
-                <select id="timeframe" name="timeframe"><option value="15m">15 minutes</option><option value="1d_snapshot">Daily snapshot</option></select>
+                <select id="timeframe" name="timeframe"><option value="live">Live quote</option><option value="15m">15-minute candle</option></select>
               </div>
-              <button class="search-button" type="submit">Load snapshot</button>
+              <button class="search-button" type="submit">Load market data</button>
             </form>
             <div class="market-error" id="market-error" role="alert"></div>
             <div class="quote-overview">
               <div>
-                <div class="instrument-name"><span id="quote-symbol">RELIANCE</span><span class="exchange-tag" id="quote-exchange">NSE</span></div>
+                <div class="instrument-name"><span id="quote-symbol">No symbol selected</span><span class="exchange-tag" id="quote-exchange">NSE</span></div>
                 <div class="quote-price" id="quote-close" aria-live="polite">—</div>
-                <div class="quote-subtitle">Candle close · INR</div>
+                <div class="quote-subtitle" id="quote-price-label">Last traded price · INR</div>
               </div>
-              <div class="timestamp-box"><span>Candle timestamp</span><strong id="quote-timestamp">Waiting for response</strong></div>
+              <div class="timestamp-box"><span id="quote-time-label">Last trade</span><strong id="quote-timestamp">No request yet</strong></div>
             </div>
             <div class="quote-grid" role="group" aria-label="Candle details">
               <div class="quote-stat"><span>Open</span><strong id="quote-open">—</strong></div>
@@ -394,7 +394,7 @@
           </div>
         </section>
 
-        <p class="footer-note">Dashboard data refreshes only when requested. The current development provider returns synthetic sample values and is not a live market feed.</p>
+        <p class="footer-note">Quotes are fetched from Groww on request. The timestamp identifies the last trade or candle time returned by Groww; other integrations remain marked unavailable until connected.</p>
       </main>
     </div>
   </div>
@@ -431,6 +431,10 @@
         status.append(document.createTextNode(healthy ? "Responding" : "Unavailable"));
         setText("application-detail", healthy ? "Health check succeeded" : "Health check returned an issue");
         setText("environment-label", (health.environment || "unknown").toUpperCase());
+        setText("market-source", health.market_data_provider || "Not configured");
+        setText("market-source-detail", health.market_data_status === "configured"
+          ? "Credentials are configured; quotes are fetched from Groww on request."
+          : "Add Groww credentials to the local environment to request quotes.");
         setText("health-updated", `Checked ${new Date().toLocaleTimeString("en-IN")}`);
       } catch {
         const status = byId("application-status");
@@ -439,7 +443,25 @@
         status.append(document.createTextNode("Unavailable"));
         setText("application-detail", "The local health endpoint did not respond");
         setText("health-updated", "Health check failed");
+        setText("market-source", "Unavailable");
+        setText("market-source-detail", "Could not read market-data configuration.");
       }
+    }
+
+    function clearMarketQuote(symbol, exchange, timeframe) {
+      setText("quote-symbol", symbol || "No symbol selected");
+      setText("quote-exchange", exchange || "—");
+      setText("quote-close", "—");
+      setText("quote-open", "—");
+      setText("quote-high", "—");
+      setText("quote-low", "—");
+      setText("quote-close-small", "—");
+      setText("quote-volume", "—");
+      setText("quote-timestamp", "Waiting for response");
+      setText("quote-price-label", timeframe === "15m" ? "Candle close · INR" : "Last traded price · INR");
+      setText("quote-time-label", timeframe === "15m" ? "Candle timestamp" : "Last trade");
+      setText("market-title", timeframe === "15m" ? "Latest 15-minute candle" : "Market quote");
+      byId("market-badge").lastChild.textContent = timeframe === "15m" ? "15-minute candle" : "Live quote";
     }
 
     async function loadMarket(event) {
@@ -455,30 +477,39 @@
       button.disabled = true;
       button.textContent = "Loading…";
       showMarketError("");
+      const exchange = byId("exchange").value;
+      const timeframe = byId("timeframe").value;
+      clearMarketQuote(symbol, exchange, timeframe);
+      setText("quote-timestamp", "Fetching from Groww…");
+      setText("market-updated", "Requesting Groww data…");
       const params = new URLSearchParams({
         symbol,
-        exchange: byId("exchange").value,
-        timeframe: byId("timeframe").value,
+        exchange,
+        timeframe,
       });
 
       try {
         const candle = await readJson(`/api/v1/market-data/latest?${params.toString()}`);
         setText("quote-symbol", candle.symbol);
         setText("quote-exchange", candle.exchange);
-        setText("quote-close", inr.format(Number(candle.close)));
+        const displayPrice = candle.last_price ?? candle.close;
+        setText("quote-close", inr.format(Number(displayPrice)));
         setText("quote-open", inr.format(Number(candle.open)));
         setText("quote-high", inr.format(Number(candle.high)));
         setText("quote-low", inr.format(Number(candle.low)));
         setText("quote-close-small", inr.format(Number(candle.close)));
         setText("quote-volume", integer.format(Number(candle.volume)));
         setText("quote-timestamp", new Date(candle.timestamp).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }));
+        setText("quote-price-label", candle.last_price === null ? "Candle close · INR" : "Last traded price · INR");
+        setText("quote-time-label", candle.last_price === null ? "Candle timestamp" : "Last trade");
         setText("market-updated", `Updated ${new Date().toLocaleTimeString("en-IN")}`);
       } catch (error) {
         showMarketError(error instanceof Error ? error.message : "Market data could not be loaded.");
-        setText("market-updated", "Request failed");
+        setText("quote-timestamp", "Unavailable");
+        setText("market-updated", "Groww request failed");
       } finally {
         button.disabled = false;
-        button.textContent = "Load snapshot";
+        button.textContent = "Load market data";
       }
     }
 
@@ -640,13 +671,14 @@
       const button = byId("refresh-button");
       button.disabled = true;
       try {
-        await Promise.all([refreshHealth(), loadMarket(), loadAccountSources()]);
+        const refreshes = [refreshHealth(), loadAccountSources()];
+        if (byId("symbol").value.trim()) refreshes.push(loadMarket());
+        await Promise.all(refreshes);
       } finally {
         button.disabled = false;
       }
     });
     refreshHealth();
-    loadMarket();
     loadAccountSources();
   </script>
 </body>

@@ -12,3 +12,4 @@ class Candle(BaseModel):
     low: Decimal
     close: Decimal
     volume: int
+    last_price: Decimal | None = None

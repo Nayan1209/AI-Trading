@@ -7,12 +7,12 @@ import psycopg
 from .core.config import settings
 from .dashboard_sources import paper_snapshot
 from .groww_account import GrowwAccountProvider
-from .market_data.providers import MockMarketDataProvider
+from .market_data.groww_provider import GrowwMarketDataProvider
 from .market_data.service import MarketDataService
 from .paper_execution_session import PaperExecutionSession
 
 app = FastAPI(title="AI Trading System", version="0.1.0")
-market_data = MarketDataService(MockMarketDataProvider())
+market_data: MarketDataService | None = None
 paper_session = PaperExecutionSession()
 DASHBOARD_FILE = Path(__file__).parent / "static" / "dashboard.html"
 LOCAL_CLIENTS = {"127.0.0.1", "::1", "testclient"}
@@ -20,6 +20,7 @@ PRIVATE_DATA_PATHS = {
     "/api/v1/paper/in-memory",
     "/api/v1/paper/persistent",
     "/api/v1/groww/account",
+    "/api/v1/market-data/latest",
 }
 
 
@@ -68,14 +69,81 @@ def dashboard() -> FileResponse:
 
 @app.get("/api/v1/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "environment": settings.app_env}
+    token, api_key, api_secret = _groww_credentials()
+    configured = bool(token or (api_key and api_secret))
+    return {
+        "status": "ok",
+        "environment": settings.app_env,
+        "market_data_provider": "Groww Trading API" if configured else "Not configured",
+        "market_data_status": "configured" if configured else "unconfigured",
+    }
+
+
+def _groww_credentials() -> tuple[str, str, str]:
+    token = (
+        settings.groww_access_token.get_secret_value().strip()
+        if settings.groww_access_token is not None
+        else ""
+    )
+    api_key = (
+        settings.groww_api_key.get_secret_value().strip()
+        if settings.groww_api_key is not None
+        else ""
+    )
+    api_secret = (
+        settings.groww_api_secret.get_secret_value().strip()
+        if settings.groww_api_secret is not None
+        else ""
+    )
+    return token, api_key, api_secret
+
+
+def _get_market_data_service() -> MarketDataService:
+    global market_data
+    if market_data is not None:
+        return market_data
+
+    token, api_key, api_secret = _groww_credentials()
+    if not token and not (api_key and api_secret):
+        raise HTTPException(
+            status_code=503,
+            detail="Groww market-data credentials are not configured.",
+        )
+    try:
+        provider = GrowwMarketDataProvider(
+            token or None,
+            api_key=api_key or None,
+            api_secret=api_secret or None,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Groww market-data provider could not be initialized.",
+        ) from exc
+    market_data = MarketDataService(provider)
+    return market_data
 
 
 @app.get("/api/v1/market-data/latest")
 def latest_market_data(
-    symbol: str, exchange: str = "NSE", timeframe: str = "15m"
+    symbol: str, exchange: str = "NSE", timeframe: str = "live"
 ):
-    return market_data.latest(symbol, exchange, timeframe).model_dump(mode="json")
+    try:
+        return _get_market_data_service().latest(symbol, exchange, timeframe).model_dump(mode="json")
+    except HTTPException:
+        raise
+    except (KeyError, ValueError):
+        raise
+    except Exception as exc:
+        if str(getattr(exc, "code", "")) == "403":
+            raise HTTPException(
+                status_code=503,
+                detail="Groww denied live quote access (HTTP 403). Check the active Trading API subscription and live market-data permissions for this account.",
+            ) from exc
+        raise HTTPException(
+            status_code=503,
+            detail="Groww market data could not be retrieved. Check credentials, instrument symbol, and market-data API access.",
+        ) from exc
 
 
 @app.get("/api/v1/paper/in-memory")
@@ -98,9 +166,9 @@ def persistent_paper_state(request: Request) -> dict[str, object]:
             "status": "unconfigured",
             "source": "PostgreSQL paper journal",
             "detail": "Set DATABASE_URL locally and apply migration 003 to connect paper history.",
-            "order_count": 0,
-            "position_count": 0,
-            "realized_pnl": "0",
+            "order_count": None,
+            "position_count": None,
+            "realized_pnl": None,
             "unrealized_pnl": None,
             "positions": [],
             "orders": [],
@@ -122,9 +190,9 @@ def persistent_paper_state(request: Request) -> dict[str, object]:
             "status": "unavailable",
             "source": "PostgreSQL paper journal",
             "detail": "Could not read the database or paper_orders table; check the connection and migration 003.",
-            "order_count": 0,
-            "position_count": 0,
-            "realized_pnl": "0",
+            "order_count": None,
+            "position_count": None,
+            "realized_pnl": None,
             "unrealized_pnl": None,
             "positions": [],
             "orders": [],
@@ -141,29 +209,15 @@ def persistent_paper_state(request: Request) -> dict[str, object]:
 def groww_account_state(request: Request) -> dict[str, object]:
     """Read Groww holdings, positions, and current-day orders when configured."""
     _require_local_development(request)
-    token = (
-        settings.groww_access_token.get_secret_value().strip()
-        if settings.groww_access_token is not None
-        else ""
-    )
-    api_key = (
-        settings.groww_api_key.get_secret_value().strip()
-        if settings.groww_api_key is not None
-        else ""
-    )
-    api_secret = (
-        settings.groww_api_secret.get_secret_value().strip()
-        if settings.groww_api_secret is not None
-        else ""
-    )
+    token, api_key, api_secret = _groww_credentials()
     if not token and not (api_key and api_secret):
         return {
             "status": "unconfigured",
             "source": "Groww read-only API",
             "detail": "Set GROWW_ACCESS_TOKEN or both GROWW_API_KEY and GROWW_API_SECRET locally; credentials are never returned by this API.",
-            "holding_count": 0,
-            "position_count": 0,
-            "order_count": 0,
+            "holding_count": None,
+            "position_count": None,
+            "order_count": None,
             "holdings": [],
             "positions": [],
             "orders": [],
@@ -180,9 +234,9 @@ def groww_account_state(request: Request) -> dict[str, object]:
             "status": "unavailable",
             "source": "Groww read-only API",
             "detail": "Groww data could not be read; check local credentials, daily API-key approval, network, and account API access.",
-            "holding_count": 0,
-            "position_count": 0,
-            "order_count": 0,
+            "holding_count": None,
+            "position_count": None,
+            "order_count": None,
             "holdings": [],
             "positions": [],
             "orders": [],

@@ -4,7 +4,7 @@ from decimal import Decimal
 import pytest
 
 from src.market_data.models import Candle
-from src.market_data.providers import MarketDataProvider, MockMarketDataProvider
+from src.market_data.providers import MarketDataProvider
 from src.market_data.service import MarketDataService
 
 
@@ -33,12 +33,14 @@ def make_candle(timestamp: datetime) -> Candle:
     )
 
 
-def test_mock_market_data_is_valid():
-    candle = MarketDataService(MockMarketDataProvider()).latest("RELIANCE")
-    assert candle.symbol == "RELIANCE"
-    assert candle.exchange == "NSE"
-    assert candle.volume >= 0
-    assert candle.high >= candle.low
+def test_market_data_service_returns_provider_result_without_synthetic_fallback():
+    candle = make_candle(REFERENCE - timedelta(minutes=5))
+    candle.last_price = Decimal("101.5")
+    result = MarketDataService(FixedMarketDataProvider(candle)).latest(
+        "RELIANCE", reference_time=REFERENCE
+    )
+    assert result is candle
+    assert result.last_price == Decimal("101.5")
 
 
 def test_market_data_service_rejects_stale_candle():

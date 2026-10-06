@@ -61,32 +61,12 @@ The adapter must translate provider responses into internal domain objects. Grow
 **Important distinction:** Groww's `get_ohlc` is a real-time/current-day snapshot, not an interval candle. Interval candles must use the historical-data adapter. This prevents the system from accidentally treating daily snapshots as 1-minute/5-minute candles.
 
 ## Market Data Contract
-Internal normalized market-data event:
-
-```json
-{
-  "instrument_id": "internal-id",
-  "exchange": "NSE",
-  "segment": "CASH",
-  "symbol": "RELIANCE",
-  "timestamp": "ISO-8601",
-  "ltp": 0.0,
-  "open": 0.0,
-  "high": 0.0,
-  "low": 0.0,
-  "close": 0.0,
-  "volume": 0,
-  "source": "groww",
-  "is_stale": false
-}
-```
-
-Fields unavailable from a specific provider are nullable rather than fabricated.
+The latest market-data API returns the normalized `Candle` fields: requested `symbol`, `exchange`, `timeframe`, Groww trade/candle `timestamp`, `open`, `high`, `low`, `close`, `volume`, and nullable `last_price`. Price and volume values come from Groww; missing or malformed fields fail the request instead of being filled with example values. Timeframes are `live` and `15m`.
 
 ## Current Implementation Boundary
 `src/market_data/groww_provider.py` is **read-only**. It converts Groww `get_quote` output into the project's `Candle` model for the initial connectivity milestone. It does not import or expose order-placement methods.
 
-The current normalized `Candle` uses `timeframe="1d_snapshot"` for this Groww quote path. This label is deliberate: it must not be interpreted as an interval candle.
+The live quote stores Groww's current OHLC snapshot and last traded price separately. The quote timestamp is the last-trade time. The `15m` option uses Groww's historical-candle API and returns the candle close as its price.
 
 The application entry point currently implements health and latest-market-data APIs only; portfolio, order, AI, risk, and broker status APIs are not wired in.
 

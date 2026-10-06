@@ -12,10 +12,10 @@ Show system state, portfolio, P&L, drawdown, exposure, positions, AI decisions, 
 The first dashboard slice is served at `/` by the FastAPI application and consumes the health and latest-market-data endpoints plus optional read-only paper and Groww account snapshots.
 
 - Shows whether the application health endpoint responds and the reported environment.
-- Lets the user request a latest candle by symbol, exchange, and timeframe.
-- Identifies the current data as synthetic mock output and states that live execution is disabled.
+- Lets the user request a live quote or latest 15-minute candle by symbol and exchange.
+- Identifies Groww as the quote source and states that live execution is disabled.
 - Shows current-process paper orders and positions and, when configured, the PostgreSQL paper-order journal and Groww holdings, positions, and current-day orders.
-- Shows explicit unconfigured/unavailable states when `DATABASE_URL`, migration 003, or `GROWW_ACCESS_TOKEN` is unavailable. It must not invent balances, P&L, decisions, orders, or risk state.
+- Shows explicit unconfigured/unavailable states when credentials, `DATABASE_URL`, or migration 003 are unavailable. It must not invent prices, balances, P&L, decisions, orders, or risk state.
 - Provides no order entry, cancellation, trading-halt, credential, or other write controls.
 - Keeps unauthenticated paper and account snapshot APIs on development mode and loopback clients only.
 - Uses native HTML/CSS/JavaScript with no external script, font, image, or chart dependency.

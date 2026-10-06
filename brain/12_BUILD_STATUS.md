@@ -112,9 +112,9 @@ No Groww secret, access token, broker credential, model API key, or PostgreSQL s
 
 ## UI-001 — Dashboard Initial Delivery
 
-The read-only dashboard is served at `/`. It shows application health, the latest mock candle, local in-memory paper state, optional PostgreSQL paper history, and optional Groww holdings/positions/current-day orders. The account snapshot APIs are limited to development mode and loopback clients. It exposes no trading actions and is not production-ready because login/MFA and role authorization are not implemented.
+The read-only dashboard is served at `/`. It shows application health, live Groww quotes or 15-minute candles, local in-memory paper state, optional PostgreSQL paper history, and Groww holdings/positions/current-day orders. The account snapshot APIs are limited to development mode and loopback clients. It exposes no trading actions and is not production-ready because login/MFA and role authorization are not implemented.
 
-UI-001 remains in progress. Signal, AI, and risk read APIs are not connected. PostgreSQL and Groww remain inactive until `DATABASE_URL` with migration 003 and `GROWW_ACCESS_TOKEN` are configured locally. Unrealized paper P&L is not calculated without current price marks.
+UI-001 remains in progress. Signal, AI, and risk read APIs are not connected. PostgreSQL remains inactive until `DATABASE_URL` with migration 003 is configured locally. Groww sources require valid local credentials. Unrealized paper P&L is not calculated without current price marks.
 
 ### CI evidence
 

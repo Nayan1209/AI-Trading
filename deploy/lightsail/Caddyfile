@@ -1,0 +1,11 @@
+{
+	email {$TLS_EMAIL}
+}
+
+{$APP_DOMAIN} {
+	basic_auth {
+		{$DASHBOARD_USERNAME} {$DASHBOARD_PASSWORD_HASH}
+	}
+
+	reverse_proxy app:8000
+}

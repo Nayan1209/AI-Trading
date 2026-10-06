@@ -14,9 +14,11 @@
 **Phase 7 — Backtesting: 🟢 TEST-001 historical signal replay complete**<br />
 **Phase 9 — Dashboard: 🟢 Read-only command center with live Groww quotes and account snapshots**
 
-Run `uvicorn src.main:app --reload` and open `http://127.0.0.1:8000/` to view the dashboard. Enter a Groww trading symbol to request a live quote or latest 15-minute candle. The dashboard also reads this process's paper ledger, optional PostgreSQL paper-order history, and Groww holdings, positions, and current-day orders. Market and account data come from configured sources; missing or failed sources show as unavailable with no synthetic fallback. The dashboard is read-only; signals, AI, risk, and authentication are not connected.
+Run `uvicorn src.main:app --reload` and open `http://127.0.0.1:8000/` to view the dashboard. Enter a Groww trading symbol to request a live quote or latest 15-minute candle. The dashboard also reads this process's paper ledger, optional PostgreSQL paper-order history, and Groww holdings, positions, and current-day orders. Market and account data come from configured sources; missing or failed sources show as unavailable with no synthetic fallback. The dashboard is read-only; signals, AI, and risk are not connected. Lightsail access is protected by Caddy Basic Authentication over HTTPS.
 
-The account snapshot APIs return data only in development mode and for loopback clients. They are not production-ready until authentication and authorization are implemented.
+The account snapshot APIs are available to local loopback clients in development. The Lightsail deployment package exposes them only through a fixed, authenticated Caddy proxy; direct access to the app container is not published.
+
+The Lightsail container and HTTPS proxy configuration is in [`deploy/lightsail/README.md`](deploy/lightsail/README.md). It deploys the current read-only Groww integration. No live Groww order submission endpoint is implemented.
 
 #### Optional local account sources
 

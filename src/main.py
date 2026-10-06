@@ -33,11 +33,20 @@ async def disable_private_data_caching(request: Request, call_next):
     return response
 
 
-def _require_local_development(request: Request) -> None:
-    """Keep unauthenticated account snapshots local to a development server."""
+def _require_private_data_access(request: Request) -> None:
+    """Allow local development or the configured authenticated reverse proxy."""
     client_host = request.client.host if request.client is not None else None
-    if settings.app_env.lower() != "development" or client_host not in LOCAL_CLIENTS:
-        raise HTTPException(status_code=404, detail="not found")
+    environment = settings.app_env.lower()
+    if environment == "development" and client_host in LOCAL_CLIENTS:
+        return
+    trusted_proxy_ip = getattr(settings, "trusted_proxy_ip", None)
+    if (
+        environment == "production"
+        and trusted_proxy_ip
+        and client_host == trusted_proxy_ip.strip()
+    ):
+        return
+    raise HTTPException(status_code=404, detail="not found")
 
 
 @app.exception_handler(KeyError)
@@ -149,7 +158,7 @@ def latest_market_data(
 @app.get("/api/v1/paper/in-memory")
 def in_memory_paper_state(request: Request) -> dict[str, object]:
     """Return this process's paper fills and positions without changing them."""
-    _require_local_development(request)
+    _require_private_data_access(request)
     return paper_snapshot(
         paper_session.ledger.snapshot(),
         source="In-memory paper ledger",
@@ -160,7 +169,7 @@ def in_memory_paper_state(request: Request) -> dict[str, object]:
 @app.get("/api/v1/paper/persistent")
 def persistent_paper_state(request: Request) -> dict[str, object]:
     """Read the append-only PostgreSQL paper-order journal when configured."""
-    _require_local_development(request)
+    _require_private_data_access(request)
     if settings.database_url is None or not settings.database_url.get_secret_value().strip():
         return {
             "status": "unconfigured",
@@ -208,7 +217,7 @@ def persistent_paper_state(request: Request) -> dict[str, object]:
 @app.get("/api/v1/groww/account")
 def groww_account_state(request: Request) -> dict[str, object]:
     """Read Groww holdings, positions, and current-day orders when configured."""
-    _require_local_development(request)
+    _require_private_data_access(request)
     token, api_key, api_secret = _groww_credentials()
     if not token and not (api_key and api_secret):
         return {

@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     log_level: str = "INFO"
     database_url: SecretStr | None = None
+    trusted_proxy_ip: str | None = None
     groww_access_token: SecretStr | None = None
     groww_api_key: SecretStr | None = None
     groww_api_secret: SecretStr | None = None
